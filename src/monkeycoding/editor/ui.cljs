@@ -22,7 +22,8 @@
       [:div.toolbar
         [:button {:on-click store/start-recording} "record"]
         [:button {:on-click store/start-playback} "play"]
-        [:button "export"]]
+        [:button {:on-click store/discard-recording} "reset"]
+        [:button {:disabled true }"export"]]
       [:div.code-area
         [codemirror-editor {
                             :read-only true

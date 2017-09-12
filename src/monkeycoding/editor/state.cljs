@@ -13,7 +13,6 @@
                             :recording stream/empty-stream
 
                             :text ""
-                            :cursor {:line 0 :ch 0}
                             :current-mode :default-mode}))
 
 
@@ -32,12 +31,10 @@
 (defn record-input [event]
   (state-swap! update-in [:recording :inputs] conj event))
 
-(defn record-cursor [event]
-  (do
-    (state-swap! assoc :cursor event)
-    (state-swap! update-in [:recording :cursor] conj event)))
-
-
+(defn discard-recording []
+  (state-swap! merge {
+                      :recording stream/empty-stream
+                      :text ""}))
 ;; playback actions
 (defn start-playback []
     (state-swap! assoc :current-mode :playback-mode))

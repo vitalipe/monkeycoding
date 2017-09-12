@@ -34,7 +34,7 @@
   (let [
         input (or (js->clj event))
         pos (or (get input "from") event)]
-  
+
     (merge {:dt dt :snapshot text :at {:line (.-line pos) :ch (.-ch pos)}}
       (case (get input "origin")
         "+input"  {:type :input
@@ -46,7 +46,9 @@
         "+delete" {:type :delete
                    :len (count (clojure.string/join "\n" (input "removed")))}
 
-        nil       {:type :cursor}))))
+        nil       {:type :cursor}
+
+        "setValue" {}))))
 
 
 (defn- component [spec]
@@ -57,9 +59,9 @@
 
 
 (defn- redundant-event? [current prv]
-  (=
-    (dissoc current :dt)
-    (dissoc prv :dt)))
+  (or
+    (empty? current)
+    (= (dissoc current :dt) (dissoc prv :dt))))
 
 (defn- process-input-event! [input-state text input]
   (let [
