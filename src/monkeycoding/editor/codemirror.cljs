@@ -33,22 +33,24 @@
 (defn- cm-input-data->event [text event dt]
   (let [
         input (or (js->clj event))
-        pos (or (get input "from") event)]
+        pos (or (get input "from") event)
+        origin (get input "origin")
 
-    (merge {:dt dt :snapshot text :at {:line (.-line pos) :ch (.-ch pos)}}
-      (case (get input "origin")
-        "+input"  {:type :input
-                   :text (first
-                            (cond
-                              (empty? (rest (input "text")))  (input "text")
-                              :otherewise-assume-new-line     '("\n")))}
+        text-event?    (partial contains? #{"+input" "+delete" "cut" "paste" "copy"})
+        ignored-event? (partial contains? #{"setValue"})]
 
-        "+delete" {:type :delete
-                   :len (count (clojure.string/join "\n" (input "removed")))}
+    (merge {
+              :dt dt
+              :snapshot text
+              :position {:line (.-line pos) :ch (.-ch pos)}}
 
-        nil       {:type :cursor}
+          (cond
+            (nil? origin)           {:type :cursor}
+            (ignored-event? origin) {:type :ignored}
+            (text-event? origin)    {:type :input
+                                     :insert (clojure.string/join "\n" (input "text"))
+                                     :remove (count (clojure.string/join "\n" (input "removed")))}))))
 
-        "setValue" {}))))
 
 
 (defn- component [spec]
@@ -60,7 +62,7 @@
 
 (defn- redundant-event? [current prv]
   (or
-    (empty? current)
+    (= (:type current) :ignored)
     (= (dissoc current :dt) (dissoc prv :dt))))
 
 (defn- process-input-event! [input-state text input]

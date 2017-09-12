@@ -1,7 +1,7 @@
 goog.provide("monkeycoding.player");
 goog.require("cljsjs.codemirror");
 
-// TODO: clean up
+// TODO: rewirte, fix timing and optimize
 
 
 function initCodemirror(dom, config, initial) {
@@ -24,9 +24,15 @@ function initCodemirror(dom, config, initial) {
 }
 
 
-function omitInBetween(str, from, to) {
+function omitRange(str, from, to) {
   return str.substring(0, from)  + str.substring(to);
 }
+
+function insertAtIndex(str, from, text) {
+  return str.substring(0, from)  + text + str.substring(from);
+}
+
+
 
 
 /**
@@ -39,7 +45,6 @@ function Player(dom, config) {
   var _playback = config.playback || {};
   var _cm = initCodemirror(dom, config, _playback.initial);
   var _pos = {input: 0};
-
 
   var _resume = function() {
     if (_pos.input > _playback.inputs.length -1)
@@ -55,22 +60,28 @@ function Player(dom, config) {
       var action     = _playback.inputs[_pos.input];
       var nextAction = _playback.inputs[_pos.input+1];
       var index      = 0;
+      var text       = "";
 
       console.log("input", action);
 
       switch (action.type) {
         case "input":
-            _cm.replaceRange(action.text, action.at);
+            index = _cm.indexFromPos(action.position);
+            text  = _cm.getValue();
+
+            if (action.remove)
+              text = omitRange(text, index, index  + action.remove)
+
+            if (action.insert.length)
+              text = insertAtIndex(text, index, action.insert)
+
+              _cm.setValue(text);
+
             break;
 
         case "cursor":
-            _cm.setCursor(action.at);
+            _cm.setCursor(action.position);
             break;
-
-        case "delete":
-          index = _cm.indexFromPos(action.at);
-          _cm.setValue(omitInBetween(_cm.getValue(), index, index  + action.len));
-          break;
       }
 
       _pos.input++;
@@ -79,7 +90,10 @@ function Player(dom, config) {
         if (nextAction.dt < 10)
           inputAction();
         else
-          setTimeout(inputAction, Math.max(nextAction.dt - 40, 0));
+          setTimeout(inputAction,
+            nextAction.type === "input"
+               ? Math.max(nextAction.dt - 40, 0)
+               : nextAction.dt);
     }
 
     setTimeout(inputAction, _playback.inputs[_pos.input].dt);
