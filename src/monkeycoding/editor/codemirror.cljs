@@ -29,6 +29,7 @@
     (.on "cursorActivity" #(input-proxy (.getValue %) (.getCursor %)))))
 
 
+
 (defn- cm-input-data->event [text event dt]
   (let [
         input (or (js->clj event))
@@ -36,8 +37,15 @@
 
     (merge {:dt dt :snapshot text :at {:line (.-line pos) :ch (.-ch pos)}}
       (case (get input "origin")
-        "+input"  {:type :input :text (first (input "text"))}
-        "+delete" {:type :delete :len 1}
+        "+input"  {:type :input
+                   :text (first
+                            (cond
+                              (empty? (rest (input "text")))  (input "text")
+                              :otherewise-assume-new-line     '("\n")))}
+
+        "+delete" {:type :delete
+                   :len 1}
+
         nil       {:type :cursor}))))
 
 
