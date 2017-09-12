@@ -34,7 +34,7 @@
   (let [
         input (or (js->clj event))
         pos (or (get input "from") event)]
-
+  
     (merge {:dt dt :snapshot text :at {:line (.-line pos) :ch (.-ch pos)}}
       (case (get input "origin")
         "+input"  {:type :input
@@ -44,7 +44,7 @@
                               :otherewise-assume-new-line     '("\n")))}
 
         "+delete" {:type :delete
-                   :len 1}
+                   :len (count (clojure.string/join "\n" (input "removed")))}
 
         nil       {:type :cursor}))))
 
