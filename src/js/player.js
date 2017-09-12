@@ -9,6 +9,8 @@ function initCodemirror(dom, config, initial) {
   delete config.paused;
   delete config.playback;
 
+  config.readOnly = true;
+
   var cm = new CodeMirror(dom, config);
 
   // set initial states
