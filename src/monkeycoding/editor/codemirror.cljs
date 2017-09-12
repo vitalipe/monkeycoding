@@ -52,7 +52,7 @@
 (defn- component [spec]
   (r/create-class {
                     :component-did-mount (:on-mount spec)
-                    :component-will-receive-props #(:on-props spec %3)
+                    :component-will-receive-props #((:on-props spec) (second %2))
                     :reagent-render (:render spec)}))
 
 
@@ -84,7 +84,7 @@
 
     (component {
                 :on-mount (fn [this] (reset! pl (new Player (r/dom-node this) (clj->js config))))
-                :on-props (fn [{:keys [paused]}] (.setPaused @pl paused))
+                :on-props (fn [{paused :paused}] (.setPaused @pl paused))
                 :render (fn [] [:div.player-content])})))
 
 

@@ -26,7 +26,6 @@
                             :read-only true
                             :text (:text @editor-state)}]]])
 
-
 (defn playback-mode []
   (r/with-let [paused (r/atom false)]
     [:div
@@ -34,13 +33,13 @@
         [:button {:on-click store/stop-playback} "stop"]
         [:button {:on-click #(swap! paused not)} (if @paused "resume" "pause")]]
       [:div.code-area
-        [codemirror-player {:paused @paused :playback (stream->playback (:recording @editor-state))}]]]))
+        [codemirror-player {
+                            :paused @paused
+                            :playback (stream->playback (:recording @editor-state))}]]]))
 
 
 (defn editor-screen []
-  (let [
-        read-only (get-in @editor-state [:current-mode :paused] true)
-        mode (:current-mode @editor-state)]
+  (let [mode (:current-mode @editor-state)]
     [:nav
       [:h3 "Monkey Coding Editor"]
 

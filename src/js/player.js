@@ -40,6 +40,9 @@ function Player(dom, config) {
 
 
   var _resume = function() {
+    if (_pos.input > _playback.inputs.length -1)
+      return;
+
     _paused = false;
 
     var inputAction = function() {
