@@ -36,8 +36,7 @@
         pos (or (get input "from") event)
         origin (get input "origin")
 
-        text-event?    (partial contains? #{"+input" "+delete" "cut" "paste" "copy"})
-        ignored-event? (partial contains? #{"setValue"})]
+        text-event? (partial contains? #{"+input" "+delete" "cut" "paste" "copy" "undo" "redo"})]
 
     (merge {
               :dt dt
@@ -46,7 +45,6 @@
 
           (cond
             (nil? origin)           {:type :cursor}
-            (ignored-event? origin) {:type :ignored}
             (text-event? origin)    {:type :input
                                      :insert (clojure.string/join "\n" (input "text"))
                                      :remove (count (clojure.string/join "\n" (input "removed")))}))))
@@ -62,7 +60,7 @@
 
 (defn- redundant-event? [current prv]
   (or
-    (= (:type current) :ignored)
+    (nil? (:type current))
     (= (dissoc current :dt) (dissoc prv :dt))))
 
 (defn- process-input-event! [input-state text input]
