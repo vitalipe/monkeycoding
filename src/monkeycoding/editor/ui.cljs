@@ -12,7 +12,9 @@
       [:div.toolbar
         [:button {:on-click store/finish-recording} "finish"]]
       [:div.code-area
-        [codemirror-editor {:on-change store/record-input}]]])
+        [codemirror-editor {
+                            :text (:text @editor-state)
+                            :on-change store/record-input}]]])
 
 
 (defn default-mode []
