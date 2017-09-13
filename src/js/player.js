@@ -65,6 +65,7 @@ function Player(dom, config) {
       console.log("input", action);
 
       switch (action.type) {
+
         case "input":
             index = _cm.indexFromPos(action.position);
             text  = _cm.getValue();
@@ -77,11 +78,16 @@ function Player(dom, config) {
 
               _cm.setValue(text);
 
-            break;
+        break;
+
+        case "selection":
+              _cm.setSelection(action.anchor, action.head);
+        break;
 
         case "cursor":
             _cm.setCursor(action.position);
-            break;
+        break;
+
       }
 
       _pos.input++;

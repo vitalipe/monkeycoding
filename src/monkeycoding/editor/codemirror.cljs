@@ -26,28 +26,43 @@
 
   (doto (create-codemirror! dom-node initial-config)
     (.on "change" #(input-proxy (.getValue %1) %2))
-    (.on "cursorActivity" #(input-proxy (.getValue %) (.getCursor %)))))
+    (.on "cursorActivity" #(input-proxy (.getValue %) (.getCursor %)))
+    (.on "beforeSelectionChange" #(input-proxy (.getValue %1) %2))))
 
 
+(defn- extract-position [js-pos]
+  {:line (.-line js-pos) :ch (.-ch js-pos)})
 
 (defn- cm-input-data->event [text event dt]
   (let [
-        input (or (js->clj event))
-        pos (or (get input "from") event)
+        input  (js->clj event)
         origin (get input "origin")
 
-        text-event? (partial contains? #{"+input" "+delete" "cut" "paste" "copy" "undo" "redo"})]
+        cursor-event? (nil? origin)
+        selection-event? (contains? input "ranges")
+        text-event? (contains? #{"+input" "+delete" "cut" "paste" "copy" "undo" "redo"} origin)]
 
     (merge {
               :dt dt
-              :snapshot text
-              :position {:line (.-line pos) :ch (.-ch pos)}}
+              :snapshot text}
 
           (cond
-            (nil? origin)           {:type :cursor}
-            (text-event? origin)    {:type :input
-                                     :insert (clojure.string/join "\n" (input "text"))
-                                     :remove (count (clojure.string/join "\n" (input "removed")))}))))
+            cursor-event?  {
+                            :type :cursor
+                            :position (extract-position event)}
+
+
+            selection-event? {
+                              :type :selection
+                              :head   (extract-position (.-head (first (input "ranges"))))
+                              :anchor (extract-position (.-anchor (first (input "ranges"))))}
+
+
+            text-event?    {
+                             :type :input
+                             :insert (clojure.string/join "\n" (input "text"))
+                             :remove (count (clojure.string/join "\n" (input "removed")))
+                             :position (extract-position (get input "from"))}))))
 
 
 
@@ -58,10 +73,18 @@
                     :reagent-render (:render spec)}))
 
 
-(defn- redundant-event? [current prv]
+
+(defn in-selecting-state? [{:keys [last last-selection]}]
+  (and
+    (not= (last-selection :head) (last-selection :anchor))
+    (= last last-selection)))
+
+(defn- redundant-event? [state current prv]
   (or
+    (and (= (current :type) :cursor) (in-selecting-state? state))
     (nil? (:type current))
     (= (dissoc current :dt) (dissoc prv :dt))))
+
 
 (defn- process-input-event! [input-state text input]
   (let [
@@ -69,10 +92,12 @@
         last-time (:last-time @input-state)
         dt        (if last-time (- now last-time) 0)
         callback  (@input-state :cb)
-        event     (cm-input-data->event text input dt)]
+        event     (cm-input-data->event text input dt)
+        target    (if (= (event :type) :selection) :last-selection :last-input)]
 
-    (when-not (redundant-event? event (:last @input-state))
+    (when-not (redundant-event? @input-state event (@input-state target))
       (do
+        (swap! input-state assoc target event)
         (swap! input-state assoc :last event)
         (swap! input-state assoc :last-time now)
         (callback event)))))
@@ -98,7 +123,11 @@
                                   on-change]}]
   (let [
         cm (atom nil)
-        input-state (atom {:cb noop :last nil})]
+        input-state (atom {
+                            :cb noop
+                            :last nil
+                            :last-input nil
+                            :last-selection nil})]
 
 
       (component {
