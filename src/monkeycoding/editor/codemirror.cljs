@@ -76,7 +76,7 @@
 
 (defn in-selecting-state? [{:keys [last last-selection]}]
   (and
-    (not= (last-selection :head) (last-selection :anchor))
+    (not= (:head last-selection) (:anchor last-selection))
     (= last last-selection)))
 
 (defn- redundant-event? [state current prv]
