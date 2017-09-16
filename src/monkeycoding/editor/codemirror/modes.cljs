@@ -26,25 +26,30 @@
   EditMode
     (sync-with-props! [this codemirror props] this)
     (enter!           [this codemirror props] this)
-    (cleanup!         [this codemirror] this)
+    (cleanup!         [this codemirror]       this)
     (process-input    [this codemirror event] this))
 
 
 (defrecord ViewOnlyMode []
 
   EditMode
-    (sync-with-props! [this codemirror props] this)
-    (enter!           [this codemirror props] this)
-    (cleanup!         [this codemirror] this)
-    (process-input    [this codemirror event] this))
+    (sync-with-props! [this cm {text :text}]
+                    (do
+                      (when text (.setValue cm text))
+                      (set! (.. cm -options -readOnly) true)
+                      this))
+
+    (enter!           [this cm props] (sync-with-props! this cm props))
+    (cleanup!         [this cm] (set! (.. cm -options -readOnly) false))
+    (process-input    [this _ _] this))
 
 
 (defrecord UninitializedMode []
 
   EditMode
     (sync-with-props! [this _ _] this)
-    (enter!           [this codemirror props] this)
-    (cleanup!         [this _] this)
+    (enter!           [this _ _] this)
+    (cleanup!         [this _]   this)
     (process-input    [this _ _] this))
 
 
