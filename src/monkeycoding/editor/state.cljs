@@ -13,6 +13,7 @@
                             :recording stream/empty-stream
 
                             :text ""
+                            :recording-highlight false
                             :current-mode :default-mode}))
 
 
@@ -26,10 +27,14 @@
 (defn finish-recording []
   (do
     (state-swap! assoc :text (:snapshot (last (get-in @editor-state [:recording :inputs]))))
-    (state-swap! assoc :current-mode :default-mode)))
+    (state-swap! assoc :current-mode :default-mode)
+    (state-swap! assoc :record-input false)))
+
 
 (defn record-input [event]
-  (state-swap! update-in [:recording :inputs] conj event))
+  (do
+    (state-swap! update-in [:recording :inputs] conj event)
+    (state-swap! assoc :text (:snapshot event))))
 
 (defn discard-recording []
   (state-swap! merge {

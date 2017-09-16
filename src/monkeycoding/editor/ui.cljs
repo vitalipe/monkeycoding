@@ -2,7 +2,9 @@
     (:require
       [reagent.core :as r]
 
-      [monkeycoding.editor.codemirror :refer [codemirror-editor codemirror-player]]
+      [monkeycoding.editor.codemirror.editor :refer [codemirror-editor]]
+      [monkeycoding.editor.codemirror.player :refer [codemirror-player]]
+
       [monkeycoding.editor.stream     :as stream :refer [stream->playback]]
       [monkeycoding.editor.state      :as store :refer [editor-state]]))
 
@@ -10,11 +12,15 @@
 (defn recording-mode []
   [:div
       [:div.toolbar
-        [:button {:on-click store/finish-recording} "finish"]]
+        [:button {:on-click store/finish-recording} "finish"]
+        [:button {:on-click #(swap! editor-state update :recording-highlight not)} "add highlight"]]
       [:div.code-area
         [codemirror-editor {
                             :text (:text @editor-state)
-                            :on-change store/record-input}]]])
+                            :on-input store/record-input
+
+                            :on-highlight nil
+                            :recording-highlight false}]]])
 
 
 (defn default-mode []
@@ -23,7 +29,7 @@
         [:button {:on-click store/start-recording} "record"]
         [:button {:on-click store/start-playback} "play"]
         [:button {:on-click store/discard-recording} "reset"]
-        [:button {:disabled true }"export"]]
+        [:button {:disabled true } "export"]]
       [:div.code-area
         [codemirror-editor {
                             :read-only true
