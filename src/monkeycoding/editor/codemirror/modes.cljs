@@ -5,9 +5,10 @@
 (defprotocol EditMode
   (sync-with-props! [this codemirror props])
   (enter!           [this codemirror props])
-  (cleanup!         [this codemirror])
-  (process-input    [this codemirror event]))
+  (exit!            [this codemirror])
 
+  (process-codemirror-event [this codemirror codemirror-event])
+  (process-dom-event        [this codemirror dom-event]))
 
 (defrecord RecordingMode [last
                           last-input
@@ -17,21 +18,23 @@
   EditMode
     (sync-with-props! [this _ {on-input :on-input}] (assoc this :on-input on-input))
     (enter!           [this _ props] (sync-with-props! this _ props))
-    (cleanup!         [this _] this)
-    (process-input    [this codemirror event] (process-input-event this codemirror event)))
+    (exit!            [this _] this)
+
+    (process-codemirror-event [this cm event] (process-input-event this cm event))
+    (process-dom-event        [this _ _] this))
 
 
 (defrecord HighlightingMode []
-
   EditMode
     (sync-with-props! [this codemirror props] this)
     (enter!           [this codemirror props] this)
-    (cleanup!         [this codemirror]       this)
-    (process-input    [this codemirror event] this))
+    (exit!            [this codemirror]       this)
+
+    (process-codemirror-event [this _ _] this)
+    (process-dom-event        [this _ _] this))
 
 
 (defrecord ViewOnlyMode []
-
   EditMode
     (sync-with-props! [this cm {text :text}]
                     (do
@@ -40,17 +43,20 @@
                       this))
 
     (enter!           [this cm props] (sync-with-props! this cm props))
-    (cleanup!         [this cm] (set! (.. cm -options -readOnly) false))
-    (process-input    [this _ _] this))
+    (exit!            [this cm] (set! (.. cm -options -readOnly) false))
+
+    (process-codemirror-event [this _ _] this)
+    (process-dom-event        [this _ _] this))
 
 
 (defrecord UninitializedMode []
-
   EditMode
     (sync-with-props! [this _ _] this)
     (enter!           [this _ _] this)
-    (cleanup!         [this _]   this)
-    (process-input    [this _ _] this))
+    (exit!            [this _]   this)
+
+    (process-codemirror-event [this _ _] this)
+    (process-dom-event        [this _ _] this))
 
 
 

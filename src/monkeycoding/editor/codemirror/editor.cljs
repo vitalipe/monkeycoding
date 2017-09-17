@@ -13,11 +13,18 @@
 
 
 (defn- init-codemirror-events! [codemirror mode-state-ref]
-  (let [dispatch #(reset! mode-state-ref (modes/process-input @mode-state-ref codemirror %))]
+  (let [dispatch! #(reset! mode-state-ref (%1 @mode-state-ref codemirror %2))]
+
+    (doto (.. codemirror getWrapperElement)
+      (.addEventListener "touchstart" #(dispatch! modes/process-dom-event %))
+      (.addEventListener "touchend"   #(dispatch! modes/process-dom-event %))
+      (.addEventListener "mousedown"  #(dispatch! modes/process-dom-event %))
+      (.addEventListener "mouseup"    #(dispatch! modes/process-dom-event %)))
+
     (doto codemirror
-      (.on "change"                #(dispatch %2))
-      (.on "cursorActivity"        #(dispatch (.getCursor %)))
-      (.on "beforeSelectionChange" #(dispatch %2)))))
+      (.on "change"                #(dispatch! modes/process-codemirror-event %2))
+      (.on "cursorActivity"        #(dispatch! modes/process-codemirror-event (.getCursor %)))
+      (.on "beforeSelectionChange" #(dispatch! modes/process-codemirror-event %2)))))
 
 
 (defn- props->mode [{:keys [recording-highlight read-only on-input]}]
@@ -40,7 +47,7 @@
         (same-type? from to) (reset! mode-state-ref (modes/sync-with-props! from cm props))
         :otherwise
                   (do
-                      (modes/cleanup! from cm)
+                      (modes/exit! from cm)
                       (reset! mode-state-ref (modes/enter! to cm props))))))
 
 

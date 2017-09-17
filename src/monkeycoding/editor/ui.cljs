@@ -12,15 +12,15 @@
 (defn recording-mode []
   [:div
       [:div.toolbar
-        [:button {:on-click store/finish-recording} "finish"]
-        [:button {:on-click #(swap! editor-state update :recording-highlight not)} "add highlight"]]
+        [:button {:on-click store/finish-recording}       "finish"]
+        [:button {:on-click store/start-record-highlight} "highlight"]]
       [:div.code-area
         [codemirror-editor {
                             :text (:text @editor-state)
                             :on-input store/record-input
 
-                            :on-highlight nil
-                            :recording-highlight false}]]])
+                            :on-highlight store/record-highlight
+                            :recording-highlight (:recording-highlight  @editor-state)}]]])
 
 
 (defn default-mode []

@@ -28,13 +28,21 @@
   (do
     (state-swap! assoc :text (:snapshot (last (get-in @editor-state [:recording :inputs]))))
     (state-swap! assoc :current-mode :default-mode)
-    (state-swap! assoc :record-input false)))
-
+    (state-swap! assoc :record-input false)
+    (state-swap! assoc :recording-highlight false)))
 
 (defn record-input [event]
   (do
     (state-swap! update-in [:recording :inputs] conj event)
     (state-swap! assoc :text (:snapshot event))))
+
+(defn start-record-highlight [event]
+  (state-swap! assoc :recording-highlight true))
+
+(defn record-highlight [highlight]
+  (do
+    (state-swap! assoc :recording-highlight false)
+    (print highlight)))
 
 (defn discard-recording []
   (state-swap! merge {
