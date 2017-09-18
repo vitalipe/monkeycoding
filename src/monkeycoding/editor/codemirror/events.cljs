@@ -4,7 +4,7 @@
 (defn- extract-position [js-pos]
   {:line (.-line js-pos) :ch (.-ch js-pos)})
 
-(defn cm-input-data->event [data]
+(defn- cm-input-data->event [data]
   (let [
         input  (js->clj data)
         origin (get input "origin")

@@ -10,17 +10,18 @@
 
 
 (defn recording-mode []
-  [:div
-      [:div.toolbar
-        [:button {:on-click store/finish-recording}       "finish"]
-        [:button {:on-click store/start-record-highlight} "highlight"]]
-      [:div.code-area
-        [codemirror-editor {
-                            :text (:text @editor-state)
-                            :on-input store/record-input
+  (let [{:keys [text recording-highlight]} @editor-state]
+    [:div
+        [:div.toolbar
+          [:button {:on-click store/finish-recording}       "finish"]
+          [:button {:on-click store/toggle-record-highlight} (if recording-highlight "cancel" "highlight")]]
+        [:div.code-area
+          [codemirror-editor {
+                              :text text
+                              :on-input store/record-input
 
-                            :on-highlight store/record-highlight
-                            :recording-highlight (:recording-highlight  @editor-state)}]]])
+                              :on-highlight store/record-highlight
+                              :recording-highlight recording-highlight}]]]))
 
 
 (defn default-mode []

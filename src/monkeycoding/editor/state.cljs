@@ -36,13 +36,13 @@
     (state-swap! update-in [:recording :inputs] conj event)
     (state-swap! assoc :text (:snapshot event))))
 
-(defn start-record-highlight [event]
-  (state-swap! assoc :recording-highlight true))
+(defn toggle-record-highlight [event]
+  (state-swap! update :recording-highlight not))
 
 (defn record-highlight [highlight]
   (do
     (state-swap! assoc :recording-highlight false)
-    (print highlight)))
+    (print "TODO: record highlight-info" highlight)))
 
 (defn discard-recording []
   (state-swap! merge {

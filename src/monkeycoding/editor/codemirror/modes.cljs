@@ -1,5 +1,7 @@
 (ns monkeycoding.editor.codemirror.modes
-  (:require [monkeycoding.editor.codemirror.recording :refer [process-input-event]]))
+  (:require [monkeycoding.editor.codemirror.recording :refer [process-input-event]]
+            [monkeycoding.editor.codemirror.highlighting :as highlighting]))
+
 
 
 (defprotocol EditMode
@@ -24,14 +26,17 @@
     (process-dom-event        [this _ _] this))
 
 
-(defrecord HighlightingMode []
+(defrecord HighlightingMode [
+                              selection
+                              callback
+                              original-selection]
   EditMode
-    (sync-with-props! [this codemirror props] this)
-    (enter!           [this codemirror props] this)
-    (exit!            [this codemirror]       this)
+    (sync-with-props! [this codemirror props] (highlighting/sync-with-props! this codemirror props))
+    (enter!           [this codemirror props] (highlighting/enter! this codemirror props))
+    (exit!            [this codemirror]       (highlighting/exit! this codemirror))
 
-    (process-codemirror-event [this _ _] this)
-    (process-dom-event        [this _ _] this))
+    (process-codemirror-event [this cm event] (highlighting/process-input-event this cm event))
+    (process-dom-event        [this cm event] (highlighting/process-dom-event this cm event)))
 
 
 (defrecord ViewOnlyMode []
@@ -62,6 +67,6 @@
 
 (def all {
             :recording (RecordingMode. nil nil nil nil nil)
-            :highlighting (HighlightingMode.)
+            :highlighting (HighlightingMode. {} identity nil)
             :view-only (ViewOnlyMode.)
             :uninitialized (UninitializedMode.)})
