@@ -28,8 +28,7 @@
   (assoc state :selection {}))
 
 
-(defn- save-selection [state cm]
-  (assoc state :original-selection (aget (.listSelections cm) 0)))
+(defn- get-selection [cm] (aget (.listSelections cm) 0))
 
 
 (defn- restore-selection! [selection cm]
@@ -41,13 +40,18 @@
 
 
 (defn enter! [state cm props]
-  (do
-    (set! (.. cm -options -readOnly) true)
-    (set-marking-style cm))
+  (let [selection-state (get-selection cm)]
+    (doto cm
+      (->
+        (.. -options -readOnly)
+        (set! true))
 
-  (-> state
-    (save-selection cm)
-    (sync-with-props! cm props)))
+      (.setSelection #js {"ch" 0 "line" 0} #js {"ch" 0 "line" 0})
+      (set-marking-style))
+
+    (-> state
+      (assoc :original-selection selection-state)
+      (sync-with-props! cm props))))
 
 
 (defn exit! [{selection :original-selection} cm]
