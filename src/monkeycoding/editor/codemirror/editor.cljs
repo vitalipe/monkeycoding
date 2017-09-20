@@ -29,7 +29,9 @@
     (cond
         same-mode? (reset! mode-state-ref (modes/sync-with-props! from cm props))
         :otherwise
-                  (do ;; it's important to reset! before we invoke enter! on the new mode
+                  (do
+                      ;; if we don't reset! before we enter! a new mode
+                      ;; the previous mode might get input events...
                       (reset! mode-state-ref (:uninitialized modes/all))
                       (modes/exit! from cm)
                       (reset! mode-state-ref (modes/enter! to cm props))))))
