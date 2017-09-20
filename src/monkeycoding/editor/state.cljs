@@ -43,10 +43,17 @@
   (state-swap! update :recording-highlight not))
 
 
-(defn record-highlight [highlight-info]
-  (do
-    (state-swap! assoc :recording-highlight false)
-    (.log js/console "TODO" highlight-info "mooo!")))
+(defn record-highlight [from to]
+  (let [
+        stream (:recording @editor-state)
+        last-snaphot (stream/stream->snapshot stream)
+        mark (stream/create-mark-step from to (str  "dummy into for: " from to))
+        snapshot (assoc-in last-snaphot [:marks (:id mark)] mark)]
+
+    (doto editor-state
+      (swap! update :recording stream/append-step mark snapshot 0)
+      (swap! assoc :snapshot snapshot)
+      (swap! assoc :recording-highlight false))))
 
 
 (defn discard-recording []
