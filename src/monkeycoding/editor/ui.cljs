@@ -10,14 +10,17 @@
 
 
 (defn recording-mode []
-  (let [{:keys [text recording-highlight]} @editor-state]
+  (let [{:keys [snapshot recording-highlight]} @editor-state]
     [:div
         [:div.toolbar
           [:button {:on-click store/finish-recording}       "finish"]
           [:button {:on-click store/toggle-record-highlight} (if recording-highlight "cancel" "highlight")]]
         [:div.code-area
           [codemirror-editor {
-                              :text text
+                              :text (:text snapshot)
+                              :selection (:selection snapshot)
+                              :marks (:marks snapshot)
+
                               :on-input store/record-input
 
                               :on-highlight store/record-highlight
@@ -34,7 +37,10 @@
       [:div.code-area
         [codemirror-editor {
                             :read-only true
-                            :text (:text @editor-state)}]]])
+                            :text (get-in  @editor-state [:snapshot :text])
+                            :selection (get-in  @editor-state [:snapshot :selection])
+                            :marks (get-in  @editor-state [:snapshot :marks])}]]])
+
 
 (defn playback-mode []
   (r/with-let [paused (r/atom false)]

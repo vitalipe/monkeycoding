@@ -11,8 +11,8 @@
                                     :theme :default}
 
                             :recording stream/empty-stream
+                            :snapshot stream/empty-snapshot
 
-                            :text ""
                             :recording-highlight false
                             :current-mode :default-mode}))
 
@@ -24,30 +24,37 @@
 (defn start-recording []
   (state-swap! assoc :current-mode :recording-mode))
 
-(defn finish-recording []
-  (do
-    (state-swap! assoc :text (:snapshot (last (get-in @editor-state [:recording :inputs]))))
-    (state-swap! assoc :current-mode :default-mode)
-    (state-swap! assoc :record-input false)
-    (state-swap! assoc :recording-highlight false)))
 
-(defn record-input [event]
+(defn finish-recording []
+  (doto editor-state
+    (swap! assoc :current-mode :default-mode)
+    (swap! assoc :record-input false)
+    (swap! assoc :recording-highlight false)
+    (swap! assoc :snapshot (stream/stream->snapshot (:recording @editor-state)))))
+
+
+(defn record-input [event snapshot dt]
   (do
-    (state-swap! update-in [:recording :inputs] conj event)
-    (state-swap! assoc :text (:snapshot event))))
+    (state-swap! update :recording stream/append-step event snapshot dt)
+    (state-swap! assoc :snapshot (stream/stream->snapshot (:recording @editor-state)))))
+
 
 (defn toggle-record-highlight [event]
   (state-swap! update :recording-highlight not))
 
-(defn record-highlight [highlight]
+
+(defn record-highlight [highlight-info]
   (do
     (state-swap! assoc :recording-highlight false)
-    (print "TODO: record highlight-info" highlight)))
+    (.log js/console "TODO" highlight-info "mooo!")))
+
 
 (defn discard-recording []
   (state-swap! merge {
                       :recording stream/empty-stream
-                      :text ""}))
+                      :snapshot stream/empty-snapshot}))
+
+
 ;; playback actions
 (defn start-playback []
     (state-swap! assoc :current-mode :playback-mode))

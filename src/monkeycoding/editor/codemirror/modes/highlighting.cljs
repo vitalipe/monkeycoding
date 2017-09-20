@@ -1,4 +1,6 @@
-(ns monkeycoding.editor.codemirror.highlighting)
+(ns monkeycoding.editor.codemirror.modes.highlighting
+  (:require
+    [monkeycoding.editor.codemirror.snapshot   :as snapshot]))
 
 
 (defn- set-marking-style [cm]
@@ -15,32 +17,27 @@
       (.remove "editor-mode-highlighting")))
 
 
-(defn- empty-selection? [{:keys [type head anchor]}]
+(defn- empty-selection? [{:keys [type from to]}]
   (cond
     (not= type :selection) true
-    (= head anchor)        true))
+    (= from to)        true))
 
 
 (defn- commit-mark [{:keys [selection callback] :as state}]
   (when-not (empty-selection? selection)
-    (callback selection))
+    (callback (:from selection) (:to selection)))
 
   (assoc state :selection {}))
 
 
-(defn- get-selection [cm] (aget (.listSelections cm) 0))
 
-
-(defn- restore-selection! [selection cm]
-  (.setSelection  cm (.-anchor selection) (.-head selection)))
-
-;; mode
+;; lifesycle
 (defn sync-with-props! [state cm {on-highlight :on-highlight :or {on-highlight identity}}]
   (assoc state :callback on-highlight))
 
 
 (defn enter! [state cm props]
-  (let [selection-state (get-selection cm)]
+  (let [snapshot (snapshot/take-snapshot cm (:marks props))]
     (doto cm
       (->
         (.. -options -readOnly)
@@ -50,16 +47,16 @@
       (set-marking-style))
 
     (-> state
-      (assoc :original-selection selection-state)
+      (assoc :snapshot snapshot)
       (sync-with-props! cm props))))
 
 
-(defn exit! [{selection :original-selection} cm]
+(defn exit! [{snapshot :snapshot} cm]
   (do
     (set! (.. cm -options -readOnly) false)
     (clear-marking-style cm))
 
-  (restore-selection! selection cm))
+  (snapshot/apply-snapshot! cm snapshot))
 
 
 (defn process-dom-event [state cm dom-event]

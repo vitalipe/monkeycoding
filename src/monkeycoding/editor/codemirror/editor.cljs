@@ -6,7 +6,7 @@
 
       [monkeycoding.editor.codemirror.common  :refer [default-config as-component]]
       [monkeycoding.editor.codemirror.modes   :as modes]
-      [monkeycoding.editor.codemirror.events  :as events]))
+      [monkeycoding.editor.codemirror.parse   :as parse]))
 
 
 
@@ -33,12 +33,33 @@
                       (modes/exit! from cm)
                       (reset! mode-state-ref (modes/enter! to cm props))))))
 
+
+;; event proxy
 (defn- dispatch-dom-event! [mode-state-ref cm event]
   (reset! mode-state-ref (modes/process-dom-event @mode-state-ref cm event)))
 
 
-(defn- dispatch-codemirror-event! [mode-state-ref cm event]
-  (reset! mode-state-ref (modes/process-codemirror-event @mode-state-ref cm event)))
+(defn- dispatch-codemirror-event! [mode-state-ref cm js-event]
+  (when-let [event (parse/js->step js-event)]
+    (reset! mode-state-ref (modes/process-input-event @mode-state-ref cm event))))
+
+
+(defn init-events! [codemirror mode-state-ref]
+  (let [
+        dom-proxy     #(dispatch-dom-event! mode-state-ref codemirror %)
+        input-proxy   #(dispatch-codemirror-event! mode-state-ref %1 %2)]
+
+    (doto (.. codemirror getWrapperElement)
+      (.addEventListener "touchstart" dom-proxy)
+      (.addEventListener "touchend"   dom-proxy)
+      (.addEventListener "mousedown"  dom-proxy)
+      (.addEventListener "mouseup"    dom-proxy)
+      (.addEventListener "mouseleave" dom-proxy))
+
+    (doto codemirror
+      (.on "change"                input-proxy)
+      (.on "cursorActivity"        #(input-proxy % (.getCursor %)))
+      (.on "beforeSelectionChange" input-proxy))))
 
 
 ;; Editor
@@ -47,15 +68,17 @@
 
 
 (defn- init! [dom mode-state-ref config]
-    (-> dom
-      (create-codemirror! config)
-      (events/init!
-                (partial dispatch-dom-event! mode-state-ref)
-                (partial dispatch-codemirror-event! mode-state-ref))))
+    (set! (.-cm js/window)
+          (-> dom
+                (create-codemirror! config)
+                (init-events! mode-state-ref))))
 
 
 (defn codemirror-editor [{:keys [
                                   text
+                                  selection
+                                  marks
+
 
                                   read-only
                                   recording-highlight
@@ -68,7 +91,7 @@
 
       (as-component {
                       :on-mount (fn [this]
-                                    (reset! cm (init! (r/dom-node this) mode-state {:value (or text "")}))
+                                    (reset! cm (init! (r/dom-node this) mode-state {}))
                                     (sync-mode-with-props! mode-state props @cm))
 
                       :on-props (fn [{text :text :as props}]

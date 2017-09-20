@@ -46,6 +46,7 @@ function Player(dom, config) {
   var _cm = initCodemirror(dom, config, _playback.initial);
   var _pos = {input: 0};
 
+
   var _resume = function() {
     if (_pos.input > _playback.inputs.length -1)
       return;
@@ -81,7 +82,7 @@ function Player(dom, config) {
         break;
 
         case "selection":
-              _cm.setSelection(action.anchor, action.head);
+              _cm.setSelection(action.from, action.to);
         break;
 
         case "cursor":
