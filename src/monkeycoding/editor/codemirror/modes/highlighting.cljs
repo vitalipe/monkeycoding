@@ -25,10 +25,14 @@
 
 (defn- commit-mark [{:keys [selection callback] :as state}]
   (when-not (empty-selection? selection)
-    (callback (:from selection) (:to selection)))
+    (let [{:keys [from to]} selection]
+      (cond
+        (> (:line from) (:line to)) (callback to from)
+        (> (:ch from) (:ch to))     (callback to from)
+        :otherwise                  (callback from to))))
+
 
   (assoc state :selection {}))
-
 
 
 ;; lifesycle
