@@ -19,7 +19,7 @@
 (defn stream->snapshot [stream]
   (if-let [snapshot (:snapshot (last stream))]
       snapshot
-      empty-stanpshot))
+      empty-snapshot))
 
 
 (defn append-step [stream step snapshot dt]
