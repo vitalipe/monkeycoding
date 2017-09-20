@@ -4,6 +4,8 @@
                                                       create-selection-step
                                                       create-cursor-step
                                                       create-input-step]]))
+(defn str->int [text]
+  (.parseInt js/window (re-find #"[\d.]+" text)))
 
 (defn js->position [obj]
   {:line (.-line obj) :ch (.-ch obj)})
@@ -27,9 +29,9 @@
 
 
 (defn js->mark [obj]
-  {
-    :range (js->range  (.find obj))
-    :id (re-find #"\bhighliting-mark-id-\w*" (.-className obj))})
+  (-> {}
+    (merge (js->range  (.find obj)))
+    (assoc :id (str->int (re-find #"\bhighliting-mark-id-\w" (.-className obj))))))
 
 
 (defn mark->js [{:keys [from to id]}]

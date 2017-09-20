@@ -46,4 +46,5 @@
 (defn- apply-snapshot! [codemirror {:keys [text selection marks]}]
   (doto codemirror
     (.setValue text)
-    (apply-selection! selection)))
+    (apply-selection! selection)
+    (apply-marks! marks)))
