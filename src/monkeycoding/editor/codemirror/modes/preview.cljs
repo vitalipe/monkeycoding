@@ -54,20 +54,29 @@
         :otherwise result))))
 
 
-;;(defn- create-mark-element [text]
-;;  (.createElement js/document "div"))
-    ;;(.-innerHTML text)))
+(defn- create-mark-element []
+  (let [element (.createElement js/document "div")]
+    (doto (.-classList element)
+      (.add "editor-mark-element")
+      (.add "CodeMirror-activeline-background"))
+
+    element))
 
 
-(defn- activate-line [cm line prv]
-  (doto cm
-    (.removeLineClass prv "")
-    (.addLineClass line "" "CodeMirror-activeline-background")))
+(defn- activate-line! [cm line prv]
+  (when prv  (.removeLineClass cm prv "" "CodeMirror-activeline-background"))
+  (when line (.addLineClass cm line "" "CodeMirror-activeline-background"))
+  line)
 
+(defn- activate-mark! [cm line mark widget info-dom]
+  (when widget
+    (.clear widget))
 
-(defn- activate-mark [cm sorted-marks position]
-  (.log js/console position (find-mark-at sorted-marks position)))
-
+  (when mark
+    (set! (.-innerHTML info-dom) (:info mark))
+    (let [widget (.addLineWidget cm  line info-dom #js{"above" true})]
+      (set! (.. info-dom -parentElement -parentElement -style -position) "")
+      widget)))
 
 
 ;; lifesycle
@@ -79,20 +88,29 @@
   (assoc this :marks (sort-marks-by-position (:marks props))))
 
 
-(defn enter! [this cm props]
-  (sync-with-props! this cm props))
+(defn enter! [state cm props]
+  (-> state
+    (sync-with-props! cm props)
+    (assoc :info-dom (create-mark-element))))
 
 
 (defn exit! [_ cm]
   (set! (.. cm -options -readOnly) false))
 
 
-(defn process-dom-event [{:keys [previous-selected-line] :as state} cm event]
-  (if-let [{:keys [line] :as pos} (event->position cm event)]
-    (do
-      (activate-line cm line previous-selected-line)
-      (activate-mark cm (:marks state) pos)
-      (assoc state :previous-selected-line line))
+(defn process-dom-event [{:keys [
+                                  prv-line
+                                  prv-mark
+                                  prv-widget
+                                  marks
+                                  info-dom] :as state} cm event]
 
-    ;; otherwise
-    state))
+  (let [
+        {:keys [line] :as pos} (event->position cm event)
+        mark (find-mark-at marks pos)]
+
+    (merge state
+        {
+          :prv-line (activate-line! cm line prv-line)
+          :prv-mark mark
+          :prv-widget (activate-mark! cm line mark prv-widget info-dom)})))

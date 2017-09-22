@@ -43,12 +43,15 @@
 
 
 (defrecord PreviewMode [
-                        previous-selected-line
+                        prv-mark
+                        prv-widget
+                        prv-line
+                        info-dom
                         marks]
 
   EditMode
     (sync-with-props! [this cm props] (preview/sync-with-props! this cm props))
-    (enter!           [this cm props] (preview/sync-with-props! this cm props))
+    (enter!           [this cm props] (preview/enter! this cm props))
     (exit!            [this cm] (preview/exit! this cm))
 
     (process-input-event  [this _ _] this)
@@ -69,5 +72,5 @@
 (def all {
             :recording (RecordingMode. nil nil nil nil nil nil)
             :highlighting (HighlightingMode. {} identity nil)
-            :view-only (PreviewMode. 0 '())
+            :view-only (PreviewMode. nil nil 0 nil '())
             :uninitialized (UninitializedMode.)})
