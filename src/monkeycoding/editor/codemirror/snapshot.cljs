@@ -5,18 +5,18 @@
                                                           mark->js
                                                           position->js]]))
 
-(defn- merge-intersection [current prv]
-  (let [base (select-keys prv (keys current))]
-    (merge
-          base
-          (select-keys current (keys base)))))
+(defn- merge-with-prv-marks [current prv]
+  (into {}
+    (->> (keys current)
+      (map #(merge (prv %) (current %)))
+      (map #(hash-map (:id %) %)))))
 
 
 (defn- take-marks [codemirror prv-marks]
   (-> codemirror
     (.getAllMarks)
     (js->marks)
-    (merge-intersection prv-marks)))
+    (merge-with-prv-marks prv-marks)))
 
 
 (defn- take-selection [codemirror]
@@ -37,7 +37,7 @@
 
 
 (defn take-snapshot [codemirror prv-marks-data]
- {
+   {
     :text (.getValue codemirror)
     :marks (take-marks codemirror prv-marks-data)
     :selection (take-selection codemirror)})
