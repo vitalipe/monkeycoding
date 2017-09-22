@@ -57,7 +57,8 @@
       (.addEventListener "touchend"   dom-proxy)
       (.addEventListener "mousedown"  dom-proxy)
       (.addEventListener "mouseup"    dom-proxy)
-      (.addEventListener "mouseleave" dom-proxy))
+      (.addEventListener "mouseleave" dom-proxy)
+      (.addEventListener "mousemove"  dom-proxy))
 
     (doto codemirror
       (.on "change"                input-proxy)

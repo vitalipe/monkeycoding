@@ -66,8 +66,8 @@
 (defn process-dom-event [state cm dom-event]
     (case (.-type dom-event)
          ("mouseleave" "mousedown" "touchstart") (assoc state :selection {})
-         ("mouseup" "touchend") (commit-mark state)))
-
+         ("mouseup" "touchend") (commit-mark state)
+      state))
 
 (defn process-input-event [state cm event]
   (merge state
