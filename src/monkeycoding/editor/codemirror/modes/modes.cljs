@@ -42,14 +42,17 @@
     (process-dom-event  [this cm event] (highlighting/process-dom-event this cm event)))
 
 
-(defrecord PreviewMode []
+(defrecord PreviewMode [
+                        previous-selected-line
+                        marks]
+
   EditMode
     (sync-with-props! [this cm props] (preview/sync-with-props! this cm props))
     (enter!           [this cm props] (preview/sync-with-props! this cm props))
     (exit!            [this cm] (preview/exit! this cm))
 
     (process-input-event  [this _ _] this)
-    (process-dom-event    [this _ _] this))
+    (process-dom-event    [this cm event] (preview/process-dom-event this cm event)))
 
 
 (defrecord UninitializedMode []
@@ -66,5 +69,5 @@
 (def all {
             :recording (RecordingMode. nil nil nil nil nil nil)
             :highlighting (HighlightingMode. {} identity nil)
-            :view-only (PreviewMode.)
+            :view-only (PreviewMode. 0 '())
             :uninitialized (UninitializedMode.)})
