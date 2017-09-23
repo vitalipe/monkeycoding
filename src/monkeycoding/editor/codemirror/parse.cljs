@@ -38,8 +38,9 @@
   [
     (position->js from)
     (position->js to)
-    (js-obj "className" (str "highliting-mark " "highliting-mark-id-" id))])
-
+    (js-obj
+            "className" (str "highliting-mark " "highliting-mark-id-" id)
+            "startStyle" "highliting-mark-start")])
 
 (defn js->marks [obj]
   (->> obj
