@@ -6,8 +6,8 @@ const ZeroPosition = Object.freeze({line : 0, ch : 0});
 const EmptySelection = Object.freeze({from :ZeroPosition, to: ZeroPosition });
 
 
-function initCodemirror(dom, {theme, language, showLines = true, customClassName = null}) {
-    let cm = new CodeMirror(dom, {theme, language, showLines, readOnly : true});
+function initCodemirror(dom, {theme, language, lineNumbers = true, customClassName = null}) {
+    let cm = new CodeMirror(dom, {theme, language, lineNumbers, readOnly : true});
 
     dom.classList.add("CodeMirror-focused"); // always display cursor
     dom.classList.add("mokey-code-player");
@@ -76,6 +76,11 @@ const commands = {
 
     cursor(codemirror, action) {
       codemirror.setCursor(action.position);
+    },
+
+    mark(codemirror, action) {
+      let className = ["highliting-mark", " ", "highliting-mark-id-", action.id].join("");
+      codemirror.markText(action.from, action.to, {className, startStyle : "highliting-mark-start"});
     }
 };
 
