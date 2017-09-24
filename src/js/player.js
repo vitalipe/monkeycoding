@@ -44,29 +44,30 @@ function nextAnimationTick(deltaMs, callback, ...args) {
 }
 
 
-function omitRange(str, from, to) {
-  return str.substring(0, from)  + str.substring(to);
-}
+function positionFromTextOffset(cm, {line, ch}, offset) {
+    if (!offset)
+      return null;
 
+    let pos  = cm.indexFromPos({line, ch});
+    let text   = cm.getValue();
 
-function insertAtIndex(str, from, text) {
-  return str.substring(0, from)  + text + str.substring(from);
+    for (let i = 0; i < offset; i++)
+      (text[pos+i] === '\n') ? line++ : ch++;
+
+    return {line, ch};
 }
 
 
 const commands = {
 
-    input(codemirror, action) {
-      let index = codemirror.indexFromPos(action.position);
-      let text  = codemirror.getValue();
+    input(codemirror, {insert = "", remove = 0, position}) {
+      let to = positionFromTextOffset(codemirror, position, remove);
 
-      if (action.remove)
-        text = omitRange(text, index, index  + action.remove)
+      if (to)
+        codemirror.replaceRange(insert , position, to);
+      else
+        codemirror.replaceRange(insert , position);
 
-      if (action.insert.length)
-        text = insertAtIndex(text, index, action.insert)
-
-        codemirror.setValue(text);
     },
 
     selection(codemirror, action) {
