@@ -19,6 +19,15 @@ function initCodemirror(dom, {theme, language, lineNumbers = true, customClassNa
     return cm;
 }
 
+function registerInteractionEvents(codemirror, ...handlers) {
+  let dom = codemirror.getWrapperElement();
+  let fromXY = ({pageX, pageY}) => codemirror.coordsChar({top: pageY, left : pageY});
+  let dispatch = (pos) => handlers.map(h => h(pos));
+
+  dom.addEventListener("touchstart", ({touches : [xy]}) => dispatch(fromXY(xy)));
+  dom.addEventListener("mousemove", (e) => dispatch(fromXY(e)));
+}
+
 
 function applySnapshot(codemirror, {text = "", marks = {}, selection = EmptySelection}) {
     codemirror.setValue(text);
@@ -90,7 +99,7 @@ const commands = {
 class Player {
 
     constructor(domNode, {
-                          highlightActiveRow = true,
+                          highlightActiveLine = true,
                           HighlightActiveMark = true,
                           showLineNumbers = true,
                           theme = "",
@@ -98,14 +107,22 @@ class Player {
 
       this._codemirror = initCodemirror(domNode, {language, theme});
 
+      registerInteractionEvents(
+          this._codemirror,
+          (p) => this._highlightLine(p));
+
+
       this._stream     = null;
       this._position   = 0;
       this._cancelNext = null;
 
+      this._lastActiveLine = null;
+      this._highlightActiveLine = highlightActiveLine;
+
       this._markInsertHandler    = noop;
       this._progressHandler      = noop;
       this._markHighlightHandler = noop;
-      this._progressHandler      = noop;
+      this._lineHighlightHandler = noop;
     }
 
     play({initial, inputs}) {
@@ -162,8 +179,31 @@ class Player {
 
     onMarkInsert(callback)     { this._markInsertHandler    = (callback || noop)}
     onMarkHighlight(callback)  { this._markHighlightHandler = (callback || noop)}
-    onRowHighlight(callback)   { this._rowHighlightHandler  = (callback || noop)}
+    onLineHighlight(callback)   { this._lineHighlightHandler  = (callback || noop)}
     onProgressUpdate(callback) { this._progressHandler      = (callback || noop)}
+
+    // private
+    _highlightLine({line, outside}) {
+      let cm = this._codemirror;
+      let last = this._lastActiveLine;
+      let active = outside ? null : line;
+
+      this._lastActiveLine = active;
+
+      if (line === last)
+        return;
+
+      for (let i = cm.lineCount() - 1; i >= 0; i--) // just to be on the safe side
+        this._codemirror.removeLineClass(i, "", "CodeMirror-activeline-background");
+
+      if (active === null)
+        this._lineHighlightHandler({line : null, text : null});
+      else
+        this._lineHighlightHandler({line : active, text : this._codemirror.getLine(active)});
+
+      if (active !== null && this._highlightActiveLine)
+        this._codemirror.addLineClass(line, "", "CodeMirror-activeline-background");
+    }
 
 
     _execAction(action) {
