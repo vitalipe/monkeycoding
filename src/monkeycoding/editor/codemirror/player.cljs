@@ -5,14 +5,20 @@
       [monkeycoding.player :refer [Player]]))
 
 
+(defn init-player! [dom config paused playback]
+  (let [player (new Player dom (clj->js config))]
+    (when playback (.play player (clj->js playback)))
+    (when paused   (.pause player))
+    player))
+
 
 ;; Player is just a nice React wrapper of the JS player
 (defn codemirror-player [{:keys [paused playback]}]
   (let [
         pl (atom nil)
-        config (merge default-config {:playback playback :paused paused})]
+        config default-config]
 
     (as-component {
-                    :on-mount (fn [this] (reset! pl (new Player (r/dom-node this) (clj->js config))))
-                    :on-props (fn [{paused :paused}] (.setPaused @pl paused))
+                    :on-mount (fn [this] (reset! pl (init-player! (r/dom-node this) config paused playback)))
+                    :on-props (fn [{paused :paused}] (if paused (.pause @pl) (.resume @pl)))
                     :render (fn [] [:div.player-content])})))
