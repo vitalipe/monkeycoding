@@ -5,6 +5,7 @@ goog.require("cljsjs.codemirror");
 const ZeroPosition = Object.freeze({line : 0, ch : 0});
 const EmptySelection = Object.freeze({from :ZeroPosition, to: ZeroPosition });
 
+function noop() {}
 
 function initCodemirror(dom, {theme, language, lineNumbers = true, customClassName = null}) {
     let cm = new CodeMirror(dom, {theme, language, lineNumbers, readOnly : true});
@@ -100,6 +101,11 @@ class Player {
       this._stream     = null;
       this._position   = 0;
       this._cancelNext = null;
+
+      this._markInsertHandler    = noop;
+      this._progressHandler      = noop;
+      this._markHighlightHandler = noop;
+      this._progressHandler      = noop;
     }
 
     play({initial, inputs}) {
@@ -137,6 +143,7 @@ class Player {
 
       this._execAction(nextAction);
       this._position++;
+      this._notifyActionExec(nextAction);
     }
 
     previousStep() {
@@ -148,15 +155,15 @@ class Player {
       this.pause();
 
       this._execAction(prvAction);
-      this._position -= 2;
+      this._position--;
+      this._notifyActionExec(prvAction);
     }
 
 
-    onMarkInsert() {}
-    onMarkHighlight() {}
-    onRowHighlight() {}
-
-    onProgressUpdate() {}
+    onMarkInsert(callback)     { this._markInsertHandler    = (callback || noop)}
+    onMarkHighlight(callback)  { this._markHighlightHandler = (callback || noop)}
+    onRowHighlight(callback)   { this._rowHighlightHandler  = (callback || noop)}
+    onProgressUpdate(callback) { this._progressHandler      = (callback || noop)}
 
 
     _execAction(action) {
@@ -166,12 +173,23 @@ class Player {
       command(codemirror, action);
     }
 
-    _nextTick() {
+    _notifyActionExec(action, currentPosition) {
+      let total  = this._stream.length;
+      let played = this._position; // next index, by starts at 0, so we're fine
 
+      this._progressHandler({total, played});
+
+      if (action.type === "mark")
+        this._markInsertHandler({id : action.id, info : action.info})
+    }
+
+    _nextTick() {
       let nextAction = this._stream[this._position];
       let onTick = () => {
         this._execAction(nextAction);
         this._position++;
+        this._notifyActionExec(nextAction);
+
         this._nextTick();
       }
 
