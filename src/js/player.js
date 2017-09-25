@@ -4,6 +4,7 @@ goog.require("cljsjs.codemirror");
 
 const ZeroPosition = Object.freeze({line : 0, ch : 0});
 const EmptySelection = Object.freeze({from :ZeroPosition, to: ZeroPosition });
+const NullMark = Object.freeze({id :null, info: null, isNull: true});
 
 function noop() {}
 
@@ -21,7 +22,7 @@ function initCodemirror(dom, {theme, language, lineNumbers = true, customClassNa
 
 function registerInteractionEvents(codemirror, ...handlers) {
   let dom = codemirror.getWrapperElement();
-  let fromXY = ({pageX, pageY}) => codemirror.coordsChar({top: pageY, left : pageY});
+  let fromXY = ({pageX, pageY}) => codemirror.coordsChar({top: pageY, left : pageX});
   let dispatch = (pos) => handlers.map(h => h(pos));
 
   dom.addEventListener("touchstart", ({touches : [xy]}) => dispatch(fromXY(xy)));
@@ -32,7 +33,9 @@ function registerInteractionEvents(codemirror, ...handlers) {
 function applySnapshot(codemirror, {text = "", marks = {}, selection = EmptySelection}) {
     codemirror.setValue(text);
     codemirror.setSelection(selection.from, selection.to);
-    //FIXME set marks
+
+    for (let mark of Object.values(marks))
+      commands.mark(codemirror, mark);
 }
 
 
@@ -65,6 +68,56 @@ function positionFromTextOffset(cm, {line, ch}, offset) {
       (text[pos+i] === '\n') ? line++ : ch++;
 
     return {line, ch};
+}
+
+function createInlineMarkNode() {
+  let node = document.createElement("div");
+
+  node.classList.add("editor-mark-element");
+  node.classList.add("CodeMirror-activeline-background");
+
+  return node;
+}
+
+function extractMarkID(className) {
+  let prefix = "highliting-mark-id-"
+  let index = className.indexOf(prefix);
+
+  if(index === -1)
+    return null;
+
+  return parseInt(className.substring(index + prefix.length));
+}
+
+
+function sortMarksByPosition(marks) {
+  let cmp = (a, b) => ((a > b) ? 1 : ((a === b) ? 0 : -1));
+  let cmpPos = (a, b) => (a.line === b.line) ? cmp(a.ch, b.ch) : cmp(a.line, b.line);
+
+  return marks
+            .map((m) => Object.assign(m.find(), {id : extractMarkID(m.className)}))
+            .sort((a, b) => cmpPos(a.from, b.from));
+}
+
+
+function findMarkAt(sortedMarks, pos) {
+  if (pos.outside)
+    return NullMark;
+
+  let isAfter  = (before, after) =>
+                      (before.line === after.line)
+                        ? (before.ch <= after.ch)
+                        : (before.line <= before.line);
+
+  let isInsideMark = ({from, to}) => isAfter(from, pos) && !isAfter(to, pos);
+  let isAfterMark  = ({from}) => isAfter(from, pos);
+  let found = NullMark;
+
+  for (let mark of sortedMarks)
+    if      (isInsideMark(mark))  found = mark;
+    else if (!isAfterMark(mark))  break;
+
+  return found;
 }
 
 
@@ -109,16 +162,29 @@ class Player {
 
       registerInteractionEvents(
           this._codemirror,
-          (p) => this._highlightLine(p));
+          (p) => this._highlightLine(p),
+          (p) => this._highlightMark(p));
+
+      this._markNode = createInlineMarkNode();
+
+      // config
+      this._isHighlightActiveMark = HighlightActiveMark;
+      this._isHighlightActiveLine = highlightActiveLine;
 
 
+      // stream
       this._stream     = null;
       this._position   = 0;
       this._cancelNext = null;
 
-      this._lastActiveLine = null;
-      this._highlightActiveLine = highlightActiveLine;
+      this._marksInfo = {};
+      this._sortedMarks = [];
+      this._lastActiveMark = NullMark;
+      this._markLineWidget = null;
 
+      this._lastActiveLine = null;
+
+      // callbacks
       this._markInsertHandler    = noop;
       this._progressHandler      = noop;
       this._markHighlightHandler = noop;
@@ -126,10 +192,23 @@ class Player {
     }
 
     play({initial, inputs}) {
-      this._stream = inputs;
-      this._position = 0;
+      this.pause();
+
+      this._stream     = inputs;
+      this._position   = 0;
+      this._cancelNext = null;
+
+      this._marksInfo = {};
+      this._sortedMarks = [];
+      this._lastActiveMark = NullMark;
+      this._markLineWidget = null;
+
+      this._lastActiveLine = null;
+
 
       applySnapshot(this._codemirror, initial);
+
+      this._initMarksCacheInfo(initial.marks);
       this._nextTick();
     }
 
@@ -201,16 +280,61 @@ class Player {
       else
         this._lineHighlightHandler({line : active, text : this._codemirror.getLine(active)});
 
-      if (active !== null && this._highlightActiveLine)
+      if (active !== null && this._isHighlightActiveLine)
         this._codemirror.addLineClass(line, "", "CodeMirror-activeline-background");
     }
 
+    _highlightMark(pos) {
+      let widget = this._markLineWidget;
+      let node = this._markNode
+      let last = this._lastActiveMark;
+      let mark = findMarkAt(this._sortedMarks, pos);
+      let handler = this._markHighlightHandler;
+      let info = mark.isNull ? null : this._marksInfo[mark.id];
+
+      if (mark.id === last.id)
+        return;
+
+      this._markLineWidget = null;
+      this._lastActiveMark = mark;
+
+      if (widget)
+        widget.clear();
+
+      handler({id: mark.id, info});
+
+      if (mark.isNull || !this._isHighlightActiveMark)
+        return;
+
+      node.innerHTML = info;
+      this._markLineWidget = this._codemirror.addLineWidget(pos.line, node, {above : true});
+    }
 
     _execAction(action) {
       let command = commands[action.type];
       let codemirror = this._codemirror;
 
       command(codemirror, action);
+      this._calcMarksCacheInfo(action);
+    }
+
+    _initMarksCacheInfo(marksInfo) {
+      let markList = Object.values(marksInfo);
+      let sorted = sortMarksByPosition(this._codemirror.getAllMarks());
+      let info = Object.assign({}, ...markList.map(({id, info}) => {id: {id, info}}));
+
+      this._marksInfo = info;
+      this._sortedMarks = sorted;
+    }
+
+    _calcMarksCacheInfo(action) {
+        if (!["mark", "input"].includes(action.type))
+          return;
+
+        if (action.type === "mark")
+          this._marksInfo[action.id] = action.info;
+
+        this._sortedMarks = sortMarksByPosition(this._codemirror.getAllMarks());
     }
 
     _notifyActionExec(action, currentPosition) {
