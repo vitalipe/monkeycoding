@@ -73,10 +73,9 @@
     (.clear widget))
 
   (when mark
-    (set! (.-innerHTML info-dom) (:info mark))
-    (let [widget (.addLineWidget cm  line info-dom #js{"above" true})]
-      (set! (.. info-dom -parentElement -parentElement -style -position) "")
-      widget)))
+    (do
+      (set! (.-innerHTML info-dom) (:info mark))
+      (.addLineWidget cm  line info-dom #js{"above" true}))))
 
 
 ;; lifesycle
