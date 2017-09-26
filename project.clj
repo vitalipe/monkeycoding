@@ -33,7 +33,6 @@
                          :output-to "public/js/app.js"
                          :output-dir "public/js/out"
                          :asset-path   "js/out"
-                         :libs ["src/js"]
                          :source-map true
                          :optimizations :none
                          :pretty-print  true}

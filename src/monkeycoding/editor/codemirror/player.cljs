@@ -2,11 +2,11 @@
     (:require
       [reagent.core :as r :refer [atom]]
       [monkeycoding.editor.codemirror.common :refer [as-component default-config]]
-      [monkeycoding.player :refer [Player]]))
+      [monkeycoding.player :as player]))
 
 
 (defn init-player! [dom config paused playback]
-  (let [player (new Player dom (clj->js config))]
+  (let [player (new player/Player dom (clj->js config))]
     (when playback (.play player (clj->js playback)))
     (when paused   (.pause player))
     player))
