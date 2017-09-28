@@ -3,6 +3,18 @@
     [monkeycoding.editor.codemirror.snapshot   :as snapshot]))
 
 
+(defn text->position [text]
+  {
+    :line (count (re-seq #"\n" text))
+    :ch (count (last (clojure.string/split text #"\n")))})
+
+
+(defn- position-after-input [input]
+  (cond
+    (empty? (:insert input)) (:position input)
+    :otherwise (merge-with + (:position input) (text->position (:insert input)))))
+
+
 (defn- selecting-now? [{:keys [last last-selection]}]
   (and
     (not= (:to last-selection) (:from last-selection))
@@ -21,11 +33,25 @@
     (selecting-now? state)))
 
 
-(defn- redundant-event? [state current prv]
-  (or
-    (empty-selection? current)
-    (cursor-event-during-selection? state current)
-    (= current prv)))
+(defn- shadow-cursor-after-input? [cur prv]
+  (and
+    (= (:type cur) :cursor)
+    (= (:type prv) :input)
+    (= (cur :position) (position-after-input prv))))
+
+
+(defn- empty-isolated-selection? [selection prv]
+  (and
+    (not= (:type prv) :selection)
+    (empty-selection? selection)))
+
+
+(defn- redundant-event? [state current prv prv-of-same-type]
+    (or
+      (empty-isolated-selection? current prv)
+      (cursor-event-during-selection? state current)
+      (shadow-cursor-after-input?  current prv)
+      (= current prv)))
 
 
 (defn- calc-dt [now last-time]
@@ -42,7 +68,7 @@
 (defn- merge-input-data [state input now]
   (let [
         target    (if (= (input :type) :selection) :last-selection :last-input)
-        redundant (redundant-event? state input (get state target))]
+        redundant (redundant-event? state input (:last state) (get state target))]
 
     (merge state
         (when-not redundant {
