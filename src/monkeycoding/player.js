@@ -62,12 +62,14 @@ function positionFromTextOffset(cm, {line, ch}, offset) {
       return null;
 
     let pos  = cm.indexFromPos({line, ch});
-    let text   = cm.getValue();
+    let rows = cm.getValue().substr(pos, offset).split('\n');
 
-    for (let i = 0; i < offset; i++)
-      (text[pos+i] === '\n') ? line++ : ch++;
+    if (!rows.length)
+      return {line, ch};
 
-    return {line, ch};
+    return {
+      line: line + (rows.length-1),
+      ch:   rows.length > 1 ? (rows[rows.length-1].length) : ch + rows[0].length};
 }
 
 function createInlineMarkNode() {
