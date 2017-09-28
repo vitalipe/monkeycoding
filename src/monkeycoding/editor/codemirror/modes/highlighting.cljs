@@ -17,21 +17,18 @@
       (.remove "editor-mode-highlighting")))
 
 
-(defn- empty-selection? [{:keys [type from to]}]
-  (cond
-    (not= type :selection) true
-    (= from to)        true))
-
+(defn- non-empty-selection? [{:keys [type from to]}]
+  (and
+    (= type :selection)
+    (not= from to)))
 
 (defn- commit-mark [{:keys [selection callback] :as state}]
-  (when-not (empty-selection? selection)
+  (when (non-empty-selection? selection)
     (let [{:keys [from to]} selection]
       (cond
         (> (:line from) (:line to)) (callback to from)
         (> (:ch from) (:ch to))     (callback to from)
         :otherwise                  (callback from to))))
-
-
   (assoc state :selection {}))
 
 
@@ -59,7 +56,6 @@
   (do
     (set! (.. cm -options -readOnly) false)
     (clear-marking-style cm))
-
   (snapshot/apply-snapshot! cm snapshot))
 
 
@@ -71,4 +67,4 @@
 
 (defn process-input-event [state cm event]
   (merge state
-    (when-not (empty-selection? event) {:selection event})))
+    (when (non-empty-selection? event) {:selection event})))

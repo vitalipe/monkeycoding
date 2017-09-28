@@ -9,9 +9,22 @@
     (= last last-selection)))
 
 
+(defn- empty-selection? [{:keys [type from to]}]
+  (and
+      (= type type :selection)
+      (= from to)))
+
+
+(defn- cursor-event-during-selection? [state {type :type}]
+  (and
+    (= type :cursor)
+    (selecting-now? state)))
+
+
 (defn- redundant-event? [state current prv]
   (or
-    (and (= (current :type) :cursor) (selecting-now? state))
+    (empty-selection? current)
+    (cursor-event-during-selection? state current)
     (= current prv)))
 
 
