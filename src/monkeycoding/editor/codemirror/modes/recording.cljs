@@ -27,9 +27,7 @@
   (and
     (= (:type cur) :cursor)
     (= (:type prv) :input)
-    (= (cur :position) (do
-                        (.log js/console (cur :position) (position-after-input prv))
-                        (position-after-input prv)))))
+    (= (cur :position) (position-after-input prv))))
 
 
 (defn- redundant-event? [{:keys [last selecting]} current]
