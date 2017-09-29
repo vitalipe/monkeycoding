@@ -15,8 +15,6 @@
 
 
 (defrecord RecordingMode [last
-                          last-input
-                          last-selection
                           last-time
                           marks
                           on-input]
@@ -70,7 +68,7 @@
 
 
 (def all {
-            :recording (RecordingMode. nil nil nil nil nil nil)
+            :recording (RecordingMode. nil nil nil nil)
             :highlighting (HighlightingMode. {} identity nil)
             :view-only (PreviewMode. nil nil 0 nil '())
             :uninitialized (UninitializedMode.)})
