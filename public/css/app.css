@@ -1,3 +1,7 @@
+.wave-wrapper {
+  overflow: auto;
+}
+
 .highliting-mark{
   background-color: rgba(114, 158, 85, 0.5);
   position: relative;

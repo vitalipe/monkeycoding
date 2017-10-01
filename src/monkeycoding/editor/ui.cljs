@@ -2,8 +2,9 @@
     (:require
       [reagent.core :as r]
 
-      [monkeycoding.editor.codemirror.editor :refer [codemirror-editor]]
-      [monkeycoding.editor.codemirror.player :refer [codemirror-player]]
+      [monkeycoding.editor.codemirror.editor   :refer [codemirror-editor]]
+      [monkeycoding.editor.player              :refer [player]]
+      [monkeycoding.editor.timeline            :refer [timeline-widget]]
 
       [monkeycoding.editor.stream     :as stream :refer [stream->playback]]
       [monkeycoding.editor.state      :as store :refer [editor-state]]))
@@ -14,7 +15,15 @@
     [:div
         [:div.toolbar
           [:button {:on-click store/finish-recording}       "finish"]
-          [:button {:on-click store/toggle-record-highlight} (if recording-highlight "cancel" "highlight")]]
+          [:button {:on-click store/toggle-record-highlight} (if recording-highlight "cancel" "highlight")]
+          [:div
+            [:label "delay cap: "]
+            [:select
+              [:option {:value 100} "100ms"]
+              [:option {:value 500} "500ms"]
+              [:option {:value 1000} "1000ms"]]]]
+
+
         [:div.code-area
           [codemirror-editor {
                               :text (:text snapshot)
@@ -49,9 +58,9 @@
         [:button {:on-click store/stop-playback} "stop"]
         [:button {:on-click #(swap! paused not)} (if @paused "resume" "pause")]]
       [:div.code-area
-        [codemirror-player {
-                            :paused @paused
-                            :playback (stream->playback (:recording @editor-state))}]]]))
+        [player {
+                  :paused @paused
+                  :playback (stream->playback (:recording @editor-state))}]]]))
 
 
 (defn editor-screen []
@@ -63,4 +72,11 @@
         (case mode
             :default-mode   [default-mode]
             :recording-mode [recording-mode]
-            :playback-mode  [playback-mode])]]))
+            :playback-mode  [playback-mode])
+
+
+        [timeline-widget
+          {
+            :position 0
+            :stream (:recording @editor-state)
+            :on-seek #(.log js/console "seek")}]]]))
