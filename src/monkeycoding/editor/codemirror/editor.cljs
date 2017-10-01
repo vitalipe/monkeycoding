@@ -4,7 +4,7 @@
       [cljsjs.codemirror]
       [cljsjs.codemirror.mode.javascript]
 
-      [monkeycoding.editor.codemirror.common  :refer [default-config as-component]]
+      [monkeycoding.editor.common             :refer [default-config as-component]]
       [monkeycoding.editor.codemirror.modes   :as modes]
       [monkeycoding.editor.codemirror.parse   :as parse]))
 
@@ -68,7 +68,12 @@
 
 ;; Editor
 (defn- create-codemirror! [dom-node config]
-  (new  js/CodeMirror dom-node (clj->js (merge default-config config))))
+  (let [config (merge default-config config)]
+    (new  js/CodeMirror dom-node (js-obj
+                                    "lineNumbers" (:show-line-numbers config)
+                                    "theme" (:theme config)
+                                    "language" (:language config)))))
+
 
 
 (defn- init! [dom mode-state-ref config]

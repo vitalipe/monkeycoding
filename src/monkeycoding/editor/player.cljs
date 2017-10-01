@@ -1,7 +1,7 @@
-(ns monkeycoding.editor.codemirror.player
+(ns monkeycoding.editor.player
     (:require
       [reagent.core :as r :refer [atom]]
-      [monkeycoding.editor.codemirror.common :refer [as-component default-config]]
+      [monkeycoding.editor.common :refer [as-component default-config]]
       [monkeycoding.player :as player]))
 
 
@@ -13,10 +13,15 @@
 
 
 ;; Player is just a nice React wrapper of the JS player
-(defn codemirror-player [{:keys [paused playback]}]
+(defn player [{:keys [paused playback]}]
   (let [
         pl (atom nil)
-        config default-config]
+        config (js-obj
+                  "showLineNumbers" (:show-line-numbers default-config)
+                  "theme" (:theme default-config)
+                  "language" (:language default-config))]
+              
+
 
     (as-component {
                     :on-mount (fn [this] (reset! pl (init-player! (r/dom-node this) config paused playback)))

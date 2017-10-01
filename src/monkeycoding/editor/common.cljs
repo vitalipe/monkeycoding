@@ -1,14 +1,12 @@
-(ns monkeycoding.editor.codemirror.common
+(ns monkeycoding.editor.common
     (:require [reagent.core :refer [create-class]]))
 
-;; TODO: this should later move to app config
 (def default-config {
                       :mode "javascript"
                       :theme "twilight"
-                      :lineNumbers true})
+                      :show-line-numbers true})
 
 
-;; TODO: this should later move to utils or something
 (defn as-component [spec]
   (create-class {
                   :component-did-mount (:on-mount spec)
