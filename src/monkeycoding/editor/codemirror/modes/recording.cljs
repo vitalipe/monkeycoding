@@ -38,8 +38,9 @@
       (= current last)))
 
 
-(defn- calc-dt [now last-time]
-  (if last-time (- now last-time) 0))
+(defn- calc-dt
+        ([now last] (calc-dt now last (* 999 1000)))
+        ([now last dt-cap] (min dt-cap (if last (- now last) 0))))
 
 
 (defn take-adjusted-snapshot [cm marks {type :type :as event}]
@@ -59,10 +60,10 @@
 
 
 ;; lifesycle
-(defn process-input-event [{:keys [last-time on-input marks] :as state} cm event]
+(defn process-input-event [{:keys [last-time on-input marks dt-cap] :as state} cm event]
   (let [
         now  (.now js/Date)
-        dt (calc-dt now last-time)
+        dt (calc-dt now last-time dt-cap)
         snapshot (take-adjusted-snapshot cm marks event)
         new-state (merge-input-data state event now)
         changed   (not= (:last state) (:last new-state))]
@@ -74,7 +75,7 @@
 
 
 (defn sync-with-props! [this _  props]
-  (merge this (select-keys props [:on-input :marks])))
+  (merge this (select-keys props [:on-input :marks :dt-cap])))
 
 (defn enter! [this cm props]
   (snapshot/apply-snapshot! cm (select-keys props [:selection :text :marks]))

@@ -17,6 +17,7 @@
 (defrecord RecordingMode [last
                           last-time
                           marks
+                          dt-cap
                           on-input]
   EditMode
     (sync-with-props! [this cm props] (recording/sync-with-props! this cm props))
@@ -68,7 +69,7 @@
 
 
 (def all {
-            :recording (RecordingMode. nil nil nil nil)
+            :recording (RecordingMode. nil nil nil nil nil)
             :highlighting (HighlightingMode. {} identity nil)
             :view-only (PreviewMode. nil nil 0 nil '())
             :uninitialized (UninitializedMode.)})

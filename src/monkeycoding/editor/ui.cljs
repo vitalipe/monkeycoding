@@ -1,6 +1,6 @@
 (ns monkeycoding.editor.ui
     (:require
-      [reagent.core :as r]
+      [reagent.core :as r :refer [atom with-let]]
 
       [monkeycoding.editor.codemirror.editor   :refer [codemirror-editor]]
       [monkeycoding.editor.player              :refer [player]]
@@ -10,30 +10,37 @@
       [monkeycoding.editor.state      :as store :refer [editor-state]]))
 
 
+(defn- event->int [evt]
+  (.parseInt js/window (.. evt -target -value)))
+
+
+
 (defn recording-mode []
-  (let [{:keys [snapshot recording-highlight]} @editor-state]
-    [:div
-        [:div.toolbar
-          [:button {:on-click store/finish-recording}       "finish"]
-          [:button {:on-click store/toggle-record-highlight} (if recording-highlight "cancel" "highlight")]
-          [:div
-            [:label "delay cap: "]
-            [:select
-              [:option {:value 100} "100ms"]
-              [:option {:value 500} "500ms"]
-              [:option {:value 1000} "1000ms"]]]]
+  (with-let [dt-cap (atom 1000)]
+    (let [
+          recording-highlight (:recording-highlight @editor-state)
+          snapshot (:snapshot @editor-state)]
+      [:div
+          [:div.toolbar
+            [:button {:on-click store/finish-recording} "finish"]
+            [:button {:on-click store/toggle-record-highlight} (if recording-highlight "cancel" "highlight")]
+            [:div
+              [:label "delay cap: "]
+              [:select {:value @dt-cap :on-change #(reset! dt-cap (event->int %))}
+                [:option {:value 100} "100ms"]
+                [:option {:value 500} "500ms"]
+                [:option {:value 1000} "1000ms"]]]]
+          [:div.code-area
+            [codemirror-editor {
+                                :text (:text snapshot)
+                                :selection (:selection snapshot)
+                                :marks (:marks snapshot)
 
+                                :dt-cap @dt-cap
 
-        [:div.code-area
-          [codemirror-editor {
-                              :text (:text snapshot)
-                              :selection (:selection snapshot)
-                              :marks (:marks snapshot)
-
-                              :on-input store/record-input
-
-                              :on-highlight store/record-highlight
-                              :recording-highlight recording-highlight}]]]))
+                                :on-input store/record-input
+                                :on-highlight store/record-highlight
+                                :recording-highlight recording-highlight}]]])))
 
 
 (defn default-mode []

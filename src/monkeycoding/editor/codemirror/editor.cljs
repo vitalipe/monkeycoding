@@ -87,7 +87,7 @@
                                   text
                                   selection
                                   marks
-
+                                  dt-cap
 
                                   read-only
                                   recording-highlight
