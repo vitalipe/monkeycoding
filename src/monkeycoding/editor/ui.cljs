@@ -1,6 +1,6 @@
 (ns monkeycoding.editor.ui
     (:require
-      [reagent.core :as r :refer [atom with-let]]
+      [reagent.core :as r :refer [atom with-let cursor]]
 
       [monkeycoding.editor.codemirror.editor   :refer [codemirror-editor]]
       [monkeycoding.editor.player              :refer [player]]
@@ -12,6 +12,11 @@
 
 (defn- event->int [evt]
   (.parseInt js/window (.. evt -target -value)))
+
+
+(defn marks-panel [marks-cursor]
+  [:ul
+      (map #(vector :li {:key (:id %)} (str %)) (vals @marks-cursor))])
 
 
 
@@ -75,6 +80,7 @@
     [:nav
       [:h3 "Monkey Coding Editor"]
 
+
       [:section
         (case mode
             :default-mode   [default-mode]
@@ -86,4 +92,6 @@
           {
             :position 0
             :stream (:recording @editor-state)
-            :on-seek #(.log js/console "seek")}]]]))
+            :on-seek #(.log js/console "seek")}]
+
+        [marks-panel (cursor editor-state [:recording :marks-metadata])]]]))
