@@ -20,14 +20,14 @@
                                   (reset! the-wave (new wave/Wave (r/dom-node this)))
                                   (reset! prv-stream stream)
                                   (doto @the-wave
-                                    (.setStream (clj->js stream))
+                                    (.setStream (clj->js (:inputs stream)))
                                     (.render)))
 
 
                       :on-props (fn [{:keys [position, stream, on-position-change]}]
                                   (when (not= stream @prv-stream)
                                     (doto @the-wave
-                                      (.setStream (clj->js stream))
+                                      (.setStream (clj->js (:inputs stream)))
                                       (.render)))
 
                                   (reset! prv-stream stream))
@@ -42,7 +42,7 @@
                                 position]}]
 
   [:div.timeline
-    [:div "steps:" (str position "/" (count stream))]
+    [:div "steps:" (str position "/" (count (:inputs stream)))]
     [:div "time:"  (/ (reduce + (map :dt stream)) 1000)]
     [:div.wave-wrapper
       [wave-widget {

@@ -1,7 +1,13 @@
-(ns monkeycoding.editor.stream)
+(ns monkeycoding.editor.stream
+  (:require
+      [clojure.set :refer [difference]]))
 
 
-(def empty-stream [])
+(def empty-stream {
+                    :inputs []
+                    :marks-metadata {}})
+
+
 
 (def empty-snapshot {
                       :text ""
@@ -10,21 +16,41 @@
 
 
 ;; stream
-(defn stream->playback [stream]
+(defn stream->playback [{inputs :inputs}]
   {
-   :initial (:snapshot (first stream))
-   :inputs (into [] (map #(dissoc % :snapshot) (rest stream)))})
+   :initial (:snapshot (first inputs))
+   :inputs (into [] (map #(dissoc % :snapshot) (rest inputs)))})
 
 
-(defn stream->snapshot [stream]
-  (if-let [snapshot (:snapshot (last stream))]
+(defn stream->snapshot [{inputs :inputs}]
+  (if-let [snapshot (:snapshot (last inputs))]
       snapshot
       empty-snapshot))
 
 
-(defn append-step [stream step snapshot dt]
-  (conj stream  (merge step {:snapshot snapshot, :dt dt})))
+(defn- sync-marks-metadata-with-snapshot  [meta {marks :marks} index]
+  (let [
+        prv-live-marks (into #{} (map :id (remove :remove-at (vals meta))))
+        marks-to-kill (difference prv-live-marks (into #{} (keys marks)))]
 
+      (->> marks-to-kill
+        (map meta)
+        (map #(hash-map (:id %) (assoc % :remove-at index)))
+        (apply merge meta))))
+
+
+(defn- sync-marks-metadata-with-new-step [meta {:keys [type id]} index]
+  (merge meta
+    (when (= type :mark)
+      { id {:id id :insert-at index :remove-at nil}})))
+
+
+(defn append-step [stream step snapshot dt]
+  (let [stream-length (count (:inputs stream))]
+    (-> stream
+      (update :inputs conj (merge step {:snapshot snapshot, :dt dt}))
+      (update :marks-metadata sync-marks-metadata-with-new-step step stream-length)
+      (update :marks-metadata sync-marks-metadata-with-snapshot snapshot stream-length))))
 
 
 ;; steam steps
