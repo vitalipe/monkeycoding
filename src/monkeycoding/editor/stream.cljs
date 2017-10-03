@@ -46,6 +46,13 @@
             (recur rest (insert stream i m))
             stream))))
 
+(defn insert-marks-info [marks marks-info]
+  (->> (vals marks)
+    (map #(assoc % :info (get-in marks-info [(:id %) :info])))
+    (map #(hash-map (:id %) %))
+    (apply merge)))
+
+
 ;; stream
 (defn stream->playback [{marks :marks [initial & inputs] :inputs}]
   (let [raw-inputs (map #(dissoc % :snapshot) inputs)]
@@ -57,9 +64,9 @@
                               (apply merge))})))
 
 
-(defn stream->snapshot [{inputs :inputs}]
+(defn stream->snapshot [{inputs :inputs marks :marks}]
   (if-let [snapshot (:snapshot (last inputs))]
-      snapshot
+      (update snapshot :marks insert-marks-info marks)
       empty-snapshot))
 
 
@@ -72,8 +79,7 @@
       (update-in [:inputs index :snapshot :marks] assoc id {
                                                             :id id
                                                             :from from
-                                                            :to to
-                                                            :info info})
+                                                            :to to})
       (update :marks assoc id {
                                 :id id
                                 :from from
