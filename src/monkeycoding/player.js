@@ -123,6 +123,13 @@ function findMarkAt(sortedMarks, pos) {
 }
 
 
+function mark(cm, from, to, id) {
+    cm.markText(from, to,
+                {
+                  className : ["highliting-mark", " ", "highliting-mark-id-", id].join(""),
+                  startStyle : "highliting-mark-start"});
+}
+
 const commands = {
 
     input(codemirror, {insert = "", remove = 0, position}) {
@@ -132,7 +139,6 @@ const commands = {
         codemirror.replaceRange(insert , position, to);
       else
         codemirror.replaceRange(insert , position);
-
     },
 
     selection(codemirror, action) {
@@ -141,11 +147,6 @@ const commands = {
 
     cursor(codemirror, action) {
       codemirror.setCursor(action.position);
-    },
-
-    mark(codemirror, action) {
-      let className = ["highliting-mark", " ", "highliting-mark-id-", action.id].join("");
-      codemirror.markText(action.from, action.to, {className, startStyle : "highliting-mark-start"});
     }
 };
 
@@ -193,14 +194,14 @@ class Player {
       this._lineHighlightHandler = noop;
     }
 
-    play({initial, inputs}) {
+    play({initial, inputs, marksInfo}) {
       this.pause();
 
       this._stream     = inputs;
       this._position   = 0;
       this._cancelNext = null;
 
-      this._marksInfo = {};
+      this._marksInfo = marksInfo || {};
       this._sortedMarks = [];
       this._lastActiveMark = NullMark;
       this._markLineWidget = null;
@@ -210,7 +211,7 @@ class Player {
 
       applySnapshot(this._codemirror, initial);
 
-      this._initMarksCacheInfo(initial.marks);
+      this._syncMarksCacheInfo();
       this._nextTick();
     }
 
@@ -317,26 +318,17 @@ class Player {
       let codemirror = this._codemirror;
 
       command(codemirror, action);
+      (action.marks || []).map(({from, to, id}) => mark(codemirror, from, to, id));
       this._calcMarksCacheInfo(action);
     }
 
-    _initMarksCacheInfo(marksInfo) {
-      let markList = Object.values(marksInfo);
-      let sorted = sortMarksByPosition(this._codemirror.getAllMarks());
-      let info = Object.assign({}, ...markList.map(({id, info}) => {id: {id, info}}));
-
-      this._marksInfo = info;
-      this._sortedMarks = sorted;
+    _syncMarksCacheInfo() {
+      this._sortedMarks = sortMarksByPosition(this._codemirror.getAllMarks());
     }
 
     _calcMarksCacheInfo(action) {
-        if (!["mark", "input"].includes(action.type))
-          return;
-
-        if (action.type === "mark")
-          this._marksInfo[action.id] = action.info;
-
-        this._sortedMarks = sortMarksByPosition(this._codemirror.getAllMarks());
+        if (action.type == "input" || action.marks)
+          this._syncMarksCacheInfo()
     }
 
     _notifyActionExec(action, currentPosition) {

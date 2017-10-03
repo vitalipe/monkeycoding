@@ -29,13 +29,32 @@
         (apply merge meta))))
 
 
+(defn- group-marks-by-insert [marks offset]
+  (->> (vals marks)
+    (map #(update % :insert + offset))
+    (group-by :insert)))
+
+
+(defn- insert-marks-into-input-stream [inputs marks]
+  (let [
+        grouped-marks (into []  (group-marks-by-insert marks -1))
+        strip-mark #(select-keys % [:id :from :to])
+        insert (fn [stream i m] (update stream i assoc :marks (map strip-mark m)))]
+
+    (loop [[[i, m] & rest] grouped-marks, stream (into [] inputs)]
+          (if i
+            (recur rest (insert stream i m))
+            stream))))
 
 ;; stream
 (defn stream->playback [{marks :marks [initial & inputs] :inputs}]
-  {
-   :initial (:snapshot initial)
-   :inputs (into [] (map #(dissoc % :snapshot) inputs))
-   :marks (sort-by :insert (map #(select-keys (% 1) [:id :info :insert :from :to]) marks))})
+  (let [raw-inputs (map #(dissoc % :snapshot) inputs)]
+    (clj->js {
+               "initial" (:snapshot initial)
+               "inputs"  (insert-marks-into-input-stream raw-inputs marks)
+               "marksInfo"  (->> (vals marks)
+                              (map #(hash-map (:id %) (:info %)))
+                              (apply merge))})))
 
 
 (defn stream->snapshot [{inputs :inputs}]
