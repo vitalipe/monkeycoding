@@ -94,4 +94,4 @@
             :stream (:recording @editor-state)
             :on-seek #(.log js/console "seek")}]
 
-        [marks-panel (cursor editor-state [:recording :marks-metadata])]]]))
+        [marks-panel (cursor editor-state [:recording :marks])]]]))

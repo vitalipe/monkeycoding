@@ -11,7 +11,8 @@
                                     :theme :default}
 
                             :recording stream/empty-stream
-                            :snapshot stream/empty-snapshot
+                            :snapshot  stream/empty-snapshot
+                            :index 0
 
                             :recording-highlight false
                             :current-mode :default-mode}))
@@ -35,7 +36,7 @@
 
 (defn record-input [event snapshot dt]
   (do
-    (state-swap! update :recording stream/append-step event snapshot dt)
+    (state-swap! update :recording stream/append-input event snapshot dt)
     (state-swap! assoc :snapshot (stream/stream->snapshot (:recording @editor-state)))))
 
 
@@ -44,16 +45,10 @@
 
 
 (defn record-highlight [from to]
-  (let [
-        stream (:recording @editor-state)
-        last-snaphot (stream/stream->snapshot stream)
-        mark (stream/create-mark-step from to (str  "dummy into for: " from to))
-        snapshot (assoc-in last-snaphot [:marks (:id mark)] mark)]
-
     (doto editor-state
-      (swap! update :recording stream/append-step mark snapshot 0)
-      (swap! assoc :snapshot snapshot)
-      (swap! assoc :recording-highlight false))))
+      (swap! update :recording stream/append-mark {:from from :to to :info (str  "dummy into for: " from to)})
+      (swap! assoc :snapshot (stream/stream->snapshot (:recording @editor-state)))
+      (swap! assoc :recording-highlight false)))
 
 
 (defn discard-recording []

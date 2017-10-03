@@ -1,9 +1,9 @@
 (ns monkeycoding.editor.codemirror.parse
   (:require
     [monkeycoding.editor.stream   :as stream :refer [
-                                                      create-selection-step
-                                                      create-cursor-step
-                                                      create-input-step]]))
+                                                      create-selection-input
+                                                      create-cursor-input
+                                                      create-text-input]]))
 (defn str->int [text]
   (.parseInt js/window (re-find #"[\d.]+" text)))
 
@@ -60,14 +60,14 @@
         text-event? (contains? #{"+input" "+delete" "cut" "paste" "copy" "undo" "redo"} origin)]
 
       (cond
-          selection-event? (create-selection-step
+          selection-event? (create-selection-input
                             (js->position (.-anchor (first (input "ranges"))))
                             (js->position (.-head (first (input "ranges")))))
 
-        cursor-event?  (create-cursor-step
+        cursor-event?  (create-cursor-input
                             (js->position data))
 
-        text-event?    (create-input-step
+        text-event?    (create-text-input
                             (clojure.string/join "\n" (input "text"))
                             (count (clojure.string/join "\n" (input "removed")))
                             (js->position (get input "from"))))))

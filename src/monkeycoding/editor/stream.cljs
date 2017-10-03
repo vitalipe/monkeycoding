@@ -5,7 +5,9 @@
 
 (def empty-stream {
                     :inputs []
-                    :marks-metadata {}})
+                    :marks {}
+
+                    :next-mark-id 0})
 
 
 
@@ -15,11 +17,25 @@
                       :marks {}})
 
 
+;; helpers
+(defn- sync-marks-with-snapshot [meta {marks :marks} index]
+  (let [
+        prv-live-marks (into #{} (map :id (remove :remove (vals meta))))
+        marks-to-kill (difference prv-live-marks (into #{} (keys marks)))]
+
+      (->> marks-to-kill
+        (map meta)
+        (map #(hash-map (:id %) (assoc % :remove index)))
+        (apply merge meta))))
+
+
+
 ;; stream
-(defn stream->playback [{inputs :inputs}]
+(defn stream->playback [{marks :marks [initial inputs] :inputs}]
   {
-   :initial (:snapshot (first inputs))
-   :inputs (into [] (map #(dissoc % :snapshot) (rest inputs)))})
+   :initial (:snapshot initial)
+   :inputs (into [] (map #(dissoc % :snapshot) inputs))
+   :marks (sort-by :insert (map #(select-keys (% 1) [:id :info :insert :from :to]) marks))})
 
 
 (defn stream->snapshot [{inputs :inputs}]
@@ -28,55 +44,42 @@
       empty-snapshot))
 
 
-(defn- sync-marks-metadata-with-snapshot  [meta {marks :marks} index]
+(defn append-mark [stream  {:keys [info to from]}]
   (let [
-        prv-live-marks (into #{} (map :id (remove :remove-at (vals meta))))
-        marks-to-kill (difference prv-live-marks (into #{} (keys marks)))]
-
-      (->> marks-to-kill
-        (map meta)
-        (map #(hash-map (:id %) (assoc % :remove-at index)))
-        (apply merge meta))))
-
-
-(defn- sync-marks-metadata-with-new-step [meta {:keys [type id]} index]
-  (merge meta
-    (when (= type :mark)
-      { id {:id id :insert-at index :remove-at nil}})))
-
-
-(defn append-step [stream step snapshot dt]
-  (let [stream-length (count (:inputs stream))]
+        id (inc (:next-mark-id stream))
+        index (dec (count (:inputs stream)))]
     (-> stream
-      (update :inputs conj (merge step {:snapshot snapshot, :dt dt}))
-      (update :marks-metadata sync-marks-metadata-with-new-step step stream-length)
-      (update :marks-metadata sync-marks-metadata-with-snapshot snapshot stream-length))))
+      (assoc :next-mark-id id)
+      (update-in [:inputs index :snapshot :marks] assoc id {
+                                                            :id id
+                                                            :from from
+                                                            :to to
+                                                            :info info})
+      (update :marks assoc id {
+                                :id id
+                                :from from
+                                :to to
+                                :insert index
+                                :remove nil
+                                :info info}))))
 
 
-;; steam steps
-(def ^:private next-mark-id (atom 0))
+(defn append-input [stream step snapshot dt]
+  (-> stream
+    (update :inputs conj (merge step {:snapshot snapshot, :dt dt}))
+    (update :marks sync-marks-with-snapshot snapshot (count (:inputs stream)))))
 
 
-(defn- create-mark-step [from to info]
-  (let [
-        id (swap! next-mark-id inc)]
-        ;;snapshot (update snapshot :marks assoc id {:id id, :from from, :to to, :info info})]
-    {
-      :type :mark
-      :id id
-      :from from
-      :to to
-      :info info}))
 
-
-(defn- create-selection-step [from to]
+;; inputs
+(defn- create-selection-input [from to]
   {
     :type :selection
     :from from
     :to to})
 
 
-(defn- create-input-step [insert remove position]
+(defn- create-text-input [insert remove position]
   {
     :type :input
     :insert insert
@@ -85,7 +88,7 @@
 
 
 
-(defn- create-cursor-step [position]
+(defn- create-cursor-input [position]
   {
     :type :cursor
     :position position})

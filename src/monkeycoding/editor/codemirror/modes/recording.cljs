@@ -39,7 +39,7 @@
 
 
 (defn- calc-dt
-        ([now last] (calc-dt now last (* 999 1000)))
+        ([now last] (calc-dt now last (* 999  1000)))
         ([now last dt-cap] (min dt-cap (if last (- now last) 0))))
 
 
@@ -76,6 +76,7 @@
 
 (defn sync-with-props! [this _  props]
   (merge this (select-keys props [:on-input :marks :dt-cap])))
+
 
 (defn enter! [this cm props]
   (snapshot/apply-snapshot! cm (select-keys props [:selection :text :marks]))
