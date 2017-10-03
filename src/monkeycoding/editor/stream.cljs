@@ -31,7 +31,7 @@
 
 
 ;; stream
-(defn stream->playback [{marks :marks [initial inputs] :inputs}]
+(defn stream->playback [{marks :marks [initial & inputs] :inputs}]
   {
    :initial (:snapshot initial)
    :inputs (into [] (map #(dissoc % :snapshot) inputs))
