@@ -54,7 +54,10 @@
         [:button {:on-click store/start-recording} "record"]
         [:button {:on-click store/start-playback} "play"]
         [:button {:on-click store/discard-recording} "reset"]
-        [:button {:disabled true } "export"]]
+        [:button {:disabled true } "export"]
+        [:button {:on-click store/previous-postition} "<|"]
+        [:button {:on-click store/next-postition} "|>"]]
+
       [:div.code-area
         [codemirror-editor {
                             :read-only true
@@ -90,7 +93,7 @@
 
         [timeline-widget
           {
-            :position 0
+            :position (:position @editor-state)
             :stream (:recording @editor-state)
             :on-seek #(.log js/console "seek")}]
 

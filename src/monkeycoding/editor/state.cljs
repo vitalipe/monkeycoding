@@ -12,7 +12,7 @@
 
                             :recording stream/empty-stream
                             :snapshot  stream/empty-snapshot
-                            :index 0
+                            :position 0
 
                             :recording-highlight false
                             :current-mode :default-mode}))
@@ -35,9 +35,10 @@
 
 
 (defn record-input [event snapshot dt]
-  (do
-    (state-swap! update :recording stream/append-input event snapshot dt)
-    (state-swap! assoc :snapshot (stream/stream->snapshot (:recording @editor-state)))))
+  (doto editor-state
+    (swap! update :recording stream/append-input event snapshot dt)
+    (swap! assoc  :position (dec (count (get-in @editor-state [:recording :inputs]))))
+    (swap! assoc :snapshot (stream/stream->snapshot (:recording @editor-state)))))
 
 
 (defn toggle-record-highlight [event]
@@ -47,13 +48,14 @@
 (defn record-highlight [from to]
     (doto editor-state
       (swap! update :recording stream/append-mark {:from from :to to :info (str  "dummy into for: " from to)})
-      (swap! assoc :snapshot (stream/stream->snapshot (:recording @editor-state)))
+      (swap! assoc :snapshot (stream/stream->snapshot (:recording @editor-state) (:position @editor-state)))
       (swap! assoc :recording-highlight false)))
 
 
 (defn discard-recording []
   (state-swap! merge {
                       :recording stream/empty-stream
+                      :position 0
                       :snapshot stream/empty-snapshot}))
 
 
@@ -64,6 +66,21 @@
 
 (defn toggle-playback-pause []
   (state-swap! update-in [:current-mode :paused] not))
+
+
+(defn next-postition []
+  (when true
+    (doto editor-state
+      (swap! update :position inc)
+      (swap! assoc :snapshot (stream/stream->snapshot (:recording @editor-state) (:position @editor-state))))))
+
+
+(defn previous-postition []
+  (when true
+    (doto editor-state
+      (swap! update :position dec)
+      (swap! assoc :snapshot (stream/stream->snapshot (:recording @editor-state) (:position @editor-state))))))
+
 
 
 (defn stop-playback []
