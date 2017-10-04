@@ -48,3 +48,9 @@
     (.setValue text)
     (apply-selection! selection)
     (apply-marks! marks)))
+
+
+(defn- same-text-and-selection? [cm {:keys [text selection]}]
+    (and
+        (= text (.getValue cm))
+        (= selection (take-selection cm))))

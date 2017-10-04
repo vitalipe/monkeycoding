@@ -42,6 +42,7 @@
 
 
 (defrecord PreviewMode [
+                        snapshot
                         prv-mark
                         prv-widget
                         prv-line
@@ -53,7 +54,7 @@
     (enter!           [this cm props] (preview/enter! this cm props))
     (exit!            [this cm] (preview/exit! this cm))
 
-    (process-input-event  [this _ _] this)
+    (process-input-event  [this cm event] this)
     (process-dom-event    [this cm event] (preview/process-dom-event this cm event)))
 
 
@@ -71,5 +72,5 @@
 (def all {
             :recording (RecordingMode. nil nil nil nil nil)
             :highlighting (HighlightingMode. {} identity nil)
-            :view-only (PreviewMode. nil nil 0 nil '())
+            :view-only (PreviewMode. nil nil nil 0 nil '())
             :uninitialized (UninitializedMode.)})

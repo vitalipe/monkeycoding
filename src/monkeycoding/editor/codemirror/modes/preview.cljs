@@ -4,6 +4,23 @@
     [monkeycoding.editor.codemirror.parse      :as parse]))
 
 
+
+(defn- add-codemirror-class [cm class]
+  (-> cm
+        (.getWrapperElement)
+        (.-classList)
+        (.add class))
+  cm)
+
+
+(defn- clear-codemirror-class [cm class]
+  (-> cm
+      (.getWrapperElement)
+      (.-classList)
+      (.remove class))
+  cm)
+
+
 (defn- xy->position [cm xy]
   (when xy
     (->> xy
@@ -84,29 +101,44 @@
     (set! (.. cm -options -readOnly) true)
     (snapshot/apply-snapshot! cm (select-keys props [:selection :text :marks])))
 
-  (assoc this :marks (sort-marks-by-position (:marks props))))
+  (-> this
+    (assoc :marks (sort-marks-by-position (:marks props)))
+    (assoc :snapshot (select-keys props [:selection :text :marks]))))
+
 
 
 (defn enter! [state cm props]
+  (add-codemirror-class cm "editor-mode-preview")
+  (add-codemirror-class cm "CodeMirror-focused")
+
   (-> state
     (sync-with-props! cm props)
     (assoc :info-dom (create-mark-element))))
 
 
-(defn exit! [_ cm]
-  (set! (.. cm -options -readOnly) false))
+(defn exit! [this cm]
+  (clear-codemirror-class cm "editor-mode-preview")
+  (clear-codemirror-class cm "CodeMirror-focused")
+
+  (set! (.. cm -options -readOnly) false)
+  this)
 
 
 (defn process-dom-event [{:keys [
+                                  snapshot
                                   prv-line
                                   prv-mark
                                   prv-widget
+                                  marks-info
                                   marks
                                   info-dom] :as state} cm event]
 
   (let [
         {:keys [line] :as pos} (event->position cm event)
         mark (find-mark-at marks pos)]
+
+    (when-not (snapshot/same-text-and-selection? cm snapshot)
+      (snapshot/apply-snapshot! cm snapshot))
 
     (merge state
         {

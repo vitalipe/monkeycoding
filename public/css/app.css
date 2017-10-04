@@ -23,6 +23,11 @@
   z-index: 99;
 }
 
+.editor-mode-preview .CodeMirror-cursors {
+    visibility: visible !important;
+    cursor: hand !important;
+}
+
 
 .highliting-mark-start::before {
   content: "";
