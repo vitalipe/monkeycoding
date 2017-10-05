@@ -10,7 +10,10 @@
                  [cljsjs/codemirror "5.24.0-1"]]
 
   :plugins [[lein-cljsbuild "1.1.5"]
-            [lein-figwheel "0.5.13"]]
+            [lein-figwheel "0.5.13"]
+            [yogthos/lein-sass "0.1.1"]]
+
+  :sass {:source "style" :target "public/css"}
 
   :min-lein-version "2.5.0"
 
