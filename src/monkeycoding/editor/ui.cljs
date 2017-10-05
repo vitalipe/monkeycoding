@@ -49,21 +49,32 @@
 
 
 (defn default-mode []
+  (let [last-position (dec (count (get-in @editor-state [:recording :inputs])))]
     [:div
       [:div.toolbar
         [:button {:on-click store/start-recording} "record"]
         [:button {:on-click store/start-playback} "play"]
         [:button {:on-click store/discard-recording} "reset"]
         [:button {:disabled true } "export"]
-        [:button {:on-click store/previous-postition} "<|"]
-        [:button {:on-click store/next-postition} "|>"]]
+        [:button {
+                  :disabled (= 0 (:position @editor-state))
+                  :on-click #(store/goto-postition 0)} "|<"]
+        [:button {
+                  :disabled (= 0 (:position @editor-state))
+                  :on-click store/previous-postition} "<"]
+        [:button {
+                  :disabled (= last-position (:position @editor-state))
+                  :on-click store/next-postition} ">"]
+        [:button {
+                  :disabled (= last-position (:position @editor-state))
+                  :on-click #(store/goto-postition last-position)} ">|"]]
 
       [:div.code-area
         [codemirror-editor {
                             :read-only true
                             :text (get-in  @editor-state [:snapshot :text])
                             :selection (get-in  @editor-state [:snapshot :selection])
-                            :marks (get-in  @editor-state [:snapshot :marks])}]]])
+                            :marks (get-in  @editor-state [:snapshot :marks])}]]]))
 
 
 (defn playback-mode []

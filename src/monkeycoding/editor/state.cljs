@@ -68,18 +68,17 @@
   (state-swap! update-in [:current-mode :paused] not))
 
 
-(defn next-postition []
-  (when true
-    (doto editor-state
-      (swap! update :position inc)
-      (swap! assoc :snapshot (stream/stream->snapshot (:recording @editor-state) (:position @editor-state))))))
+(defn goto-postition [position]
+  (doto editor-state
+    (swap! assoc :position position)
+    (swap! assoc :snapshot (stream/stream->snapshot (:recording @editor-state) position))))
 
+
+(defn next-postition []
+  (goto-postition  (inc (:position @editor-state))))
 
 (defn previous-postition []
-  (when true
-    (doto editor-state
-      (swap! update :position dec)
-      (swap! assoc :snapshot (stream/stream->snapshot (:recording @editor-state) (:position @editor-state))))))
+  (goto-postition  (dec (:position @editor-state))))
 
 
 
