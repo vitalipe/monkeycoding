@@ -49,7 +49,7 @@
 
 
 (defn default-mode []
-  (let [last-position (dec (count (get-in @editor-state [:recording :inputs])))]
+  (let [last-index (count (rest (get-in @editor-state [:recording :inputs])))]
     [:div
       [:div.toolbar
         [:button {:on-click store/start-recording} "record"]
@@ -63,11 +63,11 @@
                   :disabled (= 0 (:position @editor-state))
                   :on-click store/previous-postition} "<"]
         [:button {
-                  :disabled (= last-position (:position @editor-state))
+                  :disabled (= last-index (:position @editor-state))
                   :on-click store/next-postition} ">"]
         [:button {
-                  :disabled (= last-position (:position @editor-state))
-                  :on-click #(store/goto-postition last-position)} ">|"]]
+                  :disabled (= last-index (:position @editor-state))
+                  :on-click #(store/goto-postition last-index)} ">|"]]
 
       [:div.code-area
         [codemirror-editor {

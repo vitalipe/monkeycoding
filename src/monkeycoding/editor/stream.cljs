@@ -71,7 +71,7 @@
 
 (defn stream->snapshot
   ([{inputs :inputs :as snapshot}]   (stream->snapshot snapshot (dec (count inputs))))
-  ([{inputs :inputs marks :marks} i] (snapshot-with-marks-info (:snapshot (nth inputs i)) marks)))
+  ([{inputs :inputs marks :marks} i] (snapshot-with-marks-info (:snapshot (nth inputs i nil)) marks)))
 
 
 (defn append-mark [stream  {:keys [info to from]}]
