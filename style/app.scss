@@ -144,6 +144,17 @@ body {
   }
 }
 
+
+.editable-label {
+  color: $font-color;
+  background: rgba(0, 0, 0, 0);
+  border: none;
+  outline: none;
+  margin-left: 5px;
+}
+
+
+
 // etc
 @-webkit-keyframes beacon {
    0% {

@@ -2,6 +2,7 @@
     (:require
       [reagent.core :as r :refer [atom with-let cursor]]
 
+      [monkeycoding.editor.common              :refer [as-component]]
       [monkeycoding.editor.codemirror.editor   :refer [codemirror-editor]]
       [monkeycoding.editor.player              :refer [player]]
       [monkeycoding.editor.timeline            :refer [timeline-widget]]
@@ -61,6 +62,25 @@
   [:span.toolbar-spacer])
 
 
+(defn editable-label [{:keys [value on-change class] :or {on-change identity}}]
+  (with-let [
+              state (r/atom {:text value :value value})
+              commit #(do
+                        (swap! state assoc :value (:text @state))
+                        (on-change (:text @state)))]
+
+    (when-not (= (:value @state) value)
+      (reset! state {:value value :text value}))
+
+    [:input.editable-label {
+                             :type "text"
+                             :value (:text @state)
+                             :on-key-down #(when (= 13 (.-keyCode %)) (do (.blur (.-target %)) (commit)))
+                             :on-blur commit
+                             :on-click #(.select (.-target %))
+                             :on-change #(swap! state assoc :text (.. % -target -value))
+                             :class class}]))
+
 
 (defn editor-screen []
   (let [{:keys [current-mode
@@ -90,8 +110,8 @@
 
             (when-not (= current-mode :recording-mode)
               [:div.project-title-menu
-                [:a.navbar-brand "New Project Name"]
-                [icon "ios-arrow-down"]])]
+                [icon "ios-arrow-down"]
+                [editable-label {:value "New Project Name"}]])]
 
           [:div.btn-group.project-toobar.form-inline
             [toolbar-button {:on-click store/start-recording} :record]
@@ -103,9 +123,9 @@
             [toolbar-button :redo]
 
             [toolbar-spacer]
-            [toolbar-button :commit]
+            [toolbar-button :export]
             [toolbar-spacer]
-            [toolbar-button :export]]]
+            [toolbar-button :add-mark]]]
 
 
         [:div.stage-container
