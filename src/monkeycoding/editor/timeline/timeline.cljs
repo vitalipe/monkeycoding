@@ -44,8 +44,9 @@
         stream-length (count (:inputs stream))
         stream-index  (if (> stream-length 0) (inc position) 0)]
     [:div.timeline
-      [:div "steps:" (str stream-index "/" stream-length)]
-      [:div "time:"  (/ (reduce + (map :dt (:inputs stream))) 1000)]
+      [:label "steps:" (str stream-index "/" stream-length)]
+      [:label " -> "]
+      [:label "time:"  (/ (reduce + (map :dt (:inputs stream))) 1000)]
       [:div.wave-wrapper
         [wave-widget {
                       :stream stream
