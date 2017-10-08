@@ -3,7 +3,7 @@
 
 (def default-config {
                       :mode "javascript"
-                      :theme "twilight"
+                      :theme "seti"
                       :show-line-numbers true})
 
 

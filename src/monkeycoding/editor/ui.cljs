@@ -10,102 +10,139 @@
       [monkeycoding.editor.state      :as store :refer [editor-state]]))
 
 
-(defn- event->int [evt]
-  (.parseInt js/window (.. evt -target -value)))
+;; widgets
+(defn icon [name]
+  (->> (case name
+          :export      "android-share-alt"
+          :commit      "merge"
+          :redo        "forward"
+          :undo        "reply"
+          :record      "record"
+          :menu        "navicon"
+          :play        "play"
+          :goto-next   "ios-fastforward"
+          :goto-prv    "ios-rewind"
+          :goto-start  "ios-skipbackward"
+          :goto-end    "ios-skipforward"
+          :timeline    "ios-pulse-strong"
+          :close       "close"
+          :add-mark    "ios-location"
+          :delta-time  "android-stopwatch"
+          name)
+
+    (str "i" ".icon" ".ion-")
+    (keyword)
+    (vector)))
 
 
-(defn marks-panel [marks-cursor]
-  [:ul
-      (map #(vector :li {:key (:id %)} (str %)) (vals @marks-cursor))])
+(defn toolbar-button
+  ([icon-or-props] (if (map? icon-or-props)
+                    (toolbar-button icon-or-props (:icon icon-or-props))
+                    (toolbar-button {} icon-or-props)))
+  ([{:keys [
+            disabled  ;; disabled buttons don't trigger clicks
+            on-click  ;; the normal rect handler
+            selected  ;; selected buttons are styled differently
+            class]}   ;; custom class names
+    icon-name]        ;; icon name or an icon element
+   (let [custom-classes (list
+                          (when disabled " disabled")
+                          (when selected " selected"))]
+     [:span.toolbar-button {
+                            :class (apply conj class custom-classes)
+                            :on-click (if disabled identity on-click)}
+                      (cond
+                        (keyword? icon-name) [icon icon-name]
+                        (string? icon-name) [icon icon-name]
+                        :otherwise icon-name)])))
 
 
+(defn toolbar-spacer []
+  [:span.toolbar-spacer])
 
-(defn recording-mode []
-  (with-let [dt-cap (atom 1000)]
-    (let [
-          recording-highlight (:recording-highlight @editor-state)
-          snapshot (:snapshot @editor-state)]
-      [:div
-          [:div.toolbar
-            [:button {:on-click store/finish-recording} "finish"]
-            [:button {:on-click store/toggle-record-highlight} (if recording-highlight "cancel" "highlight")]
-            [:div
-              [:label "delay cap: "]
-              [:select {:value @dt-cap :on-change #(reset! dt-cap (event->int %))}
-                [:option {:value 100} "100ms"]
-                [:option {:value 500} "500ms"]
-                [:option {:value 1000} "1000ms"]]]]
-          [:div.code-area
-            [codemirror-editor {
-                                :text (:text snapshot)
-                                :selection (:selection snapshot)
-                                :marks (:marks snapshot)
-
-                                :dt-cap @dt-cap
-
-                                :on-input store/record-input
-                                :on-highlight store/record-highlight
-                                :recording-highlight recording-highlight}]]])))
-
-
-(defn default-mode []
-  (let [last-index (count (rest (get-in @editor-state [:recording :inputs])))]
-    [:div
-      [:div.toolbar
-        [:button {:on-click store/start-recording} "record"]
-        [:button {:on-click store/start-playback} "play"]
-        [:button {:on-click store/discard-recording} "reset"]
-        [:button {:disabled true } "export"]
-        [:button {
-                  :disabled (= 0 (:position @editor-state))
-                  :on-click #(store/goto-postition 0)} "|<"]
-        [:button {
-                  :disabled (= 0 (:position @editor-state))
-                  :on-click store/previous-postition} "<"]
-        [:button {
-                  :disabled (= last-index (:position @editor-state))
-                  :on-click store/next-postition} ">"]
-        [:button {
-                  :disabled (= last-index (:position @editor-state))
-                  :on-click #(store/goto-postition last-index)} ">|"]]
-
-      [:div.code-area
-        [codemirror-editor {
-                            :read-only true
-                            :text (get-in  @editor-state [:snapshot :text])
-                            :selection (get-in  @editor-state [:snapshot :selection])
-                            :marks (get-in  @editor-state [:snapshot :marks])}]]]))
-
-
-(defn playback-mode []
-  (r/with-let [paused (r/atom false)]
-    [:div
-      [:div.toolbar
-        [:button {:on-click store/stop-playback} "stop"]
-        [:button {:on-click #(swap! paused not)} (if @paused "resume" "pause")]]
-      [:div.code-area
-        [player {
-                  :paused @paused
-                  :playback (stream->playback (:recording @editor-state))}]]]))
 
 
 (defn editor-screen []
-  (let [mode (:current-mode @editor-state)]
-    [:nav
-      [:h3 "Monkey Coding Editor"]
+  (let [{:keys [current-mode
+                snapshot
+                recording-highlight
+                position recording]} @editor-state
+        last-index (count (rest (:inputs recording)))]
+
+    [:div.editor-screen-layout
+
+        ;; editor header
+        [:nav.editor-navbar.navbar.top
+          [:div.form-inline
+            [toolbar-button :menu]
+            [:a.navbar-brand "Monkey Coding Editor (alpha)"]]
 
 
-      [:section
-        (case mode
-            :default-mode   [default-mode]
-            :recording-mode [recording-mode]
-            :playback-mode  [playback-mode])
+          [:div.mode-toobar.form-inline
+
+            (when (= current-mode :recording-mode)
+              [:div.recording-toobar.form-inline
+                [toolbar-button {:on-click store/finish-recording} :close]
+                [toolbar-spacer]
+                [toolbar-button {:selected recording-highlight :on-click store/toggle-record-highlight} :add-mark]
+                [toolbar-button {:on-click store/toggle-record-highlight} :delta-time]
+                [icon "ios-arrow-down"]])
+
+            (when-not (= current-mode :recording-mode)
+              [:div.project-title-menu
+                [:a.navbar-brand "New Project Name"]
+                [icon "ios-arrow-down"]])]
+
+          [:div.btn-group.project-toobar.form-inline
+            [toolbar-button {:on-click store/start-recording} :record]
 
 
-        [timeline-widget
-          {
-            :position (:position @editor-state)
-            :stream (:recording @editor-state)
-            :on-seek #(.log js/console "seek")}]
+            [toolbar-spacer]
 
-        [marks-panel (cursor editor-state [:recording :marks])]]]))
+            [toolbar-button :undo]
+            [toolbar-button :redo]
+
+            [toolbar-spacer]
+            [toolbar-button :commit]
+            [toolbar-spacer]
+            [toolbar-button :export]]]
+
+
+        [:div.stage-container
+          [:div.code-area
+            (cond
+              (= current-mode :playback-mode) [player {
+                                                        :paused false
+                                                        :playback (stream->playback recording)}]
+              :otherwise [codemirror-editor {
+                                              :text (:text snapshot)
+                                              :selection (:selection snapshot)
+                                              :marks  (:marks snapshot)
+                                              :dt-cap 100
+                                              :on-input store/record-input
+                                              :on-highlight store/record-highlight
+                                              :recording-highlight recording-highlight
+                                              :read-only (= current-mode :default-mode)}])]]
+
+
+        [:div.timeline-container
+          [timeline-widget   {
+                              :position position
+                              :stream recording
+                              :on-seek #(.log js/console "seek!!")}]
+
+          ;; timeline controls
+          [:nav.timeline-navbar.navbar.bottom
+            [:div.timeline-toggle.form-inline
+              [toolbar-button :timeline]]
+
+            [:div.timeline-controls.form-inline
+              [toolbar-button {:disabled (= 0 position) :on-click #(store/goto-postition 0)}   :goto-start]
+              [toolbar-button {:disabled (= 0 position) :on-click #(store/previous-postition)} :goto-prv]
+
+              (if (= current-mode :playback-mode)
+                [toolbar-button {:on-click store/stop-playback} "stop"]
+                [toolbar-button {:on-click store/start-playback} :play])
+
+              [toolbar-button {:disabled (= last-index position) :on-click #(store/next-postition)}            :goto-next]
+              [toolbar-button {:disabled (= last-index position) :on-click #(store/goto-postition last-index)} :goto-end]]]]]))

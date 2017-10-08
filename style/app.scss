@@ -1,5 +1,92 @@
-// editor
+$background-color: #151718;
+$font-color: #FFFFFF;
+
+$toolbar-bg-color: black;
+$toolbar-icon-color: #FFBE11;
+$toolbar-icon-hover-color: #2C2C2C;
+
+
+body {
+  background-color: $background-color;
+  color: $font-color;
+}
+
+
+// screen layout
+.editor-screen-layout {
+
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+
+  .stage-container {
+    flex-grow: 2;
+    display: flex;
+    justify-content: space-between;
+  }
+
+  .marks-panel {
+    width: 260px;
+    overflow: auto;
+  }
+
+  .code-area {
+    width: 100%;
+    overflow: auto;
+  }
+}
+
+
+// toolbars
+.toolbar-spacer {
+  margin-right: 40px;
+}
+
+.toolbar-button {
+  padding-left: 8px;
+  padding-right: 8px;
+  font-size: 32px;
+  color: $toolbar-icon-color;
+
+  &:hover {
+    background-color: $toolbar-icon-hover-color;
+  }
+
+  .selected {
+    background-color: red;
+  }
+}
+
+
+.editor-navbar {
+  padding-top: 0;
+  padding-bottom: 0;
+  background-color: $toolbar-bg-color;
+}
+
+.timeline-navbar {
+  justify-content: center;
+  padding-top: 0;
+  padding-bottom: 0;
+  background-color: $toolbar-bg-color;
+
+
+  .timeline-toggle {
+    position: absolute;
+    left:0;
+  }
+}
+
+
+// code editor
 .code-area {
+  .CodeMirror {
+    height: auto;
+    font-size: 18px;
+  }
+
+  padding-top: 5px;
+  background-color: $background-color;
 
   // all modes
   .highliting-mark{
@@ -50,8 +137,8 @@
 }
 
 
-// timeline
 .timeline {
+  margin-top: 20px;
   .wave-wrapper {
     overflow: auto;
   }
