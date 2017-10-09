@@ -19,6 +19,10 @@ body {
   display: flex;
   flex-direction: column;
 
+  .editor-navbar {
+    flex-shrink: 0;
+  }
+
   .stage-container {
     flex-grow: 2;
     display: flex;
@@ -38,26 +42,6 @@ body {
 
 
 // toolbars
-.toolbar-spacer {
-  margin-right: 40px;
-}
-
-.toolbar-button {
-  padding-left: 8px;
-  padding-right: 8px;
-  font-size: 32px;
-  color: $toolbar-icon-color;
-
-  &:hover {
-    background-color: $toolbar-icon-hover-color;
-  }
-
-  .selected {
-    background-color: red;
-  }
-}
-
-
 .editor-navbar {
   padding-top: 0;
   padding-bottom: 0;
@@ -137,14 +121,23 @@ body {
 }
 
 
-.timeline {
-  margin-top: 20px;
-  .wave-wrapper {
-    overflow: auto;
+.timeline-container {
+
+  .timeline-progress {
+    height: 2px;
   }
+
+  .timeline {
+    margin-top: 20px;
+    .wave-wrapper {
+      overflow: auto;
+    }
+  }
+
 }
 
 
+// widgets
 .editable-label {
   color: $font-color;
   background: rgba(0, 0, 0, 0);
@@ -152,6 +145,40 @@ body {
   outline: none;
   margin-left: 5px;
 }
+
+.collapsible-v-panel {
+  transition-property: all;
+	transition-duration: 2.0s;
+  transition-timing-function: cubic-bezier(0, 1, 0.5, 1);
+
+  overflow: hidden;
+  max-height: 600px;
+
+  &.hide {
+    max-height: 0;
+    transition-duration: .4s;
+  }
+}
+
+.toolbar-spacer {
+  margin-right: 40px;
+}
+
+.toolbar-button {
+  padding-left: 8px;
+  padding-right: 8px;
+  font-size: 32px;
+  color: $toolbar-icon-color;
+
+  &:hover {
+    background-color: $toolbar-icon-hover-color;
+  }
+
+  &.selected {
+    background-color: red;
+  }
+}
+
 
 
 

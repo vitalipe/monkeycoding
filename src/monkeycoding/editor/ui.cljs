@@ -46,9 +46,9 @@
             selected  ;; selected buttons are styled differently
             class]}   ;; custom class names
     icon-name]        ;; icon name or an icon element
-   (let [custom-classes (list
-                          (when disabled " disabled")
-                          (when selected " selected"))]
+   (let [custom-classes (remove nil? [
+                                      (when disabled " disabled")
+                                      (when selected " selected")])]
      [:span.toolbar-button {
                             :class (apply conj class custom-classes)
                             :on-click (if disabled identity on-click)}
@@ -60,6 +60,10 @@
 
 (defn toolbar-spacer []
   [:span.toolbar-spacer])
+
+
+(defn collapsible-v-panel [show child]
+  [:div.collapsible-v-panel {:class (if-not show "hide" "")} child])
 
 
 (defn editable-label [{:keys [value on-change class] :or {on-change identity}}]
@@ -83,88 +87,99 @@
 
 
 (defn editor-screen []
-  (let [{:keys [current-mode
-                snapshot
-                recording-highlight
-                position recording]} @editor-state
-        last-index (count (rest (:inputs recording)))]
+  (with-let [state (r/atom {
+                            :dt-cap 500
+                            :timeline-open true})]
+    (let [{:keys [current-mode
+                  snapshot
+                  recording-highlight
+                  position recording]} @editor-state
+          last-index (count (rest (:inputs recording)))]
 
-    [:div.editor-screen-layout
+      [:div.editor-screen-layout
 
-        ;; editor header
-        [:nav.editor-navbar.navbar.top
-          [:div.form-inline
-            [toolbar-button :menu]
-            [:a.navbar-brand "Monkey Coding Editor (alpha)"]]
-
-
-          [:div.mode-toobar.form-inline
-
-            (when (= current-mode :recording-mode)
-              [:div.recording-toobar.form-inline
-                [toolbar-button {:on-click store/finish-recording} :close]
-                [toolbar-spacer]
-                [toolbar-button {:selected recording-highlight :on-click store/toggle-record-highlight} :add-mark]
-                [toolbar-button {:on-click store/toggle-record-highlight} :delta-time]
-                [icon "ios-arrow-down"]])
-
-            (when-not (= current-mode :recording-mode)
-              [:div.project-title-menu
-                [icon "ios-arrow-down"]
-                [editable-label {
-                                  :value (get-in @editor-state [:meta :title])
-                                  :on-change #(swap! editor-state assoc-in [:meta :title] %)}]])]
-
-          [:div.btn-group.project-toobar.form-inline
-            [toolbar-button {:on-click store/start-recording} :record]
+          ;; editor header
+          [:nav.editor-navbar.navbar.top
+            [:div.form-inline
+              [toolbar-button :menu]
+              [:a.navbar-brand "Monkey Coding Editor (alpha)"]]
 
 
-            [toolbar-spacer]
+            [:div.mode-toobar.form-inline
 
-            [toolbar-button :undo]
-            [toolbar-button :redo]
+              (when (= current-mode :recording-mode)
+                [:div.recording-toobar.form-inline
+                  [toolbar-button {:on-click store/finish-recording} :close]
+                  [toolbar-spacer]
+                  [toolbar-button {:selected recording-highlight :on-click store/toggle-record-highlight} :add-mark]
+                  [toolbar-button {:on-click store/toggle-record-highlight} :delta-time]
+                  [icon "ios-arrow-down"]])
 
-            [toolbar-spacer]
-            [toolbar-button :export]
-            [toolbar-spacer]
-            [toolbar-button :add-mark]]]
+              (when-not (= current-mode :recording-mode)
+                [:div.project-title-menu
+                  [icon "ios-arrow-down"]
+                  [editable-label {
+                                    :value (get-in @editor-state [:meta :title])
+                                    :on-change #(swap! editor-state assoc-in [:meta :title] %)}]])]
 
-
-        [:div.stage-container
-          [:div.code-area
-            (cond
-              (= current-mode :playback-mode) [player {
-                                                        :paused false
-                                                        :playback (stream->playback recording)}]
-              :otherwise [codemirror-editor {
-                                              :text (:text snapshot)
-                                              :selection (:selection snapshot)
-                                              :marks  (:marks snapshot)
-                                              :dt-cap 100
-                                              :on-input store/record-input
-                                              :on-highlight store/record-highlight
-                                              :recording-highlight recording-highlight
-                                              :read-only (= current-mode :default-mode)}])]]
-
-
-        [:div.timeline-container
-          [timeline-widget   {
-                              :position position
-                              :stream recording
-                              :on-seek #(.log js/console "seek!!")}]
-
-          ;; timeline controls
-          [:nav.timeline-navbar.navbar.bottom
-            [:div.timeline-toggle.form-inline
-              [toolbar-button :timeline]]
-
-            [:div.timeline-controls.form-inline
-              [toolbar-button {:disabled (= 0 position) :on-click #(store/goto-postition 0)}   :goto-start]
-              [toolbar-button {:disabled (= 0 position) :on-click #(store/previous-postition)} :goto-prv]
-
+            [:div.btn-group.project-toobar.form-inline
+              [toolbar-button {
+                                :on-click store/start-recording
+                                :selected (= current-mode :recording-mode)
+                                :icon :record}]
               (if (= current-mode :playback-mode)
                 [toolbar-button {:on-click store/stop-playback} "stop"]
                 [toolbar-button {:on-click store/start-playback} :play])
 
-              [toolbar-button {:disabled (= last-index position) :on-click #(store/next-postition)}            :goto-next]
-              [toolbar-button {:disabled (= last-index position) :on-click #(store/goto-postition last-index)} :goto-end]]]]]))
+              [toolbar-spacer]
+
+              [toolbar-button :undo]
+              [toolbar-button :redo]
+
+              [toolbar-spacer]
+              [toolbar-button :export]
+              [toolbar-spacer]
+              [toolbar-button :add-mark]]]
+
+
+          [:div.stage-container
+            [:div.code-area
+              (cond
+                (= current-mode :playback-mode) [player {
+                                                          :paused false
+                                                          :playback (stream->playback recording)}]
+                :otherwise [codemirror-editor {
+                                                :text (:text snapshot)
+                                                :selection (:selection snapshot)
+                                                :marks  (:marks snapshot)
+                                                :dt-cap (:dt-cap @state)
+                                                :on-input store/record-input
+                                                :on-highlight store/record-highlight
+                                                :recording-highlight recording-highlight
+                                                :read-only (= current-mode :default-mode)}])]]
+
+
+          [:div.timeline-container
+            [:div.progress.timeline-progress
+              [:div.progress-bar {:role "progressbar" :style {:width "55%"}}]]
+            [collapsible-v-panel (:timeline-open @state)
+              [timeline-widget   {
+                                  :position position
+                                  :stream recording
+                                  :on-seek #(.log js/console "seek!!")}]]
+
+            ;; timeline controls
+            [:nav.timeline-navbar.navbar.bottom
+              [:div.timeline-toggle.form-inline
+                [toolbar-button {:selected (:timeline-open @state)
+                                 :on-click #(swap! state update :timeline-open not)}
+                  :timeline]]
+
+              [:div.timeline-controls.form-inline
+                [toolbar-button {:disabled (= 0 position) :on-click #(store/goto-postition 0)}   :goto-start]
+                [toolbar-button {:disabled (= 0 position) :on-click #(store/previous-postition)} :goto-prv]
+
+                [:label (str position "/" (count (:inputs recording)))]
+
+                [toolbar-button {:disabled (= last-index position) :on-click #(store/next-postition)}            :goto-next]
+                [toolbar-button {:disabled (= last-index position) :on-click #(store/goto-postition last-index)} :goto-end]]]]])))
