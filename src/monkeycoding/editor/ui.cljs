@@ -75,7 +75,7 @@
     [:input.editable-label {
                              :type "text"
                              :value (:text @state)
-                             :on-key-down #(when (= 13 (.-keyCode %)) (do (.blur (.-target %)) (commit)))
+                             :on-key-down #(when (= 13 (.-keyCode %)) (.blur (.-target %)))
                              :on-blur commit
                              :on-click #(.select (.-target %))
                              :on-change #(swap! state assoc :text (.. % -target -value))
