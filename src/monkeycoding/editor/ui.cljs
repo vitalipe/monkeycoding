@@ -111,7 +111,9 @@
             (when-not (= current-mode :recording-mode)
               [:div.project-title-menu
                 [icon "ios-arrow-down"]
-                [editable-label {:value "New Project Name"}]])]
+                [editable-label {
+                                  :value (get-in @editor-state [:meta :title])
+                                  :on-change #(swap! editor-state assoc-in [:meta :title] %)}]])]
 
           [:div.btn-group.project-toobar.form-inline
             [toolbar-button {:on-click store/start-recording} :record]
