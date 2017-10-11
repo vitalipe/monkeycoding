@@ -6,7 +6,7 @@
 
 
 
-(defn- calc% [total position]
+(defn- calc-% [total position]
   (* 100 (when-not (zero? total) (/ position total))))
 
 (defn- percentage->position [total percentage]
@@ -64,6 +64,12 @@
     (update 1 merge {:style {:width width}})))
 
 
+(defn- event->progress-width [event]
+  (let [target (.. event -target)]
+    (if (.contains (.. target -classList) "progress-bar")
+      (.. target -parentElement -clientWidth)
+      (.. target -clientWidth))))
+
 (defn time-progress [{:keys [open
                              inputs
                              position
@@ -71,16 +77,15 @@
 
   (r/with-let [state (r/atom {
                                 :last-size (count inputs)
-                                :last-progress (calc% (count inputs) (inc position))
+                                :last-progress (calc-% (count inputs) (inc position))
                                 :last-position 0})]
 
     (let [input-size (count inputs)]
       [:div.progress-h-pad
         {:on-click (fn [evt]
                       (let [
-                            progress (calc% (.. evt -target -clientWidth) (.-clientX evt))
+                            progress (calc-%  (event->progress-width evt) (.-clientX evt))
                             position (percentage->position input-size progress)]
-
                         (on-seek position)
                         (swap! state merge {
                                             :last-size input-size
@@ -90,8 +95,8 @@
         [progress {
                     :open open
                     :progress (cond
-                                  (not= input-size (:last-size @state))   (calc% input-size (inc position))
-                                  (not= position (:last-position @state)) (calc% input-size (inc position))
+                                  (not= input-size (:last-size @state))   (calc-% input-size (inc position))
+                                  (not= position (:last-position @state)) (calc-% input-size (inc position))
                                   :otherwise                              (:last-progress @state))}]])))
 
 
