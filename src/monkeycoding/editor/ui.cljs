@@ -5,7 +5,7 @@
       [monkeycoding.editor.common              :refer [as-component]]
       [monkeycoding.editor.codemirror.editor   :refer [codemirror-editor]]
       [monkeycoding.editor.player              :refer [player]]
-      [monkeycoding.editor.timeline            :refer [timeline-widget]]
+      [monkeycoding.editor.timeline            :refer [timeline-panel]]
 
       [monkeycoding.editor.stream     :as stream :refer [stream->playback]]
       [monkeycoding.editor.state      :as store :refer [editor-state]]))
@@ -62,9 +62,6 @@
   [:span.toolbar-spacer])
 
 
-(defn collapsible-v-panel [show child]
-  [:div.collapsible-v-panel {:class (if-not show "hide" "")} child])
-
 
 (defn editable-label [{:keys [value on-change class] :or {on-change identity}}]
   (with-let [
@@ -89,7 +86,7 @@
 (defn editor-screen []
   (with-let [state (r/atom {
                             :dt-cap 500
-                            :timeline-open true})]
+                            :timeline-open false})]
     (let [{:keys [current-mode
                   snapshot
                   recording-highlight
@@ -159,27 +156,27 @@
                                                 :read-only (= current-mode :default-mode)}])]]
 
 
-          [:div.timeline-container
-            [:div.progress.timeline-progress
-              [:div.progress-bar {:role "progressbar" :style {:width "55%"}}]]
-            [collapsible-v-panel (:timeline-open @state)
-              [timeline-widget   {
-                                  :position position
-                                  :stream recording
-                                  :on-seek #(.log js/console "seek!!")}]]
+          [timeline-panel   {
+                              :open (:timeline-open @state)
+                              :position position
+                              :stream recording
+                              :on-seek store/goto-postition}]
 
-            ;; timeline controls
-            [:nav.timeline-navbar.navbar.bottom
-              [:div.timeline-toggle.form-inline
-                [toolbar-button {:selected (:timeline-open @state)
-                                 :on-click #(swap! state update :timeline-open not)}
-                  :timeline]]
 
-              [:div.timeline-controls.form-inline
-                [toolbar-button {:disabled (= 0 position) :on-click #(store/goto-postition 0)}   :goto-start]
-                [toolbar-button {:disabled (= 0 position) :on-click #(store/previous-postition)} :goto-prv]
+          ;; timeline controls
+          [:nav.timeline-navbar.navbar.bottom {:draggable false}
+            [:div.timeline-toggle.form-inline
+              [toolbar-button {:selected (:timeline-open @state)
+                               :on-click #(swap! state update :timeline-open not)
+                               :icon :timeline}]]
 
-                [:label (str position "/" (count (:inputs recording)))]
+            [:div.timeline-controls.form-inline
+              [toolbar-button {:disabled (= 0 position) :on-click #(store/goto-postition 0)}   :goto-start]
+              [toolbar-button {:disabled (= 0 position) :on-click #(store/previous-postition)} :goto-prv]
 
-                [toolbar-button {:disabled (= last-index position) :on-click #(store/next-postition)}            :goto-next]
-                [toolbar-button {:disabled (= last-index position) :on-click #(store/goto-postition last-index)} :goto-end]]]]])))
+              (if (empty? (:inputs recording))
+                [:label "0/0"]
+                [:label (str (inc position) "/" (count (:inputs recording)))])
+
+              [toolbar-button {:disabled (= last-index position) :on-click #(store/next-postition)}            :goto-next]
+              [toolbar-button {:disabled (= last-index position) :on-click #(store/goto-postition last-index)} :goto-end]]]])))
