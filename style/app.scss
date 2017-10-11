@@ -19,7 +19,7 @@ body {
   display: flex;
   flex-direction: column;
 
-  .editor-navbar {
+  .editor-navbar, .timeline-navbar {
     flex-shrink: 0;
   }
 
@@ -29,10 +29,6 @@ body {
     justify-content: space-between;
   }
 
-  .marks-panel {
-    width: 260px;
-    overflow: auto;
-  }
 
   .code-area {
     width: 100%;
@@ -122,18 +118,18 @@ body {
 
 
 .timeline-container {
+  .progress-h-pad {
+    padding-top: 20px;
+    cursor: pointer;
+  }
+
+  .timeline {
+    overflow: auto;
+  }
 
   .timeline-progress {
     height: 2px;
   }
-
-  .timeline {
-    margin-top: 20px;
-    .wave-wrapper {
-      overflow: auto;
-    }
-  }
-
 }
 
 
@@ -183,6 +179,10 @@ body {
 
 
 // etc
+.hidden {
+  display: none;
+}
+
 @-webkit-keyframes beacon {
    0% {
        border-color: rgba(163, 163, 163, 1);
