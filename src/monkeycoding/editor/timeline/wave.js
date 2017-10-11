@@ -6,13 +6,17 @@ const SegmentMs   = 80;
 
 
 class Wave {
-    constructor(canvas) {
+    constructor(canvas, {onWidthChange}) {
       this._ctx = canvas.getContext('2d');
       this._canvas = canvas;
       this._bounds = canvas.getBoundingClientRect();
 
+
       this._stream = [];
       this._segments = [];
+
+      this._onWidthChange = (onWidthChange || function() {});
+      this._onSeek = () => null;
 
     }
 
@@ -54,13 +58,13 @@ class Wave {
       let width = ((this._segments.length+10) * SegmentMs) / MsToPxRatio;
 
       this._canvas.width = Math.max(parentBounds.width, width);
-      this._canvas.height = 200;
 
       // setting canvas size will the transform matrix
       // this hack should disable sub-pixel AA
       this._ctx.translate(0.5, 0.5);
 
       this._bounds = this._canvas.getBoundingClientRect();
+      this._onWidthChange(this._canvas.width);
     }
 
 
