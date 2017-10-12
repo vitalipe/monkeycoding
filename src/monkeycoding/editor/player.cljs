@@ -20,10 +20,10 @@
                   "showLineNumbers" (:show-line-numbers default-config)
                   "theme" (:theme default-config)
                   "language" (:language default-config))]
-              
+
 
 
     (as-component {
                     :on-mount (fn [this] (reset! pl (init-player! (r/dom-node this) config paused playback)))
                     :on-props (fn [{paused :paused}] (if paused (.pause @pl) (.resume @pl)))
-                    :render (fn [] [:div.player-content])})))
+                    :render (fn [] [:div.player-content {:style {:height "100%"}}])})))

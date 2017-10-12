@@ -32,7 +32,6 @@ body {
 
   .code-area {
     width: 100%;
-    overflow: auto;
   }
 }
 
@@ -60,9 +59,10 @@ body {
 
 // code editor
 .code-area {
+
   .CodeMirror {
-    height: auto;
     font-size: 18px;
+    height: 100%;
   }
 
   padding-top: 5px;
@@ -121,10 +121,6 @@ body {
   .progress-h-pad {
     padding-top: 20px;
     cursor: pointer;
-  }
-
-  .timeline {
-    overflow: auto;
   }
 
   .timeline-progress {

@@ -106,4 +106,4 @@
                       :on-props (fn [{text :text :as props}]
                                   (sync-mode-with-props! mode-state props @cm))
 
-                      :render (fn [] [:div])})))
+                      :render (fn [] [:div {:style {:height "100%"}}])})));
