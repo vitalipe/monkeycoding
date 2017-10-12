@@ -7,8 +7,10 @@
                       :show-line-numbers true})
 
 
-(defn as-component [spec]
+(defn as-component [{:keys [on-mount
+                            on-props
+                            render] :or {on-mount #() on-props #()}}]
   (create-class {
-                  :component-did-mount (:on-mount spec)
-                  :component-will-receive-props #((:on-props spec) (second %2))
-                  :reagent-render (:render spec)}))
+                  :component-did-mount on-mount
+                  :component-will-receive-props #(on-props (second %2))
+                  :reagent-render render}))
