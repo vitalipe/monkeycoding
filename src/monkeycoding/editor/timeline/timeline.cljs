@@ -9,17 +9,16 @@
 (defn- calc-% [total position]
   (* 100 (when-not (zero? total) (/ position total))))
 
+
 (defn- percentage->position [total percentage]
   (max 0 (dec (.round js/Math (* total (/ percentage 100))))))
 
 
-
-(defn wave-widget [{:keys [
+(defn wave-canvas [{:keys [
                             position
                             stream
                             on-wave-width-change
                             on-seek]}]
-
 
   (let [
         the-wave (r/atom nil)
@@ -57,6 +56,15 @@
 (defn progress [{:keys [open progress]}]
   [:div.progress.timeline-progress {:class (when-not open "hidden")}
     [:div.progress-bar {:role "progressbar" :style {:width (str progress "%")}}]])
+
+
+(defn scroll-panel []
+  (as-component {
+                  :on-mount #(new js/SimpleBar (r/dom-node %))
+                  :render (fn [props & children]
+                            (if (map? props)
+                              (into [] (concat [:div.scroll-panel {:class (:class props)}] children))
+                              (into [] (concat [:div.scroll-panel] [props] children))))}))
 
 
 (defn wave-progress [{:keys [open seek width]}]
@@ -115,10 +123,9 @@
                         :on-seek on-seek}]
 
         [collapsible-v-panel open
-          [:div.timeline
-              [:div.progress-h-pad
-                [wave-progress {:open open :width (:wave-width @state) :seek (:wave-seek @state)}]]
-              [wave-widget {
+          [scroll-panel
+              [wave-progress {:open open :width (:wave-width @state) :seek (:wave-seek @state)}]
+              [wave-canvas {
                             :on-wave-width-change #(swap! state assoc :wave-width %)
                             :on-seek #()
                             :stream stream

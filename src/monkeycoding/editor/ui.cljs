@@ -86,7 +86,7 @@
 (defn editor-screen []
   (with-let [state (r/atom {
                             :dt-cap 500
-                            :timeline-open false})]
+                            :timeline-open true})]
     (let [{:keys [current-mode
                   snapshot
                   recording-highlight

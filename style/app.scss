@@ -5,6 +5,8 @@ $toolbar-bg-color: black;
 $toolbar-icon-color: #FFBE11;
 $toolbar-icon-hover-color: #2C2C2C;
 
+$scrollbar-color: gold;
+
 
 body {
   background-color: $background-color;
@@ -65,6 +67,35 @@ body {
     height: 100%;
   }
 
+  .CodeMirror-gutter-filler, .CodeMirror-scrollbar-filler {
+    background: $background-color;
+  }
+
+  .CodeMirror-overlayscroll-vertical div {
+    width: 6px;
+    background: $scrollbar-color;
+  }
+
+
+  .CodeMirror-overlayscroll-horizontal div {
+    height: 6px;
+    background: $scrollbar-color;
+  }
+
+  .CodeMirror-overlayscroll-vertical, .CodeMirror-overlayscroll-horizontal  {
+    opacity: 0;
+    transition: opacity .2s linear;
+  }
+
+  .CodeMirror-overlayscroll-vertical:hover,
+  &:hover .CodeMirror-overlayscroll-vertical,
+  .CodeMirror-overlayscroll-horizontal:hover,
+  &:hover .CodeMirror-overlayscroll-horizontal  {
+    opacity: 0.5;
+  }
+
+
+  padding-right: 4px;
   padding-top: 5px;
   background-color: $background-color;
 
@@ -119,7 +150,7 @@ body {
 
 .timeline-container {
   .progress-h-pad {
-    padding-top: 20px;
+    padding-top: 10px;
     cursor: pointer;
   }
 
@@ -171,7 +202,9 @@ body {
   }
 }
 
-
+.simplebar-scrollbar {
+  background: $scrollbar-color!important;
+}
 
 
 // etc
