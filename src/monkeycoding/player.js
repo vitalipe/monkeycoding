@@ -8,14 +8,14 @@ const NullMark = Object.freeze({id :null, info: null, isNull: true});
 
 function noop() {}
 
-function initCodemirror(dom, {theme, language, lineNumbers = true, customClassName = null}) {
-    let cm = new CodeMirror(dom, {theme, language, lineNumbers, readOnly : true});
+function initCodemirror(dom, config) {
+    let cm = new CodeMirror(dom, config);
 
     dom.classList.add("CodeMirror-focused"); // always display cursor
     dom.classList.add("mokey-code-player");
 
-    if (customClassName)
-      dom.classList.add(customClassName);
+    if (config.customClassName)
+      dom.classList.add(config.customClassName);
 
     return cm;
 }
@@ -157,11 +157,18 @@ class Player {
     constructor(domNode, {
                           highlightActiveLine = true,
                           HighlightActiveMark = true,
-                          showLineNumbers = true,
+                          rawConfig = {},
                           theme = "",
                           language = "c"}) {
 
-      this._codemirror = initCodemirror(domNode, {language, theme});
+      let config = {
+        language, theme,
+        showLineNumbers : true,
+        readOnly : true,
+        customClassName : null
+      };
+
+      this._codemirror = initCodemirror(domNode, Object.assign(rawConfig, config));
 
       registerInteractionEvents(
           this._codemirror,
