@@ -1,24 +1,30 @@
 (ns monkeycoding.editor.timeline
     (:require
       [reagent.core :as r]
-      [monkeycoding.editor.common        :refer [as-component]]
-      [monkeycoding.editor.timeline.wave :as wave]))
+      [monkeycoding.editor.common            :refer [as-component]]
+      [monkeycoding.editor.timeline.progress :refer [wave-progress time-progress]]
+      [monkeycoding.editor.timeline.wave     :as wave]))
 
 
 
-(defn- calc-% [total position]
-  (* 100 (when-not (zero? total) (/ position total))))
+;; helper widgets
+(defn collapsible-v-panel [show child]
+  [:div.collapsible-v-panel {:class (if-not show "hide" "")} child])
 
 
-(defn- percentage->position [total percentage]
-  (max 0 (dec (.round js/Math (* total (/ percentage 100))))))
+(defn scroll-panel []
+  (as-component {
+                  :on-mount #(new js/SimpleBar (r/dom-node %))
+                  :render (fn [props & children]
+                            (if (map? props)
+                              (into [] (concat [:div.scroll-panel {:class (:class props)}] children))
+                              (into [] (concat [:div.scroll-panel] [props] children))))}))
 
 
 (defn wave-canvas [{:keys [
                             position
                             stream
-                            on-wave-width-change
-                            on-seek]}]
+                            on-seek-px]}]
 
   (let [
         the-wave (r/atom nil)
@@ -29,8 +35,8 @@
                                   (reset! the-wave (new wave/Wave
                                                     (r/dom-node this)
                                                     (js-obj
-                                                            "onWidthChange" on-wave-width-change
-                                                            "onSeek" on-seek)))
+                                                            "MsToPxRatio" 10
+                                                            "onSeek" on-seek-px)))
                                   (reset! prv-stream stream)
                                   (doto @the-wave
                                     (.setStream (clj->js (:inputs stream)))
@@ -49,64 +55,6 @@
                       :render (fn [] [:canvas])})))
 
 
-(defn collapsible-v-panel [show child]
-  [:div.collapsible-v-panel {:class (if-not show "hide" "")} child])
-
-
-(defn progress [{:keys [open progress]}]
-  [:div.progress.timeline-progress {:class (when-not open "hidden")}
-    [:div.progress-bar {:role "progressbar" :style {:width (str progress "%")}}]])
-
-
-(defn scroll-panel []
-  (as-component {
-                  :on-mount #(new js/SimpleBar (r/dom-node %))
-                  :render (fn [props & children]
-                            (if (map? props)
-                              (into [] (concat [:div.scroll-panel {:class (:class props)}] children))
-                              (into [] (concat [:div.scroll-panel] [props] children))))}))
-
-
-(defn wave-progress [{:keys [open seek width]}]
-  (-> (progress {:open open :progress (* 100 (/ seek width))})
-    (update 1 merge {:style {:width width}})))
-
-
-(defn- event->progress-width [event]
-  (let [target (.. event -target)]
-    (if (.contains (.. target -classList) "progress-bar")
-      (.. target -parentElement -clientWidth)
-      (.. target -clientWidth))))
-
-(defn time-progress [{:keys [open
-                             inputs
-                             position
-                             on-seek]}]
-
-  (r/with-let [state (r/atom {
-                                :last-size (count inputs)
-                                :last-progress (calc-% (count inputs) (inc position))
-                                :last-position 0})]
-
-    (let [input-size (count inputs)]
-      [:div.progress-h-pad
-        {:on-click (fn [evt]
-                      (let [
-                            progress (calc-%  (event->progress-width evt) (.-clientX evt))
-                            position (percentage->position input-size progress)]
-                        (on-seek position)
-                        (swap! state merge {
-                                            :last-size input-size
-                                            :last-progress progress
-                                            :last-position position})))}
-
-        [progress {
-                    :open open
-                    :progress (cond
-                                  (not= input-size (:last-size @state))   (calc-% input-size (inc position))
-                                  (not= position (:last-position @state)) (calc-% input-size (inc position))
-                                  :otherwise                              (:last-progress @state))}]])))
-
 
 (defn timeline-panel [{:keys [
                                 stream
@@ -114,7 +62,7 @@
                                 on-seek
                                 position]}]
 
-    (r/with-let [state (r/atom {:wave-width 0 :wave-seek 200})]
+    (let []
       [:div.timeline-container
         [time-progress {
                         :inputs (:inputs stream)
@@ -124,9 +72,8 @@
 
         [collapsible-v-panel open
           [scroll-panel
-              [wave-progress {:open open :width (:wave-width @state) :seek (:wave-seek @state)}]
+              [wave-progress {:open open :inputs (:inputs stream) :on-seek on-seek}]
               [wave-canvas {
-                            :on-wave-width-change #(swap! state assoc :wave-width %)
                             :on-seek #()
                             :stream stream
                             :position position}]]]]))
