@@ -19,7 +19,10 @@
         config (js-obj
                   "showLineNumbers" (:show-line-numbers default-config)
                   "theme" (:theme default-config)
-                  "language" (:language default-config))]
+                  "language" (:language default-config)
+                  "rawConfig" (js-obj
+                                    "scrollbarStyle" "overlay"
+                                    "coverGutterNextToScrollbar" true))]
 
 
 

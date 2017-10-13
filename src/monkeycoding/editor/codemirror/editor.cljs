@@ -2,6 +2,8 @@
     (:require
       [reagent.core :as r :refer [atom]]
       [cljsjs.codemirror]
+      [cljsjs.codemirror.addon.scroll.simplescrollbars]
+
       [cljsjs.codemirror.mode.javascript]
 
       [monkeycoding.editor.common             :refer [default-config as-component]]
@@ -72,7 +74,9 @@
     (new  js/CodeMirror dom-node (js-obj
                                     "lineNumbers" (:show-line-numbers config)
                                     "theme" (:theme config)
-                                    "language" (:language config)))))
+                                    "language" (:language config)
+                                    "scrollbarStyle" "overlay"
+                                    "coverGutterNextToScrollbar" true))))
 
 
 
