@@ -1,79 +1,58 @@
 (ns monkeycoding.editor.timeline
     (:require
       [reagent.core :as r]
-      [monkeycoding.editor.common            :refer [as-component]]
-      [monkeycoding.editor.timeline.progress :refer [wave-progress time-progress]]
-      [monkeycoding.editor.timeline.wave     :as wave]))
+      [monkeycoding.editor.timeline.widgets  :refer [timeline-progress]]
+      [monkeycoding.editor.timeline.wave     :refer [wave-panel]]))
 
 
 
-;; helper widgets
-(defn collapsible-v-panel [show child]
-  [:div.collapsible-v-panel {:class (if-not show "hide" "")} child])
+(defn percentage-progress [{:keys [open
+                                   inputs
+                                   position
+                                   on-seek]}]
+
+  (r/with-let [
+                calc-% #(* 100 (when-not (zero? %1) (/ %2 %1)))
+                percentage->position #(max 0 (dec (.round js/Math (* %1 (/ %2 100)))))
+                state (r/atom {
+                                :last-size (count inputs)
+                                :last-progress (calc-% (count inputs) (inc position))
+                                :last-position 0})]
 
 
-(defn scroll-panel []
-  (as-component {
-                  :on-mount #(new js/SimpleBar (r/dom-node %))
-                  :render (fn [props & children]
-                            (if (map? props)
-                              (into [] (concat [:div.scroll-panel {:class (:class props)}] children))
-                              (into [] (concat [:div.scroll-panel] [props] children))))}))
-
-
-(defn wave-canvas [{:keys [
-                            position
-                            stream
-                            on-seek-px]}]
-
-  (let [
-        the-wave (r/atom nil)
-        prv-stream (r/atom nil)]
-
-    (as-component {
-                      :on-mount (fn [this]
-                                  (reset! the-wave (new wave/Wave
-                                                    (r/dom-node this)
-                                                    (js-obj
-                                                            "MsToPxRatio" 10
-                                                            "onSeek" on-seek-px)))
-                                  (reset! prv-stream stream)
-                                  (doto @the-wave
-                                    (.setStream (clj->js (:inputs stream)))
-                                    (.render)))
-
-
-                      :on-props (fn [{:keys [position, stream, on-position-change]}]
-                                  (when (not= stream @prv-stream)
-                                    (doto @the-wave
-                                      (.setStream (clj->js (:inputs stream)))
-                                      (.render)))
-
-                                  (reset! prv-stream stream))
-
-
-                      :render (fn [] [:canvas])})))
+    (let [input-size (count inputs)]
+      [timeline-progress {
+                          :open open
+                          :progress (cond
+                                      (not= input-size (:last-size @state))   (calc-% input-size (inc position))
+                                      (not= position (:last-position @state)) (calc-% input-size (inc position))
+                                      :otherwise                              (:last-progress @state))
+                          :on-seek (fn [total complete]
+                                      (let [
+                                            progress (calc-%  total complete)
+                                            position (percentage->position input-size progress)]
+                                        (on-seek position)
+                                        (swap! state merge {
+                                                            :last-size input-size
+                                                            :last-progress progress
+                                                            :last-position position})))}])))
 
 
 
 (defn timeline-panel [{:keys [
-                                stream
+                                inputs
                                 open
                                 on-seek
                                 position]}]
 
-    (let []
       [:div.timeline-container
-        [time-progress {
-                        :inputs (:inputs stream)
-                        :open (not open)
-                        :position position
-                        :on-seek on-seek}]
-
-        [collapsible-v-panel open
-          [scroll-panel
-              [wave-progress {:open open :inputs (:inputs stream) :on-seek on-seek}]
-              [wave-canvas {
-                            :on-seek #()
-                            :stream stream
-                            :position position}]]]]))
+        [percentage-progress {
+                              :inputs inputs
+                              :open (not open)
+                              :position position
+                              :on-seek on-seek}]
+        [wave-panel
+                    {:open open
+                     :inputs inputs
+                     :position position
+                     :on-seek on-seek}]])
