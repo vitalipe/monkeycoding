@@ -159,38 +159,50 @@ body {
     height: 2px;
   }
 
-  .timeline-pin {
-        position: absolute;
-        bottom: 16px;
-        width: 22px;
-        height: 20px;
-        line-height: 20px;
-        padding: 0px;
-        font-size: 14px;
-        text-align: center;
-        color: $background-color;
-        background: rgb(255, 255, 255);
-        border: 2px solid rgb(255, 255, 255);
-        border-bottom-width: 20px;
-        border-radius: 5px;
-        border-bottom-left-radius: 0px;
-        border-bottom-right-radius: 0px;
+  .timeline-pins {
 
-        text-shadow: rgba(0, 0, 0, 0.1) 1px 1px 1px;
-        box-shadow: rgba(0, 0, 0, 0.1) 1px 1px 2px 0px;
-        z-index: 99;
-  }
+    overflow: hidden;
+    position: relative;
+    height: 50px;
 
-  .timeline-pin:after {
-        content: "";
-        position: absolute;
-        width: 0;
-        height: 0;
-        border-width: 11px;
-        border-style: solid;
-        border-color: #FFFFFF transparent transparent transparent;
-        top: 20px;
-        left: -2px;
+    .timeline-pin {
+          position: absolute;
+          transform: translateX(-10px);
+          bottom: 16px;
+          width: 22px;
+          height: 20px;
+          line-height: 20px;
+          padding: 0px;
+          font-size: 14px;
+          text-align: center;
+          color: $background-color;
+          background: rgb(255, 255, 255);
+          border: 2px solid rgb(255, 255, 255);
+          border-bottom-width: 20px;
+          border-radius: 5px;
+          border-bottom-left-radius: 0px;
+          border-bottom-right-radius: 0px;
+
+          text-shadow: rgba(0, 0, 0, 0.1) 1px 1px 1px;
+          box-shadow: rgba(0, 0, 0, 0.1) 1px 1px 2px 0px;
+          z-index: 99;
+
+         &.last {
+           transform: translateX(-25px);
+         }
+    }
+
+    .timeline-pin:after {
+          content: "";
+          position: absolute;
+          width: 0;
+          height: 0;
+          border-width: 11px;
+          border-style: solid;
+          border-color: #FFFFFF transparent transparent transparent;
+          top: 20px;
+          left: -2px;
+    }
   }
 }
 

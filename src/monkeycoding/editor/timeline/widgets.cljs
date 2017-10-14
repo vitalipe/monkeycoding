@@ -12,9 +12,9 @@
       (.. target -clientWidth))))
 
 
-(defn timeline-pin [{:keys [class position on-click count]}]
+(defn timeline-pin [{:keys [position on-click count]}]
   [:div.timeline-pin {
-                      :class class
+                      :class (when (= position "100%") "last")
                       :on-click (fn [evt]
                                   (.stopPropagation evt)
                                   (on-click))
@@ -31,7 +31,9 @@
   [:div.progress-panel {
                         :class (when-not open "hidden")
                         :on-click #(on-seek (event->progress-width %) (.-clientX %))}
-      pins
+
+      [:div.timeline-pins pins]
+      
       (let [[total complete] (cond
                               (vector? progress) (map #(str % "px") progress)
                               (number? progress) ["100%" (str progress "%")])]
