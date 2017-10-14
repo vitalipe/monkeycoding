@@ -159,7 +159,7 @@
           [timeline-panel   {
                               :open (:timeline-open @state)
                               :position position
-                              :stream recording
+                              :inputs (:inputs recording)
                               :on-seek store/goto-postition}]
 
 
