@@ -1,13 +1,14 @@
 (ns monkeycoding.editor.timeline
     (:require
       [reagent.core :as r]
-      [monkeycoding.editor.timeline.widgets  :refer [timeline-progress]]
+      [monkeycoding.editor.timeline.widgets  :refer [timeline-progress timeline-pin]]
       [monkeycoding.editor.timeline.wave     :refer [wave-panel]]))
 
 
 
 (defn percentage-progress [{:keys [open
                                    inputs
+                                   marks
                                    position
                                    on-seek]}]
 
@@ -35,24 +36,32 @@
                                         (swap! state merge {
                                                             :last-size input-size
                                                             :last-progress progress
-                                                            :last-position position})))}])))
-
-
+                                                            :last-position position})))}
+          (->> (vals marks)
+            (group-by :insert)
+            (map (fn [[position all-marks-in-pos]]
+                    [timeline-pin {
+                                    :key position
+                                    :position (str (calc-% input-size position) "%")
+                                    :on-click #(on-seek position)
+                                    :count (count all-marks-in-pos)}])))])))
 
 (defn timeline-panel [{:keys [
-                                inputs
+                                stream
                                 open
                                 on-seek
                                 position]}]
 
       [:div.timeline-container
         [percentage-progress {
-                              :inputs inputs
+                              :inputs (:inputs stream)
+                              :marks  (:marks stream)
                               :open (not open)
                               :position position
                               :on-seek on-seek}]
         [wave-panel
                     {:open open
-                     :inputs inputs
+                     :inputs (:inputs stream)
+                     :marks  (:marks stream)
                      :position position
                      :on-seek on-seek}]])

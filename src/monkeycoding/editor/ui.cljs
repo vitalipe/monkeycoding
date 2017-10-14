@@ -86,7 +86,7 @@
 (defn editor-screen []
   (with-let [state (r/atom {
                             :dt-cap 500
-                            :timeline-open true})]
+                            :timeline-open false})]
     (let [{:keys [current-mode
                   snapshot
                   recording-highlight
@@ -159,7 +159,7 @@
           [timeline-panel   {
                               :open (:timeline-open @state)
                               :position position
-                              :inputs (:inputs recording)
+                              :stream recording
                               :on-seek store/goto-postition}]
 
 
