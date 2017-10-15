@@ -2,7 +2,7 @@
     (:require
       [reagent.core :as r]
       [monkeycoding.editor.common            :refer [as-component]]
-      [monkeycoding.editor.timeline.widgets  :refer [timeline-progress scroll-panel collapsible-v-panel]]))
+      [monkeycoding.editor.timeline.widgets  :refer [timeline-progress timeline-pin scroll-panel collapsible-v-panel]]))
 
 
 ;; later can be dynamic to control zoom
@@ -138,14 +138,30 @@
 (defn wave-progress [{:keys [
                               open
                               segements
+                              marks
                               on-seek
                               position
                               width]}]
+
   [timeline-progress {
                       :on-seek #(when-let [index (px->position segements %2)] (on-seek index))
                       :progress [width (/ (* position segement-ms) ms-to-px-ratio)]
-                      :open open}])
+                      :open open}
 
+                    (let [
+                          marks (group-by :insert (vals marks))
+                          segements (->> (flatten segements)
+                                      (sort-by :input-index)
+                                      (map :index)
+                                      (into []))]
+
+                      (->> marks
+                        (map (fn [[position all-marks-in-pos]]
+                                [timeline-pin {
+                                                :key position
+                                                :count (count all-marks-in-pos)
+                                                :position (/ (* (nth segements position) segement-ms) ms-to-px-ratio)
+                                                :on-click #(on-seek position)}]))))])
 
 (defn wave-panel [{:keys [
                                 inputs
@@ -167,6 +183,7 @@
                                 :width (:width-px @state)
                                 :position active-segment-index
                                 :segements segements
+                                :marks marks
                                 :on-seek on-seek}]
                 [wave-canvas {
                               :segements segements
