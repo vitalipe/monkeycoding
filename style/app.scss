@@ -161,8 +161,8 @@ body {
 
   .timeline-pins {
 
-    overflow: hidden;
     position: relative;
+    overflow: hidden;
     height: 50px;
 
     .timeline-pin {
@@ -186,6 +186,8 @@ body {
           text-shadow: rgba(0, 0, 0, 0.1) 1px 1px 1px;
           box-shadow: rgba(0, 0, 0, 0.1) 1px 1px 2px 0px;
           z-index: 99;
+          animation: fade-in 3s;
+
 
          &.last {
            transform: translateX(-25px);
@@ -202,6 +204,7 @@ body {
           border-color: #FFFFFF transparent transparent transparent;
           top: 20px;
           left: -2px;
+
     }
   }
 }
@@ -259,7 +262,12 @@ body {
   display: none;
 }
 
-@-webkit-keyframes beacon {
+@keyframes fade-in {
+    from {opacity: 0}
+    to {opacity: 1}
+}
+
+@keyframes beacon {
    0% {
        border-color: rgba(163, 163, 163, 1);
        border-radius: 3px;
