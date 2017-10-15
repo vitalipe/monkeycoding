@@ -12,14 +12,15 @@
 
 
 (defn inputs->wave-segements [inputs]
-  (let [
-        last-index #(dec (count %))
-        into-segements (fn [segements item items-left]
-                          (->> {
-                                :input-index (- (count inputs) items-left 1)
-                                :index (last-index segements)
-                                :input item}
-                              (update segements (last-index segements) conj)))]
+  (let [into-segements (fn [segements item items-left]
+                          (let [
+                                index (dec (count segements))
+                                input-index (- (count inputs) items-left 1)]
+
+                            (update segements index conj {
+                                                          :input-index input-index
+                                                          :index index
+                                                          :input item})))]
 
     (loop [[first, & rest] inputs, segements [[]], delay (get-in inputs [0 :dt])]
         (let [
@@ -148,6 +149,7 @@
 
 (defn wave-panel [{:keys [
                                 inputs
+                                marks
                                 open
                                 on-seek
                                 position]}]
