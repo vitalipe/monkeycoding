@@ -12,15 +12,43 @@
 
 
 (defn inputs->wave-segements [inputs]
-  (loop [[first, & rest] inputs, segements [[]], delay (get-in inputs [0 :dt])]
-    (let [
-          next-delay (+ delay (:dt first))
-          seg-index (dec (count segements))
-          segements-time (* segement-ms (count segements))]
-      (cond
-        (nil? first)                  segements
-        (> next-delay segements-time) (recur (into [first] rest) (conj segements []) delay)
-        :otherwise                    (recur rest (update segements seg-index conj first) next-delay)))))
+  (let [
+        last-index #(dec (count %))
+        into-segements (fn [segements item items-left]
+                          (->> {
+                                :input-index (- (count inputs) items-left 1)
+                                :index (last-index segements)
+                                :input item}
+                              (update segements (last-index segements) conj)))]
+
+    (loop [[first, & rest] inputs, segements [[]], delay (get-in inputs [0 :dt])]
+        (let [
+              next-delay (+ delay (:dt first))
+              segements-time (* segement-ms (count segements))]
+
+          (cond
+            (nil? first)                  segements
+            (> next-delay segements-time) (recur (into [first] rest) (conj segements []) delay)
+            :otherwise                    (recur rest (into-segements segements first (count rest)) next-delay))))))
+
+
+(defn position->segment-index [segements position]
+  (let [segements (flatten segements)]
+    (when-not (empty? segements)
+        (:index (nth segements position) position))))
+
+
+(defn px->position [segements px]
+  (let [
+        px-index (.floor js/Math (* ms-to-px-ratio (/ px segement-ms)))
+        clamped-index (min px-index (dec (count segements)))]
+
+    (loop [index clamped-index]
+        (cond
+          (= 0 index)                     (get-in segements [0 0 :input-index])
+          (empty? (nth segements index))  (recur (dec index))
+          :otherwise                      (get-in segements [index 0 :input-index])))))
+
 
 
 (defn init-wave! [canvas]
@@ -47,7 +75,7 @@
                 :height (.-height (.getBoundingClientRect canvas))}))
 
 
-(defn render-wave! [{:keys [ctx width height]}  segements]
+(defn render-wave! [{:keys [ctx width height] :as wave}  segements]
   (.clearRect ctx 0 0 width height)
 
   (doseq [[current index] (map vector segements (range))]
@@ -71,11 +99,14 @@
         (.closePath)
 
         (aset "fillStyle" "#006495")
-        (.fill)))))
+        (.fill))))
+
+  wave)
 
 
 (defn- sync-wave! [wave segements]
-  (doto (adjust-wave-size! wave segements)
+  (-> wave
+    (adjust-wave-size! segements)
     (render-wave! segements)))
 
 
@@ -103,9 +134,15 @@
 
 
 
-(defn wave-progress [{:keys [open segements position width]}]
+(defn wave-progress [{:keys [
+                              open
+                              segements
+                              on-seek
+                              position
+                              width]}]
   [timeline-progress {
-                      :progress [width width]
+                      :on-seek #(when-let [index (px->position segements %2)] (on-seek index))
+                      :progress [width (/ (* position segement-ms) ms-to-px-ratio)]
                       :open open}])
 
 
@@ -116,15 +153,20 @@
                                 position]}]
 
     (r/with-let [state (r/atom {:width-px 0})]
-      (let [segements (inputs->wave-segements inputs)]
+      (let [
+            segements            (inputs->wave-segements inputs)
+            active-segment-index (position->segment-index segements position)]
+
         [:div.timeline-container
           [collapsible-v-panel {:show open}
             [scroll-panel
                 [wave-progress {
                                 :open open
                                 :width (:width-px @state)
-                                :segements segements}]
+                                :position active-segment-index
+                                :segements segements
+                                :on-seek on-seek}]
                 [wave-canvas {
                               :segements segements
-                              :position  position
+                              :position  active-segment-index
                               :on-resize #(swap! state assoc :width-px %)}]]]])))
