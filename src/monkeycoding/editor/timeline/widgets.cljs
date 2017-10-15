@@ -27,19 +27,19 @@
                                  open
                                  progress
                                  on-seek]} & pins]
+  (let [[total complete] (cond
+                          (vector? progress) (map #(str % "px") progress)
+                          (number? progress) ["100%" (str progress "%")])]
 
-  [:div.progress-panel {
-                        :class (when-not open "hidden")
-                        :on-click #(on-seek (event->progress-width %) (.-clientX %))}
-
-      [:div.timeline-pins pins]
-      
-      (let [[total complete] (cond
-                              (vector? progress) (map #(str % "px") progress)
-                              (number? progress) ["100%" (str progress "%")])]
-
+    [:div.progress-panel {
+                          :style {:width total}
+                          :class (when-not open "hidden")
+                          ;; looks like that shitty scroller widget breaks ".pageX"
+                          ;; so we need to use the non standard "offsetX", should be fine unless you use IE7 :P
+                          :on-click #(on-seek (event->progress-width %) (.. % -nativeEvent -offsetX))}
+        [:div.timeline-pins pins]
         [:div.progress.timeline-progress {:style {:width total}}
-          [:div.progress-bar {:role "progressbar" :style {:width complete}}]])])
+          [:div.progress-bar {:role "progressbar" :style {:width complete}}]]]))
 
 
 (defn collapsible-v-panel [{show :show} child]
