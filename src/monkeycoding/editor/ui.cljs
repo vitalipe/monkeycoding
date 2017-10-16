@@ -7,7 +7,7 @@
       [monkeycoding.editor.player              :refer [player]]
       [monkeycoding.editor.timeline            :refer [timeline-panel]]
 
-      [monkeycoding.editor.stream     :as stream :refer [stream->playback]]
+      [monkeycoding.editor.stream     :as stream :refer [stream->snapshot stream->playback]]
       [monkeycoding.editor.state      :as store :refer [editor-state]]))
 
 
@@ -86,12 +86,13 @@
 (defn editor-screen []
   (with-let [state (r/atom {
                             :dt-cap 500
-                            :timeline-open false})]
+                            :timeline-open true})]
     (let [{:keys [current-mode
-                  snapshot
                   recording-highlight
                   position recording]} @editor-state
-          last-index (count (rest (:inputs recording)))]
+
+          last-index (count (rest (:inputs recording)))
+          snapshot (stream->snapshot recording position)]
 
       [:div.editor-screen-layout
 
@@ -124,14 +125,22 @@
                                 :on-click store/start-recording
                                 :selected (= current-mode :recording-mode)
                                 :icon :record}]
+
               (if (= current-mode :playback-mode)
                 [toolbar-button {:on-click store/stop-playback} "stop"]
                 [toolbar-button {:on-click store/start-playback} :play])
 
               [toolbar-spacer]
 
-              [toolbar-button :undo]
-              [toolbar-button :redo]
+              [toolbar-button {
+                                :icon :undo
+                                :disabled false
+                                :on-click store/undo!}]
+
+              [toolbar-button {
+                                :icon :redo
+                                :disabled false
+                                :on-click store/redo!}]
 
               [toolbar-spacer]
               [toolbar-button :export]
