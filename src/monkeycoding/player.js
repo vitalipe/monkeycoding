@@ -160,10 +160,10 @@ class Player {
                           rawConfig = {},
                           theme = "",
                           language = "c"}) {
-
       let config = {
-        language, theme,
-        showLineNumbers : true,
+        language,
+        theme,
+        lineNumbers : true,
         readOnly : true,
         customClassName : null
       };
