@@ -83,6 +83,24 @@
                              :class class}]))
 
 
+(defn keyboard-shortcuts [& key-list]
+  (let [
+        keys (reduce-kv #(assoc %1 (set %2) %3) {} (apply hash-map key-list))
+        event->keys #(-> #{
+                            (when (.-ctrlKey %) :ctrl)
+                            (when (.-shiftKey %) :shift)
+                            (keyword (.-key %))}
+                        (disj nil))
+
+        handler (fn [evt]
+                  (when-let [callback (get keys (event->keys evt))] (callback)))]
+
+      (as-component {
+                      :on-mount (fn [_]  (.addEventListener js/window "keydown" handler))
+                      :on-unmount (fn [_] (.removeEventListener js/window "keydown" handler))
+                      :render (fn [] [:div.keyboard-shortcuts])})))
+
+
 (defn editor-screen []
   (with-let [state (r/atom {
                             :dt-cap 500
@@ -95,6 +113,10 @@
           snapshot (stream->snapshot recording position)]
 
       [:div.editor-screen-layout
+          [keyboard-shortcuts
+              [:ctrl :z] store/undo!
+              [:ctrl :y] store/redo!]
+
 
           ;; editor header
           [:nav.editor-navbar.navbar.top
@@ -159,10 +181,11 @@
                                                 :selection (:selection snapshot)
                                                 :marks  (:marks snapshot)
                                                 :dt-cap (:dt-cap @state)
-                                                :on-input store/record-input
-                                                :on-highlight store/record-highlight
                                                 :recording-highlight recording-highlight
-                                                :read-only (= current-mode :default-mode)}])]]
+                                                :read-only (= current-mode :default-mode)
+
+                                                :on-input store/record-input
+                                                :on-highlight store/record-highlight}])]]
 
 
           [timeline-panel   {
