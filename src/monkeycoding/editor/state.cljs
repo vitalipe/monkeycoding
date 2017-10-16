@@ -76,19 +76,18 @@
                           :states  []
                           :current -1}))
 
-
 (defn- current-undo-state []
-  (get (:states @undo-state) (:current @undo-state)))
+  (let [{:keys [current states]} @undo-state]
+    (cond
+      (= -1 current) stream/empty-stream
+      :otherwise (get states current))))
 
 
 (defn- sync-with-undo-state! []
-  (let [
-        recording    (current-undo-state)
-        max-position (dec (count (:inputs recording)))]
+  (let [recording    (current-undo-state)]
     (swap! editor-state merge {
                                 :recording recording
-                                :position (min max-position (:position @editor-state))})))
-
+                                :position (dec (count (:inputs recording)))})))
 
 
 (defn- sync-with-editor-state! [{prv :recording} {next :recording}]
@@ -102,7 +101,7 @@
 (add-watch editor-state :undo-redo (fn [_ _ prv next] (sync-with-editor-state! prv next)))
 
 
-(defn can-undo? [] (> (:current @undo-state) 0))
+(defn can-undo? [] (> (:current @undo-state) -1))
 (defn can-redo? [] (> (count (:states @undo-state)) (inc (:current @undo-state))))
 
 
