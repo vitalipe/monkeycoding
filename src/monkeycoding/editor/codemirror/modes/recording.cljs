@@ -75,7 +75,10 @@
 
 
 (defn sync-with-props! [this _  props]
-  (merge this (select-keys props [:on-input :marks :dt-cap])))
+  (-> this
+    (assoc :last-time (.now js/Date))
+    (merge (select-keys props [:on-input :marks :dt-cap]))))
+
 
 
 (defn enter! [this cm props]
