@@ -2,7 +2,7 @@
     (:require [reagent.core :refer [create-class]]))
 
 (def default-config {
-                      :mode "javascript"
+                      :language "javascript"
                       :theme "seti"
                       :show-line-numbers true})
 
@@ -14,5 +14,5 @@
   (create-class {
                   :component-did-mount on-mount
                   :component-will-receive-props #(on-props (second %2))
-                  :component-will-unmount on-unmount 
+                  :component-will-unmount on-unmount
                   :reagent-render render}))
