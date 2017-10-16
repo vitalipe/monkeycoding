@@ -156,12 +156,12 @@
 
               [toolbar-button {
                                 :icon :undo
-                                :disabled false
+                                :disabled (not (store/can-undo?))
                                 :on-click store/undo!}]
 
               [toolbar-button {
                                 :icon :redo
-                                :disabled false
+                                :disabled (not (store/can-redo?))
                                 :on-click store/redo!}]
 
               [toolbar-spacer]
