@@ -11,76 +11,108 @@
                                     :theme :default}
 
                             :recording stream/empty-stream
-                            :snapshot  stream/empty-snapshot
                             :position 0
 
                             :recording-highlight false
                             :current-mode :default-mode}))
 
 
-
-(def state-swap! (partial swap! editor-state))
-
 ;; recording actions
 (defn start-recording []
-  (state-swap! assoc :current-mode :recording-mode))
+  (swap! editor-state assoc :current-mode :recording-mode))
 
 
 (defn finish-recording []
   (doto editor-state
     (swap! assoc :current-mode :default-mode)
     (swap! assoc :record-input false)
-    (swap! assoc :recording-highlight false)
-    (swap! assoc :snapshot (stream/stream->snapshot (:recording @editor-state)))))
+    (swap! assoc :recording-highlight false)))
 
 
 (defn record-input [event snapshot dt]
   (doto editor-state
     (swap! update :recording stream/append-input event snapshot dt)
-    (swap! assoc  :position (dec (count (get-in @editor-state [:recording :inputs]))))
-    (swap! assoc :snapshot (stream/stream->snapshot (:recording @editor-state)))))
+    (swap! assoc  :position (dec (count (get-in @editor-state [:recording :inputs]))))))
 
 
 (defn toggle-record-highlight [event]
-  (state-swap! update :recording-highlight not))
+  (swap! editor-state update :recording-highlight not))
 
 
 (defn record-highlight [from to]
     (doto editor-state
       (swap! update :recording stream/append-mark {:from from :to to :info (str  "dummy into for: " from to)})
-      (swap! assoc :snapshot (stream/stream->snapshot (:recording @editor-state) (:position @editor-state)))
       (swap! assoc :recording-highlight false)))
-
-
-(defn discard-recording []
-  (state-swap! merge {
-                      :recording stream/empty-stream
-                      :position 0
-                      :snapshot stream/empty-snapshot}))
 
 
 ;; playback actions
 (defn start-playback []
-    (state-swap! assoc :current-mode :playback-mode))
+    (swap! editor-state assoc :current-mode :playback-mode))
 
 
 (defn toggle-playback-pause []
-  (state-swap! update-in [:current-mode :paused] not))
+  (swap! editor-state update-in [:current-mode :paused] not))
 
 
 (defn goto-postition [position]
-  (doto editor-state
-    (swap! assoc :position position)
-    (swap! assoc :snapshot (stream/stream->snapshot (:recording @editor-state) position))))
+  (swap! editor-state assoc :position position))
 
 
 (defn next-postition []
   (goto-postition  (inc (:position @editor-state))))
 
+
 (defn previous-postition []
   (goto-postition  (dec (:position @editor-state))))
 
 
-
 (defn stop-playback []
-  (state-swap! assoc :current-mode :default-mode))
+  (swap! editor-state assoc :current-mode :default-mode))
+
+
+
+;; undo redo
+(def undo-state (r/atom {
+                          :states  []
+                          :current -1}))
+
+
+(defn- current-undo-state []
+  (get (:states @undo-state) (:current @undo-state)))
+
+
+(defn- sync-with-undo-state! []
+  (let [
+        recording    (current-undo-state)
+        max-position (dec (count (:inputs recording)))]
+    (swap! editor-state merge {
+                                :recording recording
+                                :position (min max-position (:position @editor-state))})))
+
+
+
+(defn- sync-with-editor-state! [{prv :recording} {next :recording}]
+  (when-not (= prv next)
+    (when-not (= next (current-undo-state))
+      (let [{:keys [states current]} @undo-state]
+        (swap! undo-state assoc :states (conj (subvec states 0 (inc current)) next))
+        (swap! undo-state update :current inc)))))
+
+
+(add-watch editor-state :undo-redo (fn [_ _ prv next] (sync-with-editor-state! prv next)))
+
+
+(defn can-undo? [] (> (:current @undo-state) 0))
+(defn can-redo? [] (> (count (:states @undo-state)) (inc (:current @undo-state))))
+
+
+(defn undo! []
+  (when (can-undo?)
+      (swap! undo-state update :current dec)
+      (sync-with-undo-state!)))
+
+
+(defn redo! []
+  (when (can-redo?)
+      (swap! undo-state update :current inc)
+      (sync-with-undo-state!)))
