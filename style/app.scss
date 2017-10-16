@@ -101,7 +101,10 @@ body {
 
   // all modes
   .highliting-mark{
-    background-color: rgba(114, 158, 85, 0.5);
+    border-bottom-width: 1px;
+    border-bottom-color: gold;
+    border-bottom-style: solid;
+    //background-color: rgba(114, 158, 85, 0.5);
     position: relative;
   }
 
@@ -249,6 +252,14 @@ body {
 
   &.selected {
     background-color: red;
+  }
+
+  &.disabled {
+    color: grey;
+  }
+
+  &.disabled:hover {
+    background-color: transparent;
   }
 }
 
