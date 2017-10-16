@@ -59,10 +59,10 @@
 
 
 ;; stream
-(defn stream->playback [{marks :marks [initial & inputs] :inputs}]
+(defn stream->playback [{marks :marks inputs :inputs}]
   (let [raw-inputs (map #(dissoc % :snapshot) inputs)]
     (clj->js {
-               "initial" (:snapshot initial)
+               "initial" empty-snapshot
                "inputs"  (insert-marks-into-input-stream raw-inputs marks)
                "marksInfo"  (->> (vals marks)
                               (map #(hash-map (:id %) (:info %)))
