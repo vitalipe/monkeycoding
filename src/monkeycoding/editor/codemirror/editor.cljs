@@ -64,6 +64,7 @@
 
     (doto codemirror
       (.on "change"                input-proxy)
+      (.on "beforeChange"          #(when (contains? #{"undo" "redo"} (.-origin %2)) (.cancel %2)))
       (.on "cursorActivity"        #(input-proxy % (.getCursor %)))
       (.on "beforeSelectionChange" input-proxy))))
 
