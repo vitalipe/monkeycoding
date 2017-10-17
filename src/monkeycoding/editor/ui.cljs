@@ -150,7 +150,10 @@
 
               (if (= current-mode :playback-mode)
                 [toolbar-button {:on-click store/stop-playback} "stop"]
-                [toolbar-button {:on-click store/start-playback} :play])
+                [toolbar-button {
+                                  :icon :play
+                                  :disabled (empty? (:inputs recording))
+                                  :on-click store/start-playback}])
 
               [toolbar-spacer]
 
@@ -175,6 +178,7 @@
               (cond
                 (= current-mode :playback-mode) [player {
                                                           :paused false
+                                                          :on-progress #(store/update-player-progress %)
                                                           :playback (stream->playback recording)}]
                 :otherwise [codemirror-editor {
                                                 :text (:text snapshot)

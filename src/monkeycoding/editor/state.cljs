@@ -19,7 +19,9 @@
 
 ;; recording actions
 (defn start-recording []
-  (swap! editor-state assoc :current-mode :recording-mode))
+  (doto editor-state
+    (swap! assoc :position (dec (count (get-in @editor-state [:recording :inputs]))))
+    (swap! assoc :current-mode :recording-mode)))
 
 
 (defn finish-recording []
@@ -53,9 +55,14 @@
 (defn toggle-playback-pause []
   (swap! editor-state update-in [:current-mode :paused] not))
 
+(defn update-player-progress [position]
+  (swap! editor-state assoc :position position))
 
 (defn goto-postition [position]
-  (swap! editor-state assoc :position position))
+  (when-not (= position (:position @editor-state))
+    (doto editor-state
+      (swap! assoc :current-mode :default-mode)
+      (swap! assoc :position position))))
 
 
 (defn next-postition []
