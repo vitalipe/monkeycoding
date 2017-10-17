@@ -5,15 +5,17 @@
       [monkeycoding.player :as player]))
 
 
-(defn init-player! [dom config paused playback]
+(defn init-player! [dom config paused playback on-progress]
   (let [player (new player/Player dom (clj->js config))]
     (when playback (.play player (clj->js playback)))
     (when paused   (.pause player))
+    (.onProgressUpdate player #(on-progress (dec (.-played %))))
+
     player))
 
 
 ;; Player is just a nice React wrapper of the JS player
-(defn player [{:keys [paused playback]}]
+(defn player [{:keys [paused playback on-progress]}]
   (let [
         pl (atom nil)
         config (js-obj
@@ -24,9 +26,8 @@
                                     "scrollbarStyle" "overlay"
                                     "coverGutterNextToScrollbar" true))]
 
-
-
     (as-component {
-                    :on-mount (fn [this] (reset! pl (init-player! (r/dom-node this) config paused playback)))
+                    :on-mount (fn [this] (reset! pl (init-player! (r/dom-node this) config paused playback on-progress)))
                     :on-props (fn [{paused :paused}] (if paused (.pause @pl) (.resume @pl)))
+                    :on-unmount (fn [_] (.pause @pl))
                     :render (fn [] [:div.player-content {:style {:height "100%"}}])})))
