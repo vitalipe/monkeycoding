@@ -38,6 +38,7 @@
 
 
 (defn enter! [state cm props]
+  (snapshot/apply-snapshot! cm props)
   (let [snapshot (snapshot/take-snapshot cm (:marks props))]
     (doto cm
       (->

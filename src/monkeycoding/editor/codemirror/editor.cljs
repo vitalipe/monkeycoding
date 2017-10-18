@@ -16,8 +16,6 @@
 (defn- props->mode [{:keys [recording-highlight on-input]}]
   (cond
     recording-highlight (modes/all :highlighting)
-    on-input            (modes/all :recording)
-
     :default-to         (modes/all :view-only)))
 
 
@@ -91,9 +89,7 @@
                                   text
                                   selection
                                   marks
-                                  dt-cap
 
-                                  recording-highlight
 
                                   on-input
                                   on-highlight] :as props}]

@@ -7,6 +7,8 @@
       [monkeycoding.editor.player              :refer [player preview-player]]
       [monkeycoding.editor.timeline            :refer [timeline-panel]]
 
+      [monkeycoding.editor.codemirror.recorder  :as recorder]
+
       [monkeycoding.editor.stream     :as stream :refer [stream->playback-snapshot stream->snapshot stream->playback]]
       [monkeycoding.editor.state      :as store :refer [editor-state]]))
 
@@ -177,7 +179,17 @@
         [:div.stage-container
           [:div.code-area
             (cond
-              (= current-mode :default-mode) [preview-player {:playback (stream->playback-snapshot recording position)}]
+              (= current-mode :default-mode)   [preview-player {:playback (stream->playback-snapshot recording position)}]
+              (and
+                (not recording-highlight)
+                (= current-mode :recording-mode)) [recorder/editor {
+                                                                    :text (:text snapshot)
+                                                                    :selection (:selection snapshot)
+                                                                    :marks  (:marks snapshot)
+
+                                                                    :dt-cap (:dt-cap @state)
+                                                                    :on-input store/record-input}]
+
               (= current-mode :playback-mode) [player {
                                                         :paused false
                                                         :on-progress #(store/update-player-progress %)
@@ -189,7 +201,7 @@
                                               :selection (:selection snapshot)
                                               :marks  (:marks snapshot)
                                               :dt-cap (:dt-cap @state)
-                                              :recording-highlight recording-highlight
+                                              :recording-highlight true
 
                                               :on-input store/record-input
                                               :on-highlight store/record-highlight}])]]
