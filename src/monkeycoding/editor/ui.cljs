@@ -190,7 +190,6 @@
                                               :marks  (:marks snapshot)
                                               :dt-cap (:dt-cap @state)
                                               :recording-highlight recording-highlight
-                                              :read-only false
 
                                               :on-input store/record-input
                                               :on-highlight store/record-highlight}])]]

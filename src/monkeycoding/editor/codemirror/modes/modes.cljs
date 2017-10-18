@@ -41,23 +41,6 @@
     (process-dom-event  [this cm event] (highlighting/process-dom-event this cm event)))
 
 
-(defrecord PreviewMode [
-                        snapshot
-                        prv-mark
-                        prv-widget
-                        prv-line
-                        info-dom
-                        marks]
-
-  EditMode
-    (sync-with-props! [this cm props] (preview/sync-with-props! this cm props))
-    (enter!           [this cm props] (preview/enter! this cm props))
-    (exit!            [this cm] (preview/exit! this cm))
-
-    (process-input-event  [this cm event] this)
-    (process-dom-event    [this cm event] (preview/process-dom-event this cm event)))
-
-
 (defrecord UninitializedMode []
   EditMode
     (sync-with-props! [this _ _] this)

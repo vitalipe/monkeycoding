@@ -13,10 +13,9 @@
 
 
 ;; mode management
-(defn- props->mode [{:keys [recording-highlight read-only on-input]}]
+(defn- props->mode [{:keys [recording-highlight on-input]}]
   (cond
     recording-highlight (modes/all :highlighting)
-    read-only           (modes/all :view-only)
     on-input            (modes/all :recording)
 
     :default-to         (modes/all :view-only)))
@@ -94,7 +93,6 @@
                                   marks
                                   dt-cap
 
-                                  read-only
                                   recording-highlight
 
                                   on-input
