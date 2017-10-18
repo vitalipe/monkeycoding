@@ -64,9 +64,15 @@
     (clj->js {
                "initial" empty-snapshot
                "inputs"  (insert-marks-into-input-stream raw-inputs marks)
-               "marksInfo"  (->> (vals marks)
-                              (map #(hash-map (:id %) (:info %)))
-                              (apply merge))})))
+               "marksInfo" (reduce-kv #(assoc %1 %2 (:info %3)) {} marks)})))
+
+
+(defn stream->playback-snapshot [{marks :marks inputs :inputs} index]
+  (let [raw-inputs (map #(dissoc % :snapshot) inputs)]
+    (clj->js {
+               "initial" (if (= -1 index) empty-snapshot (get-in inputs [index :snapshot]))
+               "inputs"  []
+               "marksInfo" (reduce-kv #(assoc %1 %2 (:info %3)) {} marks)})))
 
 
 (defn stream->snapshot
