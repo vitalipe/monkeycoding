@@ -1,7 +1,6 @@
 (ns monkeycoding.editor.codemirror.modes
-  (:require [monkeycoding.editor.codemirror.modes.recording :as recording]
-            [monkeycoding.editor.codemirror.modes.highlighting :as highlighting]
-            [monkeycoding.editor.codemirror.modes.preview :as preview]))
+  (:require
+            [monkeycoding.editor.codemirror.modes.highlighting :as highlighting]))
 
 
 
@@ -12,20 +11,6 @@
 
   (process-input-event  [this codemirror event])
   (process-dom-event    [this codemirror event]))
-
-
-(defrecord RecordingMode [last
-                          last-time
-                          marks
-                          dt-cap
-                          on-input]
-  EditMode
-    (sync-with-props! [this cm props] (recording/sync-with-props! this cm props))
-    (enter!           [this cm props] (recording/enter! this cm props))
-    (exit!            [this _] this)
-
-    (process-input-event  [this cm step] (recording/process-input-event this cm step))
-    (process-dom-event    [this _ _] this))
 
 
 (defrecord HighlightingMode [
@@ -53,7 +38,5 @@
 
 
 (def all {
-            :recording (RecordingMode. nil nil nil nil nil)
             :highlighting (HighlightingMode. {} identity nil)
-            :view-only (PreviewMode. nil nil nil 0 nil '())
             :uninitialized (UninitializedMode.)})
