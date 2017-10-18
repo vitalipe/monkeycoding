@@ -34,8 +34,7 @@ function applySnapshot(codemirror, {text = "", marks = {}, selection = EmptySele
     codemirror.setValue(text);
     codemirror.setSelection(selection.from, selection.to);
 
-    for (let mark of Object.values(marks))
-      commands.mark(codemirror, mark);
+    Object.values(marks).forEach(({from, to, id}) => mark(codemirror, from, to, id))
 }
 
 
