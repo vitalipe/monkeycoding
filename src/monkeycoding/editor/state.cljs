@@ -11,7 +11,7 @@
                                     :theme :default}
 
                             :recording stream/empty-stream
-                            :position 0
+                            :position -1
 
                             :recording-highlight false
                             :current-mode :default-mode}))
