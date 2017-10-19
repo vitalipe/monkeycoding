@@ -3,11 +3,12 @@
       [reagent.core :as r :refer [atom with-let cursor]]
 
       [monkeycoding.editor.common              :refer [as-component]]
-      [monkeycoding.editor.codemirror.editor   :refer [codemirror-editor]]
       [monkeycoding.editor.player              :refer [player preview-player]]
       [monkeycoding.editor.timeline            :refer [timeline-panel]]
 
-      [monkeycoding.editor.codemirror.recorder  :as recorder]
+      [monkeycoding.editor.codemirror.recorder     :as recorder]
+      [monkeycoding.editor.codemirror.highlighter  :as highlighter]
+
 
       [monkeycoding.editor.stream     :as stream :refer [stream->playback-snapshot stream->snapshot stream->playback]]
       [monkeycoding.editor.state      :as store :refer [editor-state]]))
@@ -179,10 +180,17 @@
         [:div.stage-container
           [:div.code-area
             (cond
-              (= current-mode :default-mode)   [preview-player {:playback (stream->playback-snapshot recording position)}]
-              (and
-                (not recording-highlight)
-                (= current-mode :recording-mode)) [recorder/editor {
+              (= current-mode :default-mode) [preview-player
+                                                            {:playback (stream->playback-snapshot recording position)}]
+
+              recording-highlight [highlighter/component {
+                                                          :text (:text snapshot)
+                                                          :selection (:selection snapshot)
+                                                          :marks  (:marks snapshot)
+
+                                                          :on-highlight store/record-highlight}]
+
+              (= current-mode :recording-mode) [recorder/component {
                                                                     :text (:text snapshot)
                                                                     :selection (:selection snapshot)
                                                                     :marks  (:marks snapshot)
@@ -193,18 +201,7 @@
               (= current-mode :playback-mode) [player {
                                                         :paused false
                                                         :on-progress #(store/update-player-progress %)
-                                                        :playback (stream->playback recording)}]
-
-
-              :otherwise [codemirror-editor {
-                                              :text (:text snapshot)
-                                              :selection (:selection snapshot)
-                                              :marks  (:marks snapshot)
-                                              :dt-cap (:dt-cap @state)
-                                              :recording-highlight true
-
-                                              :on-input store/record-input
-                                              :on-highlight store/record-highlight}])]]
+                                                        :playback (stream->playback recording)}])]]
 
 
         [timeline-panel   {
