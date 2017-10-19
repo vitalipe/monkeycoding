@@ -34,12 +34,12 @@
     (= (cur :position) (find-position-after-input prv))))
 
 
-(defn- redundant-event? [{:keys [last-input selecting]} current]
+(defn- redundant-event? [next last selecting]
     (or
-      (empty-selection? current)
-      (cursor-event-during-selection? selecting current)
-      (shadow-cursor-after-input?  current last-input)
-      (= current last-input)))
+      (empty-selection? next)
+      (cursor-event-during-selection? selecting next)
+      (shadow-cursor-after-input?  next last)
+      (= next last)))
 
 
 (defn- calc-dt
@@ -48,33 +48,29 @@
 
 
 (defn take-adjusted-snapshot [cm marks {type :type :as event}]
-  (let [snapshot (snapshot/take-snapshot cm marks)]
-    (cond
-      (= type :selection) (assoc snapshot :selection (select-keys event [:from :to]))
-      :otherwise snapshot)))
-
-
-(defn- merge-input-data [state input now]
-  (-> state
-      (assoc :selecting (and
-                          (= :selection (:type input))
-                          (not (empty-selection? input))))
-      (merge (when-not (redundant-event? state input) {:last-time now :last-input input}))))
-
-
-(defn process-input-event [{:keys [on-input marks dt-cap]} state cm event]
   (let [
-        now  (.now js/Date)
-        dt (calc-dt now (:last-time state) dt-cap)
-        snapshot (take-adjusted-snapshot cm marks event)
-        new-state (merge-input-data state event now)
-        changed   (not= (:last-input state) (:last-input new-state))]
+        snapshot (snapshot/take-snapshot cm marks)
+        selection-from-event (select-keys event [:from :to])]
 
-    ;;(.log js/console event)
-    (when changed
-      (on-input (:last-input new-state) snapshot dt))
+    (assoc snapshot :selection
+      (if (= type :selection)  selection-from-event
+                               (:selection snapshot)))))
 
-    new-state))
+
+(defn process-input-event [
+                            {:keys [on-input marks dt-cap]}
+                            {:keys [selecting last-input last-time] :as state}
+                            codemirror
+                            next-input]
+  (let [now  (.now js/Date)]
+    (merge state {:last-input next-input}
+      (when-not (redundant-event? next-input last-input selecting)
+        (on-input next-input
+                             (take-adjusted-snapshot codemirror marks next-input)
+                             (calc-dt now (:last-time state) dt-cap))
+        {
+          :last-time now
+          :selecting  (= :selection (:type next-input))}))))
 
 
 (defn init-input-events! [codemirror callback]
