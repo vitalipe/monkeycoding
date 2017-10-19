@@ -33,7 +33,7 @@
 
 
 (defn apply-selection! [codemirror {:keys [from to]}]
-  (.setSelection codemirror (position->js from) (position->js to)))
+  (.setSelection codemirror (position->js from) (position->js to) (js-obj "origin" "snapshot!")))
 
 
 (defn take-snapshot [codemirror prv-marks-data]
@@ -43,11 +43,15 @@
     :selection (take-selection codemirror)})
 
 
-(defn apply-snapshot! [codemirror {:keys [text selection marks]}]
-  (doto codemirror
-    (.setValue text)
-    (apply-selection! selection)
-    (apply-marks! marks)))
+(defn apply-snapshot! [cm {:keys [text selection marks]}]
+  (.operation
+    cm #(do ;; batching is not only faster but should prevent event storms
+          (when-not (= (.getValue cm) text)
+              (.setValue cm text))
+
+          (apply-selection! cm selection)
+          (apply-marks! cm marks)))
+  cm)
 
 
 (defn same-text-and-selection? [cm {:keys [text selection]}]
