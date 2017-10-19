@@ -92,7 +92,7 @@
                           selection
                           marks
                           dt-cap
-                          on-input :as intitial-props]}]
+                          on-input] :as intitial-props}]
 
   (let [
         cm    (atom nil)

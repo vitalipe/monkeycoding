@@ -51,14 +51,12 @@
                           text
                           selection
                           marks
-                          on-highlight :as intitial-props]}]
+                          on-highlight] :as intitial-props}]
 
   (let [
         cm    (atom nil)
         props (atom intitial-props)
-        state (atom {
-                     :selection nil})]
-
+        state (atom {:selection nil})]
 
       (as-component {
                       :on-mount (fn [this]
