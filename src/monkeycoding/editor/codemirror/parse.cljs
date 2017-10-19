@@ -51,17 +51,19 @@
     (into {})))
 
 
-(defn js->step [data]
+(defn js->input [data]
   (let [
         input  (js->clj data)
         origin (get input "origin")
 
         cursor-event? (nil? origin)
+        snapshot-event? (= origin "snapshot!")
         selection-event? (contains? input "ranges")
         text-event? (contains? #{"+input" "+delete" "cut" "paste" "copy" "undo" "redo"} origin)]
 
       (cond
-          selection-event? (create-selection-input
+        snapshot-event?  nil
+        selection-event? (create-selection-input
                             (js->position (.-anchor (first (input "ranges"))))
                             (js->position (.-head (first (input "ranges")))))
 
@@ -71,4 +73,4 @@
         text-event?    (create-text-input
                             (clojure.string/join "\n" (input "text"))
                             (count (clojure.string/join "\n" (input "removed")))
-                            (js->position (get input "from"))))))
+                            (js->position (.-from data))))))
