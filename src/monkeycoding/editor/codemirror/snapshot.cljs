@@ -44,13 +44,10 @@
 
 
 (defn apply-snapshot! [cm {:keys [text selection marks]}]
-  (.operation
-    cm #(do ;; batching is not only faster but should prevent event storms
-          (when-not (= (.getValue cm) text)
-              (.setValue cm text))
-
-          (apply-selection! cm selection)
-          (apply-marks! cm marks)))
+  (.operation cm #(doto cm
+                    (.setValue text)
+                    (apply-selection! selection)
+                    (apply-marks! marks)))
   cm)
 
 
