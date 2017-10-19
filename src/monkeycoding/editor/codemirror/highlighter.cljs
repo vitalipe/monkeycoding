@@ -35,7 +35,7 @@
 
 (defn init-selection-event! [codemirror callback]
   (doto codemirror
-    (.on "beforeSelectionChange" #(callback (parse/js->step %2)))))
+    (.on "beforeSelectionChange" #(callback (parse/js->input %2)))))
 
 
 (defn init-dom-events! [codemirror callback]
