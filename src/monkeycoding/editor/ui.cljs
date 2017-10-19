@@ -108,10 +108,7 @@
   (with-let [state (r/atom {
                             :dt-cap 500
                             :timeline-open true})]
-    (let [{:keys [current-mode
-                  recording-highlight
-                  position recording]} @editor-state
-
+    (let [{:keys [current-mode position recording]} @editor-state
           last-index (dec (count (:inputs recording)))
           snapshot (stream->snapshot recording position)]
 
@@ -131,15 +128,14 @@
 
           [:div.mode-toobar.form-inline
 
-            (when (= current-mode :recording-mode)
+            (if (contains? #{:recording-mode :highlighting-mode} current-mode)
               [:div.recording-toobar.form-inline
                 [toolbar-button {:on-click store/finish-recording} :close]
                 [toolbar-spacer]
-                [toolbar-button {:selected recording-highlight :on-click store/toggle-record-highlight} :add-mark]
+                [toolbar-button {:selected (= current-mode :highlighting-mode) :on-click store/toggle-record-highlight} :add-mark]
                 [toolbar-button {:on-click store/toggle-record-highlight} :delta-time]
-                [icon "ios-arrow-down"]])
-
-            (when-not (= current-mode :recording-mode)
+                [icon "ios-arrow-down"]]
+              ;; else
               [:div.project-title-menu
                 [icon "ios-arrow-down"]
                 [editable-label {
@@ -148,7 +144,7 @@
 
           [:div.btn-group.project-toobar.form-inline
             [toolbar-button {
-                              :on-click store/start-recording
+                              :on-click store/toggle-recording
                               :selected (= current-mode :recording-mode)
                               :icon :record}]
 
@@ -179,29 +175,26 @@
 
         [:div.stage-container
           [:div.code-area
-            (cond
-              (= current-mode :default-mode) [preview-player
-                                                            {:playback (stream->playback-snapshot recording position)}]
 
-              recording-highlight [highlighter/component {
+            (case current-mode
+              :preview-mode [preview-player {:playback (stream->playback-snapshot recording position)}]
+              :highlighting-mode [highlighter/component {
                                                           :text (:text snapshot)
                                                           :selection (:selection snapshot)
                                                           :marks  (:marks snapshot)
 
                                                           :on-highlight store/record-highlight}]
+              :recording-mode [recorder/component {
+                                                    :text (:text snapshot)
+                                                    :selection (:selection snapshot)
+                                                    :marks  (:marks snapshot)
 
-              (= current-mode :recording-mode) [recorder/component {
-                                                                    :text (:text snapshot)
-                                                                    :selection (:selection snapshot)
-                                                                    :marks  (:marks snapshot)
-
-                                                                    :dt-cap (:dt-cap @state)
-                                                                    :on-input store/record-input}]
-
-              (= current-mode :playback-mode) [player {
-                                                        :paused false
-                                                        :on-progress #(store/update-player-progress %)
-                                                        :playback (stream->playback recording)}])]]
+                                                    :dt-cap (:dt-cap @state)
+                                                    :on-input store/record-input}]
+              :playback-mode [player {
+                                      :paused false
+                                      :on-progress #(store/update-player-progress %)
+                                      :playback (stream->playback recording)}])]]
 
 
         [timeline-panel   {
