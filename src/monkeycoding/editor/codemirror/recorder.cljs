@@ -70,6 +70,7 @@
         new-state (merge-input-data state event now)
         changed   (not= (:last-input state) (:last-input new-state))]
 
+    ;;(.log js/console event)
     (when changed
       (on-input (:last-input new-state) snapshot dt))
 
@@ -78,12 +79,12 @@
 
 (defn init-input-events! [codemirror callback]
   (doto codemirror
-    (.on "change"                #(callback %1 (parse/js->step %2)))
-    (.on "cursorActivity"        #(callback %1 (parse/js->step (.getCursor %1))))
-    (.on "beforeSelectionChange" #(callback %1 (parse/js->step %2)))))
+    (.on "change"                #(callback %1 (parse/js->input %2)))
+    (.on "cursorActivity"        #(callback %1 (parse/js->input (.getCursor %1))))
+    (.on "beforeSelectionChange" #(callback %1 (parse/js->input %2)))))
 
 
-(defn disable-undo-redo! [codemirror]
+(defn disable-undo-redo-events! [codemirror]
   (.on codemirror "beforeChange" #(when (contains? #{"undo" "redo"} (.-origin %2)) (.cancel %2))))
 
 
@@ -98,6 +99,7 @@
         cm    (atom nil)
         props (atom intitial-props)
         state (atom {
+                     :preforming-snapshot false
                      :last-input nil
                      :last-time  (.now js/Date)})]
 
@@ -105,17 +107,22 @@
                       :on-mount (fn [this]
                                   (let [
                                         codemirror (create-codemirror! (r/dom-node this) default-config)
-                                        input-callback #(reset! state (process-input-event @props @state %1 %2))]
+                                        input-callback #(when-not (:preforming-snapshot @state)
+                                                          (reset! state (process-input-event @props @state %1 %2)))]
 
                                       (->> (doto codemirror
-                                              (disable-undo-redo!)
+                                              (disable-undo-redo-events!)
                                               (snapshot/apply-snapshot! intitial-props)
                                               (init-input-events! input-callback))
                                           (reset! cm))))
 
 
                       :on-props (fn [new-props]
-                                  (reset! props new-props))
-                                  ;;(snapshot/apply-snapshot! @cm new-props))
+                                  (reset! props new-props)
+
+                                  (swap! state assoc :preforming-snapshot true)
+                                  (snapshot/apply-snapshot! @cm new-props)
+                                  (swap! state assoc :preforming-snapshot false))
+
 
                       :render (fn [] [:div {:style {:height "100%"}}])})));
