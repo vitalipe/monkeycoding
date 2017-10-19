@@ -1,12 +1,8 @@
 (ns monkeycoding.editor.codemirror.recorder
     (:require
       [reagent.core :as r :refer [atom]]
-      [cljsjs.codemirror]
 
-      ;; todo move it to init or something
-      [cljsjs.codemirror.addon.scroll.simplescrollbars]
-      [cljsjs.codemirror.mode.javascript]
-
+      [monkeycoding.editor.codemirror         :refer [create-codemirror!]]
       [monkeycoding.editor.common             :refer [default-config as-component]]
       [monkeycoding.editor.codemirror.parse   :as parse]
       [monkeycoding.editor.codemirror.snapshot   :as snapshot]))
@@ -91,22 +87,12 @@
   (.on codemirror "beforeChange" #(when (contains? #{"undo" "redo"} (.-origin %2)) (.cancel %2))))
 
 
-(defn- create-codemirror! [dom-node config]
-  (let [config (merge default-config config)]
-    (new  js/CodeMirror dom-node (js-obj
-                                    "lineNumbers" (:show-line-numbers config)
-                                    "theme" (:theme config)
-                                    "language" (:language config)
-                                    "scrollbarStyle" "overlay"
-                                    "coverGutterNextToScrollbar" true))))
-
-
-(defn editor [{:keys [
-                      text
-                      selection
-                      marks
-                      dt-cap
-                      on-input] :as intitial-props}]
+(defn component [{:keys [
+                          text
+                          selection
+                          marks
+                          dt-cap
+                          on-input :as intitial-props]}]
 
   (let [
         cm    (atom nil)
@@ -118,7 +104,7 @@
       (as-component {
                       :on-mount (fn [this]
                                   (let [
-                                        codemirror (create-codemirror! (r/dom-node this) {})
+                                        codemirror (create-codemirror! (r/dom-node this) default-config)
                                         input-callback #(reset! state (process-input-event @props @state %1 %2))]
 
                                       (->> (doto codemirror

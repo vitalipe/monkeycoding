@@ -7,6 +7,7 @@
 (defn str->int [text]
   (.parseInt js/window (re-find #"[\d.]+" text)))
 
+
 (defn js->position [obj]
   {:line (.-line obj) :ch (.-ch obj)})
 

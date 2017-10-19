@@ -32,7 +32,7 @@
         (.markText codemirror from to options))))
 
 
-(defn- apply-selection! [codemirror {:keys [from to]}]
+(defn apply-selection! [codemirror {:keys [from to]}]
   (.setSelection codemirror (position->js from) (position->js to)))
 
 
@@ -43,14 +43,14 @@
     :selection (take-selection codemirror)})
 
 
-(defn- apply-snapshot! [codemirror {:keys [text selection marks]}]
+(defn apply-snapshot! [codemirror {:keys [text selection marks]}]
   (doto codemirror
     (.setValue text)
     (apply-selection! selection)
     (apply-marks! marks)))
 
 
-(defn- same-text-and-selection? [cm {:keys [text selection]}]
+(defn same-text-and-selection? [cm {:keys [text selection]}]
     (and
         (= text (.getValue cm))
         (= selection (take-selection cm))))
