@@ -1,7 +1,8 @@
 (ns monkeycoding.editor.timeline.widgets
     (:require
       [reagent.core :as r]
-      [monkeycoding.editor.common :refer [as-component]]))
+      [monkeycoding.util :refer [as-component]]))
+
 
 
 

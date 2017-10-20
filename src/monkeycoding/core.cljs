@@ -1,7 +1,7 @@
 (ns monkeycoding.core
     (:require
       [reagent.core :as r]
-      [monkeycoding.editor.ui :refer [editor-screen]]))
+      [monkeycoding.editor.screen :refer [editor-screen]]))
 
 
 

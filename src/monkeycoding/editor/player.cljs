@@ -1,7 +1,8 @@
 (ns monkeycoding.editor.player
     (:require
       [reagent.core :as r :refer [atom]]
-      [monkeycoding.editor.common :refer [as-component default-config]]
+      [monkeycoding.editor.common :refer [default-config]]
+      [monkeycoding.util :refer [as-component]]
       [monkeycoding.player :as player]))
 
 

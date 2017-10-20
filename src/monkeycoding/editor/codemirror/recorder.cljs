@@ -3,7 +3,8 @@
       [reagent.core :as r :refer [atom]]
 
       [monkeycoding.editor.codemirror         :refer [create-codemirror!]]
-      [monkeycoding.editor.common             :refer [default-config as-component]]
+      [monkeycoding.util                      :refer [as-component]]
+      [monkeycoding.editor.common             :refer [default-config]]
       [monkeycoding.editor.codemirror.parse   :as parse]
       [monkeycoding.editor.codemirror.snapshot   :as snapshot]))
 
@@ -62,6 +63,7 @@
                             {:keys [selecting last-input last-time] :as state}
                             codemirror
                             next-input]
+
   (let [now  (.now js/Date)]
     (merge state {:last-input next-input}
       (when-not (redundant-event? next-input last-input selecting)
@@ -115,7 +117,6 @@
 
                       :on-props (fn [new-props]
                                   (reset! props new-props)
-
                                   (swap! state assoc :preforming-snapshot true)
                                   (snapshot/apply-snapshot! @cm new-props)
                                   (swap! state assoc :preforming-snapshot false))
