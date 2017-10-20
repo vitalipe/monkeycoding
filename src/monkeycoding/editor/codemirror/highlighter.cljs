@@ -3,7 +3,6 @@
       [reagent.core :as r :refer [atom]]
 
       [monkeycoding.util                      :refer [as-component]]
-      [monkeycoding.editor.common             :refer [default-config]]
       [monkeycoding.editor.codemirror         :refer [create-codemirror!]]
       [monkeycoding.editor.codemirror.parse   :as parse]
       [monkeycoding.editor.codemirror.snapshot   :as snapshot]))
@@ -52,6 +51,7 @@
                           text
                           selection
                           marks
+                          config
                           on-highlight] :as intitial-props}]
 
   (let [
@@ -62,7 +62,7 @@
       (as-component {
                       :on-mount (fn [this]
                                   (let [
-                                        codemirror (create-codemirror! (r/dom-node this) (merge default-config {:readOnly true}))
+                                        codemirror (create-codemirror! (r/dom-node this) config)
                                         selection-callback #(reset! state (process-selection-event @state %))
                                         dom-callback #(reset! state (process-dom-event @state (:on-highlight @props) %))]
 

@@ -5,10 +5,12 @@
 
 
 (def editor-state (r/atom {
-                            :meta {
-                                    :title "new banana"
-                                    :language :javascript
-                                    :theme :default}
+
+                            :title "new banana"
+                            :config {
+                                      :language "javascript"
+                                      :theme "seti"
+                                      :show-line-numbers true}
 
                             :recording stream/empty-stream
                             :position -1
@@ -77,6 +79,8 @@
   (swap! editor-state assoc :current-mode :preview-mode))
 
 
+(defn rename [name]
+  (swap! editor-state assoc :title name))
 
 ;; undo redo
 (def undo-state (r/atom {

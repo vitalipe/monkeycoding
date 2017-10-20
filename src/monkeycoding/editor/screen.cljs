@@ -25,7 +25,13 @@
   (with-let [state (r/atom {
                             :dt-cap 500
                             :timeline-open true})]
-    (let [{:keys [current-mode position recording]} @editor-state
+    (let [{:keys [
+                  current-mode
+                  position
+                  title
+                  config
+                  recording]} @editor-state
+
           last-index (dec (count (:inputs recording)))
           snapshot (stream->snapshot recording position)]
 
@@ -56,8 +62,8 @@
               [:div.project-title-menu
                 [icon "ios-arrow-down"]
                 [editable-label {
-                                  :value (get-in @editor-state [:meta :title])
-                                  :on-change #(swap! editor-state assoc-in [:meta :title] %)}]])]
+                                  :value title
+                                  :on-change store/rename}]])]
 
           [:div.btn-group.project-toobar.form-inline
             [toolbar-button {
@@ -94,22 +100,25 @@
           [:div.code-area
 
             (case current-mode
-              :preview-mode [preview-player {:playback (stream->playback-snapshot recording position)}]
+              :preview-mode [preview-player {:config config :playback (stream->playback-snapshot recording position)}]
               :highlighting-mode [highlighter/component {
                                                           :text (:text snapshot)
                                                           :selection (:selection snapshot)
                                                           :marks  (:marks snapshot)
+                                                          :config config
 
                                                           :on-highlight store/record-highlight}]
               :recording-mode [recorder/component {
                                                     :text (:text snapshot)
                                                     :selection (:selection snapshot)
                                                     :marks  (:marks snapshot)
+                                                    :config config
 
                                                     :dt-cap (:dt-cap @state)
                                                     :on-input store/record-input}]
               :playback-mode [player {
                                       :paused false
+                                      :config config
                                       :on-progress #(store/update-player-progress %)
                                       :playback (stream->playback recording)}])]]
 

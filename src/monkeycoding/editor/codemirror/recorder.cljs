@@ -4,7 +4,6 @@
 
       [monkeycoding.editor.codemirror         :refer [create-codemirror!]]
       [monkeycoding.util                      :refer [as-component]]
-      [monkeycoding.editor.common             :refer [default-config]]
       [monkeycoding.editor.codemirror.parse   :as parse]
       [monkeycoding.editor.codemirror.snapshot   :as snapshot]))
 
@@ -91,6 +90,7 @@
                           selection
                           marks
                           dt-cap
+                          config
                           on-input] :as intitial-props}]
 
   (let [
@@ -104,7 +104,7 @@
       (as-component {
                       :on-mount (fn [this]
                                   (let [
-                                        codemirror (create-codemirror! (r/dom-node this) default-config)
+                                        codemirror (create-codemirror! (r/dom-node this) config)
                                         input-callback #(when-not (:preforming-snapshot @state)
                                                           (reset! state (process-input-event @props @state %1 %2)))]
 
