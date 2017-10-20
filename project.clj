@@ -6,7 +6,7 @@
 
   :dependencies [[org.clojure/clojure "1.8.0"]
                  [org.clojure/clojurescript "1.9.908"]
-                 [reagent "0.7.0"]
+                 [reagent "0.8.0-alpha2"]
                  [cljsjs/codemirror "5.24.0-1"]]
 
   :plugins [[lein-cljsbuild "1.1.5"]
