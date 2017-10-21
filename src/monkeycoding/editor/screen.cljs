@@ -20,11 +20,39 @@
                                     toolbar-button
                                     toolbar-spacer]]))
 
+(defn- marks-panel [{:keys [open marks position]}]
+  (with-let [
+              tab-state (r/atom :all)
+              active? (fn [pos {:keys [remove insert]}] (<= insert pos (dec (or remove Infinity))))]
+
+
+    [:div.marks-panel.side-panel {:class (when open "open")}
+      [:div.tabs
+        [:div.tab.left  {
+                          :on-click #(reset! tab-state :all)
+                          :class (when (= :all @tab-state) "selected")}  "all"]
+        [:div.tab.right {
+                          :on-click #(reset! tab-state :active)
+                          :class (when (= :active @tab-state) "selected")} "active"]]
+
+      [:ul.mark-list
+        (->> (vals marks)
+          (filter (if (= :active @tab-state) (partial active? position) identity))
+          (map (fn [{:keys [id insert remove info] :as mark}]
+                  [:li.mark-list-item {:key id :class (when (active? position mark) "active")}
+                    [:div.header
+                      [:label.preview [icon :add-mark] (str " " id)]
+                      [:label.insert (str (inc insert) " ") [icon :record]]]
+                    [:div.info-preview info]])))]]))
+
+
+
 
 (defn editor-screen []
   (with-let [state (r/atom {
                             :dt-cap 500
-                            :timeline-open true})]
+                            :timeline-open true
+                            :side-panel-open true})]
     (let [{:keys [
                   current-mode
                   position
@@ -43,7 +71,7 @@
 
 
         ;; editor header
-        [:nav.editor-navbar.navbar.top
+        [:div.editor-navbar.navbar.top
           [:div.form-inline
             [toolbar-button :menu]
             [:a.navbar-brand "Monkey Coding Editor (alpha)"]]
@@ -93,7 +121,11 @@
             [toolbar-spacer]
             [toolbar-button :export]
             [toolbar-spacer]
-            [toolbar-button :add-mark]]]
+            [toolbar-button {
+                              :selected (:side-panel-open @state)
+                              :on-click #(swap! state update :side-panel-open not)
+                              :icon :add-mark}]]]
+
 
 
         [:div.stage-container
@@ -120,7 +152,13 @@
                                       :paused false
                                       :config config
                                       :on-progress #(store/update-player-progress %)
-                                      :playback (stream->playback recording)}])]]
+                                      :playback (stream->playback recording)}])]
+
+          [marks-panel
+            {
+              :marks (:marks recording)
+              :position position
+              :open (:side-panel-open @state)}]]
 
 
         [timeline-panel   {
