@@ -18,7 +18,11 @@
                                     icon
                                     editable-label
                                     toolbar-button
+                                    modal
+                                    modal-content
+                                    modal-footer
                                     toolbar-spacer]]))
+
 
 (defn- marks-panel [{:keys [open marks position]}]
   (with-let [
@@ -46,10 +50,25 @@
                     [:div.info-preview info]])))]]))
 
 
+(defn add-highlight-modal[{:keys [on-close on-add]}]
+  (with-let [info (r/atom "add description...")]
+    [modal {
+            :class "add-highlight-modal"
+            :on-close on-close}
+
+        [modal-content
+          [editable-label {
+                            :on-change #(reset! info %)
+                            :value @info}]]
+        [modal-footer
+          [:button.btn.btn-primary {:on-click #(on-add @info)} "add"]]]))
+
+
 
 
 (defn editor-screen []
   (with-let [state (r/atom {
+                            :next-highlight nil
                             :dt-cap 500
                             :timeline-open true
                             :side-panel-open true})]
@@ -64,12 +83,18 @@
           snapshot (stream->snapshot recording position)]
 
       [:div.editor-screen-layout
+
         (when-not (= current-mode :playback-mode)
           [keyboard-shortcuts
               [:ctrl :z] store/undo!
               [:ctrl :y] store/redo!])
 
-
+        (when (:next-highlight @state)
+          [add-highlight-modal {
+                                :on-close #(swap! state assoc :next-highlight nil)
+                                :on-add  #(do
+                                              (store/record-highlight (:next-highlight @state) %)
+                                              (swap! state assoc :next-highlight nil))}])
         ;; editor header
         [:div.editor-navbar.navbar.top
           [:div.form-inline
@@ -139,7 +164,7 @@
                                                           :marks  (:marks snapshot)
                                                           :config config
 
-                                                          :on-highlight store/record-highlight}]
+                                                          :on-highlight #(swap! state assoc :next-highlight {:from %1 :to %2})}]
               :recording-mode [recorder/component {
                                                     :text (:text snapshot)
                                                     :selection (:selection snapshot)

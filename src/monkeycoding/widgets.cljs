@@ -92,3 +92,14 @@
                       :on-mount (fn [_]  (.addEventListener js/window "keydown" handler))
                       :on-unmount (fn [_] (.removeEventListener js/window "keydown" handler))
                       :render (fn [] [:div.keyboard-shortcuts])})))
+
+
+(defn modal [{:keys [class on-close]} & content]
+  (let [target-has-class? #(.contains (.. %1 -target -classList) %2)]
+    [:div.modal.modal-bg {:on-click #(when (target-has-class? % "modal-bg") (on-close))}
+      [:div.modal-dialog {:class class}
+        (apply conj [:div.modal-content] content)]]))
+
+(defn modal-header  [& content] (apply conj [:div.modal-header] content))
+(defn modal-content [& content]  (apply conj [:div.modal-body] content))
+(defn modal-footer  [& content]   (apply conj [:div.modal-footer] content))

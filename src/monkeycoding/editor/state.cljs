@@ -43,9 +43,9 @@
     (swap! editor-state assoc :current-mode :highlighting-mode)))
 
 
-(defn record-highlight [from to]
+(defn record-highlight [position info]
     (doto editor-state
-      (swap! update :recording stream/append-mark {:from from :to to :info (str  "dummy into for: " from to)})
+      (swap! update :recording stream/append-mark (assoc position :info info))
       (swap! assoc  :current-mode :recording-mode)))
 
 
