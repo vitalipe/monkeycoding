@@ -160,7 +160,7 @@ class Player {
                           theme = "",
                           language = "c"}) {
       let config = {
-        language,
+        mode : language,
         theme,
         lineNumbers : true,
         readOnly : true,

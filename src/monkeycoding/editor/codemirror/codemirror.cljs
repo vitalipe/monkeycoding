@@ -40,7 +40,6 @@
       [cljsjs.codemirror.mode.idl]
       [cljsjs.codemirror.mode.javascript]
       [cljsjs.codemirror.mode.julia]
-      ;;[cljsjs.codemirror.mode.kotlin]
       [cljsjs.codemirror.mode.livescript]
       [cljsjs.codemirror.mode.lua]
       [cljsjs.codemirror.mode.markdown]
@@ -114,7 +113,7 @@
   {
     "lineNumbers" (:show-line-numbers config)
     "theme" (:theme config)
-    "language" (:language config)})
+    "mode" (:language config)})
 
 
 (defn- create-codemirror! [dom-node config]
