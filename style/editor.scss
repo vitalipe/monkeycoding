@@ -38,14 +38,17 @@
     color : #F42C04;
   }
 
-  .icon-play {
+  .navbar-brand {
+    @include no-select;
   }
+
 }
 
 
 
 // timeline
 .timeline-navbar {
+  @include no-select;
   justify-content: center;
   padding-top: 0;
   padding-bottom: 0;
@@ -59,6 +62,7 @@
 }
 
 .timeline-container {
+  @include no-select;
 
   .collapsible-v-panel {
     transition-property: max-height;
