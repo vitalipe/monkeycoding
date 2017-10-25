@@ -1,13 +1,6 @@
 @import "theme";
 @import "utils";
 
-.editor-navbar { // FIXME
-  padding-top: 0;
-  padding-bottom: 0;
-  padding-right: 0;
-  background-color: $toolbar-bg-color;
-}
-
 
 .toolbar-spacer {
   margin-right: 40px;
@@ -17,11 +10,11 @@
 .toolbar-button {
   padding-left: 8px;
   padding-right: 8px;
-  font-size: 32px;
+  font-size: $toolbar-icon-size;
   color: $toolbar-icon-color;
 
   .icon {
-    width: 32px;
+    width: $toolbar-icon-size;
   }
 
   &:hover {
@@ -29,7 +22,8 @@
   }
 
   &.selected {
-    background-color: red;
+    color: $toolbar-icon-selected-color;
+    background-color: $toolbar-icon-selected-background;
   }
 
   &.disabled {

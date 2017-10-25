@@ -1,12 +1,22 @@
 
+
 $background-color: #151718;
 $font-color: #FFFFFF;
 
+$scrollbar-color: gold;
+
+$text-font:  'Varela Round', sans-serif;
+$title-font: $text-font;
+
+// toolbar:
 $toolbar-bg-color: black;
 $toolbar-icon-color: #FFBE11;
 $toolbar-icon-hover-color: #2C2C2C;
 
-$scrollbar-color: gold;
+$toolbar-icon-selected-color: #34C1FF;
+$toolbar-icon-selected-background: $toolbar-icon-hover-color;
+$toolbar-icon-size: 32px;
 
-$title-font: 'Snowburst One', cursive;
-$text-font:  'Varela Round', sans-serif;
+// side panel:
+$side-panel-bg-color: #F5F5F5;
+$side-panel-border-color: #34C1FF;

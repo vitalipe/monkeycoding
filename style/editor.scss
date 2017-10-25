@@ -33,6 +33,13 @@
   padding-bottom: 0;
   padding-right: 0;
   background-color: $toolbar-bg-color;
+
+  .icon-record {
+    color : #F42C04;
+  }
+
+  .icon-play {
+  }
 }
 
 
@@ -73,20 +80,19 @@
   }
 
   .timeline-progress {
-    height: 5px;
+    height: 7px;
     border-radius: 0;
   }
 
   .timeline-pins {
 
     position: relative;
-    overflow: hidden;
     height: 50px;
 
     .timeline-pin {
           position: absolute;
           transform: translateX(-10px);
-          bottom: 16px;
+          bottom: 10px;
           width: 22px;
           height: 20px;
           line-height: 20px;
@@ -103,8 +109,8 @@
 
           text-shadow: rgba(0, 0, 0, 0.1) 1px 1px 1px;
           box-shadow: rgba(0, 0, 0, 0.1) 1px 1px 2px 0px;
-          z-index: 99;
-          animation: fade-in 3s;
+          z-index: 199;
+          animation: fade-in 2s;
 
 
          &.last {
@@ -235,7 +241,7 @@
   &.side-panel {
     position: absolute;
     right: 0px;
-    background-color: #F5F5F5;
+    background-color: $side-panel-bg-color;
     color: black;
     height: 100%;
     z-index: 100;
@@ -255,10 +261,10 @@
   }
 
   border-bottom-style: solid;
-  border-bottom-color:  #34C1FF;
+  border-bottom-color:  $side-panel-border-color;
 
   border-top-style: solid;
-  border-top-color:  #34C1FF;
+  border-top-color:  $side-panel-border-color;
 
   .tabs {
     display: flex;
