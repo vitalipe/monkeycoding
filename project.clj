@@ -11,9 +11,13 @@
 
   :plugins [[lein-cljsbuild "1.1.5"]
             [lein-figwheel "0.5.13"]
-            [yogthos/lein-sass "0.1.1"]]
+            [lein-npm "0.6.2"]]
 
-  :sass {:source "style" :target "public/css"}
+  :npm {
+        :devDependencies [[node-sass "4.5.3"]]
+        :package {:scripts
+                  {:sass "node-sass style/app.scss public/css/app.css"
+                   :sass-watch "node-sass style/app.scss public/css/app.css --watch"}}}
 
   :min-lein-version "2.5.0"
 
