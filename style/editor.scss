@@ -244,28 +244,26 @@
     right: 0px;
     background-color: $side-panel-bg-color;
     color: $side-panel-font-color;
-    height: 100%;
+    height: 0%;
+    overflow: hidden;
     z-index: 100;
 
     max-width: 260px;
     min-width: 260px;
-    right: -300px;
 
-    transition-property: right;
-  	transition-duration: 0.3s;
+    transition-property: height;
+  	transition-duration: 0.2s;
     transition-timing-function: cubic-bezier(0, 1, 0.5, 1);
 
 
     &.open {
-      right: 0px;
+      height: 100%;
     }
   }
 
   border-bottom-style: solid;
   border-bottom-color:  $side-panel-border-color;
 
-  border-top-style: solid;
-  border-top-color:  $side-panel-border-color;
 
   .tabs {
     display: flex;
@@ -273,33 +271,14 @@
     .tab {
       @include no-select;
 
-      color: $side-panel-disabled-color;
       padding: 8px;
       text-transform: uppercase;
       text-align: center;
       flex-grow: 1;
 
-      border-color: rgb(212, 212, 212);
-
-      border-bottom-width: 1px;
-      border-bottom-style: solid;
-
-      &.right {
-        border-left-width: 1px;
-        border-left-style: solid;
-        border-bottom-left-radius: 5px;
-      }
-
-      &.left {
-        border-right-width: 1px;
-        border-right-style: solid;
-        border-bottom-right-radius: 5px;
-
-      }
-
       &.selected {
-        border-style: none;
-        color: $side-panel-font-color;
+        border-bottom-color: $side-panel-tab-active-color;
+        border-bottom-style: solid;
       }
     }
 
@@ -311,10 +290,16 @@
     padding: 0px;
     padding-top: 40px;
 
+    .icon-record {
+      color: #F42C04;
+    }
+
+    .icon-add-mark {
+      color: $toolbar-icon-color;
+    }
 
     .mark-list-item {
       padding: 12px;
-      box-shadow: 0 0px 0.5px 0 rgba(34, 25, 25, 0.4);
 
       border-left-color: $side-panel-item-color;
       border-left-width: 4px;
