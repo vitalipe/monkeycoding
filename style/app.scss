@@ -1,3 +1,6 @@
+@import url('https://fonts.googleapis.com/css?family=Varela+Round');
+
+
 $background-color: #151718;
 $font-color: #FFFFFF;
 
@@ -6,6 +9,11 @@ $toolbar-icon-color: #FFBE11;
 $toolbar-icon-hover-color: #2C2C2C;
 
 $scrollbar-color: gold;
+
+$title-font: 'Snowburst One', cursive;
+$text-font:  'Varela Round', sans-serif;
+
+
 
 @mixin no-select {
   -webkit-user-select: none;
@@ -25,6 +33,7 @@ $scrollbar-color: gold;
 body {
   background-color: $background-color;
   color: $font-color;
+  font-family: $text-font;
 }
 
 
@@ -252,7 +261,11 @@ body {
   color: black;
 }
 
+.icon {
+  display: inline-block;
+  text-align: center;
 
+}
 
 .collapsible-v-panel {
   transition-property: max-height;
@@ -276,6 +289,10 @@ body {
   padding-right: 8px;
   font-size: 32px;
   color: $toolbar-icon-color;
+
+  .icon {
+    width: 32px;
+  }
 
   &:hover {
     background-color: $toolbar-icon-hover-color;
