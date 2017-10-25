@@ -15,6 +15,10 @@
 
   .icon {
     width: $toolbar-icon-size;
+
+    &.adjust-smaller {
+      font-size: $toolbar-icon-size - 3px;
+    }
   }
 
   &:hover {
