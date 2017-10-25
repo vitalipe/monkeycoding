@@ -5,8 +5,8 @@
 
 
 
-(defn icon [name]
-  (->> (case name
+(defn icon [icon-name]
+  (->> (case icon-name
           :export      "android-share-alt"
           :commit      "merge"
           :redo        "forward"
@@ -22,9 +22,10 @@
           :close       "close"
           :add-mark    "ios-location"
           :delta-time  "android-stopwatch"
-          name)
+          icon-name)
 
-    (str "i" ".icon" ".ion-")
+    (str ".icon" ".ion-")
+    (str "i." "icon-" (name icon-name))
     (keyword)
     (vector)))
 
