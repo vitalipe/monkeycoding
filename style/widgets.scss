@@ -1,0 +1,69 @@
+@import "theme";
+@import "utils";
+
+.editor-navbar { // FIXME
+  padding-top: 0;
+  padding-bottom: 0;
+  padding-right: 0;
+  background-color: $toolbar-bg-color;
+}
+
+
+.toolbar-spacer {
+  margin-right: 40px;
+}
+
+
+.toolbar-button {
+  padding-left: 8px;
+  padding-right: 8px;
+  font-size: 32px;
+  color: $toolbar-icon-color;
+
+  .icon {
+    width: 32px;
+  }
+
+  &:hover {
+    background-color: $toolbar-icon-hover-color;
+  }
+
+  &.selected {
+    background-color: red;
+  }
+
+  &.disabled {
+    color: grey;
+  }
+
+  &.disabled:hover {
+    background-color: transparent;
+  }
+}
+
+
+.editable-label {
+  color: $font-color;
+  background: rgba(0, 0, 0, 0);
+  border: none;
+  outline: none;
+  margin-left: 5px;
+}
+
+
+.modal {
+  display: block;
+  color: black;
+}
+
+
+.icon {
+  display: inline-block;
+  text-align: center;
+
+}
+
+
+.simplebar-scrollbar { // FIXME
+  background: $scrollbar-color!important;
+}
