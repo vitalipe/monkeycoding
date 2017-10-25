@@ -80,8 +80,9 @@
   }
 
   .timeline-progress {
-    height: 7px;
+    height: 8px;
     border-radius: 0;
+    background-color: $toolbar-icon-hover-color;
   }
 
   .timeline-pins {
