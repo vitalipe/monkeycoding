@@ -1,7 +1,7 @@
 
 
 $background-color: #151718;
-$font-color: #FFFFFF;
+$font-color: #F5F5F5;
 
 $scrollbar-color: gold;
 
@@ -20,3 +20,15 @@ $toolbar-icon-size: 32px;
 // side panel:
 $side-panel-bg-color: #F5F5F5;
 $side-panel-border-color: #34C1FF;
+$side-panel-font-color: black;
+$side-panel-disabled-color: rgb(170, 170, 170);
+
+$side-panel-item-color: #F42C04;
+$side-panel-item-active-color: #34C1FF;
+$side-panel-item-hover-color: rgb(239, 239, 239);
+
+
+
+
+// timeline:
+$timeline-progress-bg-color: #2C2C2C;
