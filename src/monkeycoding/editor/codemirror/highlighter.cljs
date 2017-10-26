@@ -73,5 +73,8 @@
                                           (reset! cm))))
 
 
-                      :on-props (fn [new-props] (reset! props new-props))
+                      :on-props (fn [new-props]
+                                  (reset! props new-props)
+                                  (snapshot/apply-snapshot! @cm new-props))
+
                       :render (fn [] [:div.editor-mode-highlighting {:style {:height "100%"}}])})));
