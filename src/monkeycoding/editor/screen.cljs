@@ -70,8 +70,8 @@
   (with-let [state (r/atom {
                             :next-highlight nil
                             :dt-cap 500
-                            :timeline-open true
-                            :side-panel-open true})]
+                            :timeline-open false
+                            :side-panel-open false})]
     (let [{:keys [
                   current-mode
                   position
