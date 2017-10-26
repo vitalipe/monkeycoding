@@ -113,7 +113,8 @@
   {
     "lineNumbers" (:show-line-numbers config)
     "theme" (:theme config)
-    "mode" (:language config)})
+    "mode" (:language config)
+    "readOnly" (:read-only config)})
 
 
 (defn- create-codemirror! [dom-node config]

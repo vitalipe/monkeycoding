@@ -62,7 +62,7 @@
       (as-component {
                       :on-mount (fn [this]
                                   (let [
-                                        codemirror (create-codemirror! (r/dom-node this) config)
+                                        codemirror (create-codemirror! (r/dom-node this) (assoc config :read-only true))
                                         selection-callback #(reset! state (process-selection-event @state %))
                                         dom-callback #(reset! state (process-dom-event @state (:on-highlight @props) %))]
 
