@@ -67,7 +67,7 @@
                                         dom-callback #(reset! state (process-dom-event @state (:on-highlight @props) %))]
 
                                       (->> (doto codemirror
-                                              (snapshot/apply-snapshot! intitial-props)
+                                              (snapshot/apply-snapshot! (dissoc intitial-props :selection))
                                               (init-selection-event!    selection-callback)
                                               (init-dom-events!         dom-callback))
                                           (reset! cm))))
@@ -75,6 +75,6 @@
 
                       :on-props (fn [new-props]
                                   (reset! props new-props)
-                                  (snapshot/apply-snapshot! @cm new-props))
+                                  (snapshot/apply-snapshot! @cm (dissoc new-props :selection)))
 
                       :render (fn [] [:div.editor-mode-highlighting {:style {:height "100%"}}])})));
