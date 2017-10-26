@@ -1,13 +1,9 @@
 (ns monkeycoding.editor.codemirror.recorder
     (:require
       [reagent.core :as r :refer [atom]]
-      [cljsjs.codemirror]
 
-      ;; todo move it to init or something
-      [cljsjs.codemirror.addon.scroll.simplescrollbars]
-      [cljsjs.codemirror.mode.javascript]
-
-      [monkeycoding.editor.common             :refer [default-config as-component]]
+      [monkeycoding.editor.codemirror         :refer [create-codemirror!]]
+      [monkeycoding.util                      :refer [as-component]]
       [monkeycoding.editor.codemirror.parse   :as parse]
       [monkeycoding.editor.codemirror.snapshot   :as snapshot]))
 
@@ -38,12 +34,12 @@
     (= (cur :position) (find-position-after-input prv))))
 
 
-(defn- redundant-event? [{:keys [last-input selecting]} current]
+(defn- redundant-event? [next last selecting]
     (or
-      (empty-selection? current)
-      (cursor-event-during-selection? selecting current)
-      (shadow-cursor-after-input?  current last-input)
-      (= current last-input)))
+      (empty-selection? next)
+      (cursor-event-during-selection? selecting next)
+      (shadow-cursor-after-input?  next last)
+      (= next last)))
 
 
 (defn- calc-dt
@@ -52,84 +48,78 @@
 
 
 (defn take-adjusted-snapshot [cm marks {type :type :as event}]
-  (let [snapshot (snapshot/take-snapshot cm marks)]
-    (cond
-      (= type :selection) (assoc snapshot :selection (select-keys event [:from :to]))
-      :otherwise snapshot)))
-
-
-(defn- merge-input-data [state input now]
-  (-> state
-      (assoc :selecting (and
-                          (= :selection (:type input))
-                          (not (empty-selection? input))))
-      (merge (when-not (redundant-event? state input) {:last-time now :last-input input}))))
-
-
-(defn process-input-event [{:keys [on-input marks dt-cap]} state cm event]
   (let [
-        now  (.now js/Date)
-        dt (calc-dt now (:last-time state) dt-cap)
-        snapshot (take-adjusted-snapshot cm marks event)
-        new-state (merge-input-data state event now)
-        changed   (not= (:last-input state) (:last-input new-state))]
+        snapshot (snapshot/take-snapshot cm marks)
+        selection-from-event (select-keys event [:from :to])]
 
-    (when changed
-      (on-input (:last-input new-state) snapshot dt))
+    (assoc snapshot :selection
+      (if (= type :selection)  selection-from-event
+                               (:selection snapshot)))))
 
-    new-state))
+
+(defn process-input-event [
+                            {:keys [on-input marks dt-cap]}
+                            {:keys [selecting last-input last-time] :as state}
+                            codemirror
+                            next-input]
+
+  (let [now  (.now js/Date)]
+    (merge state {:last-input next-input}
+      (when-not (redundant-event? next-input last-input selecting)
+        (on-input next-input
+                             (take-adjusted-snapshot codemirror marks next-input)
+                             (calc-dt now (:last-time state) dt-cap))
+        {
+          :last-time now
+          :selecting  (= :selection (:type next-input))}))))
 
 
 (defn init-input-events! [codemirror callback]
   (doto codemirror
-    (.on "change"                #(callback %1 (parse/js->step %2)))
-    (.on "cursorActivity"        #(callback %1 (parse/js->step (.getCursor %1))))
-    (.on "beforeSelectionChange" #(callback %1 (parse/js->step %2)))))
+    (.on "change"                #(callback %1 (parse/js->input %2)))
+    (.on "cursorActivity"        #(callback %1 (parse/js->input (.getCursor %1))))
+    (.on "beforeSelectionChange" #(callback %1 (parse/js->input %2)))))
 
 
-(defn disable-undo-redo! [codemirror]
+(defn disable-undo-redo-events! [codemirror]
   (.on codemirror "beforeChange" #(when (contains? #{"undo" "redo"} (.-origin %2)) (.cancel %2))))
 
 
-(defn- create-codemirror! [dom-node config]
-  (let [config (merge default-config config)]
-    (new  js/CodeMirror dom-node (js-obj
-                                    "lineNumbers" (:show-line-numbers config)
-                                    "theme" (:theme config)
-                                    "language" (:language config)
-                                    "scrollbarStyle" "overlay"
-                                    "coverGutterNextToScrollbar" true))))
-
-
-(defn editor [{:keys [
-                      text
-                      selection
-                      marks
-                      dt-cap
-                      on-input] :as intitial-props}]
+(defn component [{:keys [
+                          text
+                          selection
+                          marks
+                          dt-cap
+                          config
+                          on-input] :as intitial-props}]
 
   (let [
         cm    (atom nil)
         props (atom intitial-props)
         state (atom {
+                     :preforming-snapshot false
                      :last-input nil
                      :last-time  (.now js/Date)})]
 
       (as-component {
                       :on-mount (fn [this]
                                   (let [
-                                        codemirror (create-codemirror! (r/dom-node this) {})
-                                        input-callback #(reset! state (process-input-event @props @state %1 %2))]
+                                        codemirror (create-codemirror! (r/dom-node this) config)
+                                        input-callback #(when-not (:preforming-snapshot @state)
+                                                          (reset! state (process-input-event @props @state %1 %2)))]
 
                                       (->> (doto codemirror
-                                              (disable-undo-redo!)
+                                              (disable-undo-redo-events!)
                                               (snapshot/apply-snapshot! intitial-props)
                                               (init-input-events! input-callback))
                                           (reset! cm))))
 
 
                       :on-props (fn [new-props]
-                                  (reset! props new-props))
-                                  ;;(snapshot/apply-snapshot! @cm new-props))
+                                  (reset! props new-props)
+                                  (swap! state assoc :preforming-snapshot true)
+                                  (snapshot/apply-snapshot! @cm new-props)
+                                  (swap! state assoc :preforming-snapshot false))
+
 
                       :render (fn [] [:div {:style {:height "100%"}}])})));

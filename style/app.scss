@@ -1,296 +1,31 @@
-$background-color: #151718;
-$font-color: #FFFFFF;
+@import url('https://fonts.googleapis.com/css?family=Varela+Round');
 
-$toolbar-bg-color: black;
-$toolbar-icon-color: #FFBE11;
-$toolbar-icon-hover-color: #2C2C2C;
+@import "theme";
 
-$scrollbar-color: gold;
+@import "widgets";
+@import "editor";
+
+
+// common
+.hidden {
+  display: none;
+}
+
+.invisible {
+  visibility: hidden;
+}
+
+.horizontal-flip {
+  -moz-transform: scale(-1, 1);
+  -webkit-transform: scale(-1, 1);
+  -o-transform: scale(-1, 1);
+  -ms-transform: scale(-1, 1);
+  transform: scale(-1, 1);
+}
 
 
 body {
   background-color: $background-color;
   color: $font-color;
-}
-
-
-// screen layout
-.editor-screen-layout {
-
-  height: 100vh;
-  display: flex;
-  flex-direction: column;
-
-  .editor-navbar, .timeline-navbar {
-    flex-shrink: 0;
-  }
-
-  .stage-container {
-    flex-grow: 2;
-    display: flex;
-    justify-content: space-between;
-  }
-
-
-  .code-area {
-    width: 100%;
-  }
-}
-
-
-// toolbars
-.editor-navbar {
-  padding-top: 0;
-  padding-bottom: 0;
-  background-color: $toolbar-bg-color;
-}
-
-.timeline-navbar {
-  justify-content: center;
-  padding-top: 0;
-  padding-bottom: 0;
-  background-color: $toolbar-bg-color;
-
-
-  .timeline-toggle {
-    position: absolute;
-    left:0;
-  }
-}
-
-
-// code editor
-.code-area {
-
-  .CodeMirror {
-    font-size: 18px;
-    height: 100%;
-  }
-
-  .CodeMirror-gutter-filler, .CodeMirror-scrollbar-filler {
-    background: $background-color;
-  }
-
-  .CodeMirror-overlayscroll-vertical div {
-    width: 6px;
-    background: $scrollbar-color;
-  }
-
-
-  .CodeMirror-overlayscroll-horizontal div {
-    height: 6px;
-    background: $scrollbar-color;
-  }
-
-  .CodeMirror-overlayscroll-vertical, .CodeMirror-overlayscroll-horizontal  {
-    opacity: 0;
-    transition: opacity .2s linear;
-  }
-
-  .CodeMirror-overlayscroll-vertical:hover,
-  &:hover .CodeMirror-overlayscroll-vertical,
-  .CodeMirror-overlayscroll-horizontal:hover,
-  &:hover .CodeMirror-overlayscroll-horizontal  {
-    opacity: 0.5;
-  }
-
-
-  padding-right: 4px;
-  padding-top: 5px;
-  background-color: $background-color;
-
-  // all modes
-  .highliting-mark{
-    border-bottom-width: 1px;
-    border-bottom-color: gold;
-    border-bottom-style: solid;
-    //background-color: rgba(114, 158, 85, 0.5);
-    position: relative;
-  }
-
-  .editor-mark-element {
-    position: absolute;
-    right: 5px;
-  }
-
-  .CodeMirror-linewidget {
-    overflow: inherit;
-    z-index: 99;
-  }
-
-
-  .highliting-mark-start::before {
-    content: "";
-     border: 3px solid rgb(123, 66, 84);
-     border-radius: 3px;
-     -webkit-border-radius: 3px;
-     height: 0;
-     left: -4px;
-     top: -4px;
-     position: absolute;
-     width: 0;
-     animation-name: beacon;
-     animation-duration: 2.5s;
-     animation-iteration-count: infinite;
-  }
-
-
-  // spesific modes
-  .editor-mode-highlighting {
-    .highliting-mark {
-      background-color: rgba(183, 53, 66, 0.6);
-    }
-  }
-
-  .editor-mode-preview {
-    .CodeMirror-cursors {
-        visibility: visible !important;
-        cursor: hand !important;
-    }
-  }
-}
-
-
-.timeline-container {
-  .progress-panel {
-    padding-top: 10px;
-    cursor: pointer;
-    position: relative;
-  }
-
-  .timeline-progress {
-    height: 2px;
-  }
-
-  .timeline-pins {
-
-    position: relative;
-    overflow: hidden;
-    height: 50px;
-
-    .timeline-pin {
-          position: absolute;
-          transform: translateX(-10px);
-          bottom: 16px;
-          width: 22px;
-          height: 20px;
-          line-height: 20px;
-          padding: 0px;
-          font-size: 14px;
-          text-align: center;
-          color: $background-color;
-          background: rgb(255, 255, 255);
-          border: 2px solid rgb(255, 255, 255);
-          border-bottom-width: 20px;
-          border-radius: 5px;
-          border-bottom-left-radius: 0px;
-          border-bottom-right-radius: 0px;
-
-          text-shadow: rgba(0, 0, 0, 0.1) 1px 1px 1px;
-          box-shadow: rgba(0, 0, 0, 0.1) 1px 1px 2px 0px;
-          z-index: 99;
-          animation: fade-in 3s;
-
-
-         &.last {
-           transform: translateX(-25px);
-         }
-    }
-
-    .timeline-pin:after {
-          content: "";
-          position: absolute;
-          width: 0;
-          height: 0;
-          border-width: 11px;
-          border-style: solid;
-          border-color: #FFFFFF transparent transparent transparent;
-          top: 20px;
-          left: -2px;
-
-    }
-  }
-}
-
-
-// widgets
-.editable-label {
-  color: $font-color;
-  background: rgba(0, 0, 0, 0);
-  border: none;
-  outline: none;
-  margin-left: 5px;
-}
-
-.collapsible-v-panel {
-  transition-property: all;
-	transition-duration: 2.0s;
-  transition-timing-function: cubic-bezier(0, 1, 0.5, 1);
-
-  overflow: hidden;
-  max-height: 600px;
-
-  &.hide {
-    max-height: 0;
-    transition-duration: .4s;
-  }
-}
-
-.toolbar-spacer {
-  margin-right: 40px;
-}
-
-.toolbar-button {
-  padding-left: 8px;
-  padding-right: 8px;
-  font-size: 32px;
-  color: $toolbar-icon-color;
-
-  &:hover {
-    background-color: $toolbar-icon-hover-color;
-  }
-
-  &.selected {
-    background-color: red;
-  }
-
-  &.disabled {
-    color: grey;
-  }
-
-  &.disabled:hover {
-    background-color: transparent;
-  }
-}
-
-.simplebar-scrollbar {
-  background: $scrollbar-color!important;
-}
-
-
-// etc
-.hidden {
-  display: none;
-}
-
-@keyframes fade-in {
-    from {opacity: 0}
-    to {opacity: 1}
-}
-
-@keyframes beacon {
-   0% {
-       border-color: rgba(163, 163, 163, 1);
-       border-radius: 3px;
-       -webkit-border-radius: 3px;
-       padding: 10;
-   }
-   100% {
-       border-color: rgba(163, 163, 163, 0);
-       border-radius: 20px;
-       -webkit-border-radius: 25px;
-       left: -16px;
-       padding: 21px;
-       top: -18px;
-   }
+  font-family: $text-font;
 }

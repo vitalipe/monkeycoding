@@ -1,10 +1,5 @@
-(ns monkeycoding.editor.common
+(ns monkeycoding.util
     (:require [reagent.core :refer [create-class]]))
-
-(def default-config {
-                      :language "javascript"
-                      :theme "seti"
-                      :show-line-numbers true})
 
 
 (defn as-component [{:keys [on-mount

@@ -32,8 +32,8 @@
         (.markText codemirror from to options))))
 
 
-(defn- apply-selection! [codemirror {:keys [from to]}]
-  (.setSelection codemirror (position->js from) (position->js to)))
+(defn apply-selection! [codemirror {:keys [from to]}]
+  (.setSelection codemirror (position->js from) (position->js to) (js-obj "origin" "snapshot!")))
 
 
 (defn take-snapshot [codemirror prv-marks-data]
@@ -43,14 +43,15 @@
     :selection (take-selection codemirror)})
 
 
-(defn- apply-snapshot! [codemirror {:keys [text selection marks]}]
-  (doto codemirror
-    (.setValue text)
-    (apply-selection! selection)
-    (apply-marks! marks)))
+(defn apply-snapshot! [cm {:keys [text selection marks]}]
+  (.operation cm #(doto cm
+                    (.setValue text)
+                    (apply-selection! selection)
+                    (apply-marks! marks)))
+  cm)
 
 
-(defn- same-text-and-selection? [cm {:keys [text selection]}]
+(defn same-text-and-selection? [cm {:keys [text selection]}]
     (and
         (= text (.getValue cm))
         (= selection (take-selection cm))))

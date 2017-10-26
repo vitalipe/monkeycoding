@@ -1,0 +1,364 @@
+@import "theme";
+@import "utils";
+
+// screen layout
+.editor-screen-layout {
+
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+
+  .editor-navbar, .timeline-navbar {
+    flex-shrink: 0;
+  }
+
+  .stage-container {
+    flex-grow: 2;
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    justify-content: space-between;
+  }
+
+
+  .code-area {
+    width: 100%;
+  }
+}
+
+
+// editor toolbar
+.editor-navbar {
+  padding-top: 0;
+  padding-bottom: 0;
+  padding-right: 0;
+  background-color: $toolbar-bg-color;
+
+  .icon-record {
+    color : #F42C04;
+  }
+
+  .navbar-brand {
+    @include no-select;
+  }
+
+}
+
+
+
+// timeline
+.timeline-navbar {
+  @include no-select;
+  justify-content: center;
+  padding-top: 0;
+  padding-bottom: 0;
+  background-color: $toolbar-bg-color;
+
+
+  .timeline-toggle {
+    position: absolute;
+    left:0;
+  }
+}
+
+.timeline-container {
+  @include no-select;
+
+  .collapsible-v-panel {
+    transition-property: max-height;
+  	transition-duration: 0.3s;
+    transition-timing-function: cubic-bezier(0, 1, 0.5, 1);
+
+    overflow: hidden;
+    max-height: 250px;
+
+    &.hide {
+      max-height: 0;
+    }
+  }
+
+  .progress-panel {
+    padding-top: 10px;
+    cursor: pointer;
+    position: relative;
+  }
+
+  .timeline-progress {
+    height: 8px;
+    border-radius: 0;
+    background-color: $toolbar-icon-hover-color;
+  }
+
+  .timeline-pins {
+
+    position: relative;
+    height: 50px;
+
+    .timeline-pin {
+          position: absolute;
+          transform: translateX(-10px);
+          bottom: 10px;
+          width: 22px;
+          height: 20px;
+          line-height: 20px;
+          padding: 0px;
+          font-size: 14px;
+          text-align: center;
+          color: $background-color;
+          background: rgb(255, 255, 255);
+          border: 2px solid rgb(255, 255, 255);
+          border-bottom-width: 20px;
+          border-radius: 5px;
+          border-bottom-left-radius: 0px;
+          border-bottom-right-radius: 0px;
+
+          text-shadow: rgba(0, 0, 0, 0.1) 1px 1px 1px;
+          box-shadow: rgba(0, 0, 0, 0.1) 1px 1px 2px 0px;
+          z-index: 199;
+          animation: fade-in 2s;
+
+
+         &.last {
+           transform: translateX(-25px);
+         }
+    }
+
+    .timeline-pin:after {
+          content: "";
+          position: absolute;
+          width: 0;
+          height: 0;
+          border-width: 11px;
+          border-style: solid;
+          border-color: #FFFFFF transparent transparent transparent;
+          top: 20px;
+          left: -2px;
+
+    }
+  }
+}
+
+
+
+
+// code editor
+.code-area {
+
+  .CodeMirror-selected { // fix for the seti codemirror theme
+    background: rgba(255, 255, 255, 0.10);
+  }
+
+  .CodeMirror {
+    font-size: 18px;
+    height: 100%;
+  }
+
+  .CodeMirror-gutter-filler, .CodeMirror-scrollbar-filler {
+    background: $background-color;
+  }
+
+  .CodeMirror-overlayscroll-vertical div {
+    width: 6px;
+    background: $scrollbar-color;
+  }
+
+
+  .CodeMirror-overlayscroll-horizontal div {
+    height: 6px;
+    background: $scrollbar-color;
+  }
+
+  .CodeMirror-overlayscroll-vertical, .CodeMirror-overlayscroll-horizontal  {
+    opacity: 0;
+    transition: opacity .2s linear;
+  }
+
+  .CodeMirror-overlayscroll-vertical:hover,
+  &:hover .CodeMirror-overlayscroll-vertical,
+  .CodeMirror-overlayscroll-horizontal:hover,
+  &:hover .CodeMirror-overlayscroll-horizontal  {
+    opacity: 0.5;
+  }
+
+
+  padding-right: 4px;
+  padding-top: 5px;
+  background-color: $background-color;
+
+  // all modes
+  .highliting-mark{
+    border-bottom-width: 1px;
+    border-bottom-color: gold;
+    border-bottom-style: solid;
+    position: relative;
+  }
+
+  .editor-mark-element {
+    position: absolute;
+    right: 5px;
+  }
+
+  .CodeMirror-linewidget {
+    overflow: inherit;
+    z-index: 99;
+  }
+
+
+  .highliting-mark-start::before {
+    content: "";
+     border: 3px solid rgb(123, 66, 84);
+     border-radius: 3px;
+     -webkit-border-radius: 3px;
+     height: 0;
+     left: -4px;
+     top: -4px;
+     position: absolute;
+     width: 0;
+     animation-name: beacon;
+     animation-duration: 2.5s;
+     animation-iteration-count: infinite;
+  }
+
+
+  // spesific modes
+  .editor-mode-highlighting {
+    .highliting-mark {
+      background-color: rgba(183, 53, 66, 0.6);
+    }
+  }
+
+  .editor-mode-preview {
+    .CodeMirror-cursors {
+        visibility: visible !important;
+        cursor: hand !important;
+    }
+  }
+}
+
+
+.add-highlight-modal {
+  .editable-label {
+        color: black;
+        width: 100%;
+  }
+}
+
+
+.marks-panel {
+
+
+  &.side-panel {
+    position: absolute;
+    right: 0px;
+    background-color: $side-panel-bg-color;
+    color: $side-panel-font-color;
+    height: 0%;
+    overflow: hidden;
+    z-index: 100;
+
+    max-width: 260px;
+    min-width: 260px;
+
+    transition-property: height;
+  	transition-duration: 0.2s;
+    transition-timing-function: cubic-bezier(0, 1, 0.5, 1);
+
+
+    &.open {
+      height: 100%;
+    }
+  }
+
+  border-bottom-style: solid;
+  border-bottom-color:  $side-panel-border-color;
+
+
+  .tabs {
+    display: flex;
+
+    .tab {
+      @include no-select;
+
+      padding: 8px;
+      text-transform: uppercase;
+      text-align: center;
+      flex-grow: 1;
+
+      &.selected {
+        border-bottom-color: $side-panel-tab-active-color;
+        border-bottom-style: solid;
+      }
+    }
+
+  }
+
+  .mark-list {
+    @include no-select;
+    list-style: none;
+    padding: 0px;
+    padding-top: 40px;
+
+    .icon-record {
+      color: #F42C04;
+    }
+
+    .icon-add-mark {
+      color: $toolbar-icon-color;
+    }
+
+    .mark-list-item {
+      padding: 12px;
+
+      border-left-color: $side-panel-item-color;
+      border-left-width: 4px;
+      border-left-style: solid;
+
+      &:hover {
+          background-color: $side-panel-item-hover-color;
+      }
+
+      &.active {
+        border-left-color: $side-panel-item-active-color;
+      }
+
+      .header {
+        display: flex;
+        justify-content: space-between;
+      }
+
+      .info-preview {
+          padding-top: 20px;
+          padding-bottom: 10px;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
+
+    }
+  }
+}
+
+
+
+
+@keyframes fade-in {
+    from {opacity: 0}
+    to {opacity: 1}
+}
+
+@keyframes beacon {
+   0% {
+       border-color: rgba(163, 163, 163, 1);
+       border-radius: 3px;
+       -webkit-border-radius: 3px;
+       padding: 10;
+   }
+   100% {
+       border-color: rgba(163, 163, 163, 0);
+       border-radius: 20px;
+       -webkit-border-radius: 25px;
+       left: -16px;
+       padding: 21px;
+       top: -18px;
+   }
+}

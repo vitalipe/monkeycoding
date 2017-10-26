@@ -5,30 +5,30 @@
 
 
 (def editor-state (r/atom {
-                            :meta {
-                                    :title "new banana"
-                                    :language :javascript
-                                    :theme :default}
+
+                            :title "new banana"
+                            :config {
+                                      :language "javascript"
+                                      :theme "seti"
+                                      :show-line-numbers true}
 
                             :recording stream/empty-stream
                             :position -1
 
-                            :recording-highlight false
-                            :current-mode :default-mode}))
+                            :current-mode :preview-mode}))
 
 
 ;; recording actions
-(defn start-recording []
-  (doto editor-state
-    (swap! assoc :position (dec (count (get-in @editor-state [:recording :inputs]))))
-    (swap! assoc :current-mode :recording-mode)))
+(defn toggle-recording []
+  (if-not (= (:current-mode @editor-state) :recording-mode)
+      (doto editor-state
+        (swap! assoc :position (dec (count (get-in @editor-state [:recording :inputs]))))
+        (swap! assoc :current-mode :recording-mode))
+    (swap! editor-state assoc :current-mode :preview-mode)))
 
 
 (defn finish-recording []
-  (doto editor-state
-    (swap! assoc :current-mode :default-mode)
-    (swap! assoc :record-input false)
-    (swap! assoc :recording-highlight false)))
+  (swap! editor-state assoc :current-mode :preview-mode))
 
 
 (defn record-input [event snapshot dt]
@@ -38,13 +38,15 @@
 
 
 (defn toggle-record-highlight [event]
-  (swap! editor-state update :recording-highlight not))
+  (if (:current-mode :highlighting-mode)
+    (swap! editor-state assoc :current-mode :recording-mode)
+    (swap! editor-state assoc :current-mode :highlighting-mode)))
 
 
-(defn record-highlight [from to]
+(defn record-highlight [position info]
     (doto editor-state
-      (swap! update :recording stream/append-mark {:from from :to to :info (str  "dummy into for: " from to)})
-      (swap! assoc :recording-highlight false)))
+      (swap! update :recording stream/append-mark (assoc position :info info))
+      (swap! assoc  :current-mode :recording-mode)))
 
 
 ;; playback actions
@@ -61,7 +63,7 @@
 (defn goto-postition [position]
   (when-not (= position (:position @editor-state))
     (doto editor-state
-      (swap! assoc :current-mode :default-mode)
+      (swap! assoc :current-mode :preview-mode)
       (swap! assoc :position position))))
 
 
@@ -74,9 +76,11 @@
 
 
 (defn stop-playback []
-  (swap! editor-state assoc :current-mode :default-mode))
+  (swap! editor-state assoc :current-mode :preview-mode))
 
 
+(defn rename [name]
+  (swap! editor-state assoc :title name))
 
 ;; undo redo
 (def undo-state (r/atom {

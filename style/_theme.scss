@@ -1,0 +1,36 @@
+
+
+$background-color: #151718;
+$font-color: #F5F5F5;
+
+$scrollbar-color: gold;
+
+$text-font:  'Varela Round', sans-serif;
+$title-font: $text-font;
+
+// toolbar:
+$toolbar-bg-color: black;
+$toolbar-icon-color: #FFBE11;
+$toolbar-icon-hover-color: #2C2C2C;
+
+$toolbar-icon-selected-color: #34C1FF;
+$toolbar-icon-selected-background: $toolbar-icon-hover-color;
+$toolbar-icon-size: 32px;
+
+// side panel:
+$side-panel-bg-color: #2C2C2C;
+$side-panel-border-color: #FFBE11;
+$side-panel-font-color: $font-color;
+
+$side-panel-tab-active-color: #FFBE11;
+
+
+$side-panel-item-color: #2C2C2C;
+$side-panel-item-active-color: #34C1FF;
+$side-panel-item-hover-color:  #4A4A4A;
+
+
+
+
+// timeline:
+$timeline-progress-bg-color: #2C2C2C;

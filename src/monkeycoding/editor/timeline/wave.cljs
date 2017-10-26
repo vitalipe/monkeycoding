@@ -1,7 +1,7 @@
 (ns monkeycoding.editor.timeline.wave
     (:require
       [reagent.core :as r]
-      [monkeycoding.editor.common            :refer [as-component]]
+      [monkeycoding.util :refer [as-component]]
       [monkeycoding.editor.timeline.widgets  :refer [timeline-progress timeline-pin scroll-panel collapsible-v-panel]]))
 
 
