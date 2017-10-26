@@ -121,7 +121,7 @@
           [:div.btn-group.project-toobar.form-inline
             [toolbar-button {
                               :on-click store/toggle-recording
-                              :selected (= current-mode :recording-mode)
+                              :selected (contains? #{:recording-mode :highlighting-mode} current-mode)
                               :icon :record}]
 
             (if (= current-mode :playback-mode)
