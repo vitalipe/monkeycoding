@@ -246,6 +246,12 @@
 
 .marks-panel {
 
+  border-bottom-style: solid;
+  border-bottom-color:  $side-panel-border-color;
+
+  display: flex;
+  flex-direction: column;
+
 
   &.side-panel {
     position: absolute;
@@ -268,10 +274,6 @@
       height: 100%;
     }
   }
-
-  border-bottom-style: solid;
-  border-bottom-color:  $side-panel-border-color;
-
 
   .tabs {
     display: flex;
@@ -297,6 +299,7 @@
     list-style: none;
     padding: 0px;
     padding-top: 40px;
+    padding-right: 5px;
 
     .icon-record {
       color: #F42C04;
