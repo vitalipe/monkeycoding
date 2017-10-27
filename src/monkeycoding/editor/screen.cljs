@@ -18,10 +18,11 @@
                                     icon
                                     editable-label
                                     toolbar-button
+                                    toolbar-spacer
                                     modal
                                     modal-content
                                     modal-footer
-                                    toolbar-spacer]]))
+                                    scroll-panel]]))
 
 
 (defn- marks-panel [{:keys [open marks position]}]
@@ -39,15 +40,18 @@
                           :on-click #(reset! tab-state :active)
                           :class (when (= :active @tab-state) "selected")} "active"]]
 
-      [:ul.mark-list
-        (->> (vals marks)
-          (filter (if (= :active @tab-state) (partial active? position) identity))
-          (map (fn [{:keys [id insert remove info] :as mark}]
-                  [:li.mark-list-item {:key id :class (when (active? position mark) "active")}
-                    [:div.header
-                      [:label.preview [icon :add-mark] (str " " id)]
-                      [:label.insert (str (inc insert) " ") [icon :record]]]
-                    [:div.info-preview info]])))]]))
+
+      [scroll-panel
+        [:div.mark-list
+          (->> (vals marks)
+            (filter (if (= :active @tab-state) (partial active? position) identity))
+            (map (fn [{:keys [id insert remove info] :as mark}]
+                    [:div.mark-list-item {:key id :class (when (active? position mark) "active")}
+                      [:div.header
+                        [:label.preview [icon :add-mark] (str " " id)]
+                        [:label.insert (str (inc insert) " ") [icon :record]]]
+                      [:div.info-preview info]])))]]]))
+
 
 
 (defn add-highlight-modal[{:keys [on-close on-add]}]

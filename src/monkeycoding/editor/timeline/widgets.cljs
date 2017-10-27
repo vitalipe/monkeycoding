@@ -45,12 +45,3 @@
 
 (defn collapsible-v-panel [{show :show} child]
   [:div.collapsible-v-panel {:class (if-not show "hide" "")} child])
-
-
-(defn scroll-panel []
-  (as-component {
-                  :on-mount #(new js/SimpleBar (r/dom-node %))
-                  :render (fn [props & children]
-                            (if (map? props)
-                              (into [] (concat [:div.scroll-panel {:class (:class props)}] children))
-                              (into [] (concat [:div.scroll-panel] [props] children))))}))

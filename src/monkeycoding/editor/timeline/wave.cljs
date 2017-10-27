@@ -2,7 +2,8 @@
     (:require
       [reagent.core :as r]
       [monkeycoding.util :refer [as-component]]
-      [monkeycoding.editor.timeline.widgets  :refer [timeline-progress timeline-pin scroll-panel collapsible-v-panel]]))
+      [monkeycoding.widgets  :refer [scroll-panel]]
+      [monkeycoding.editor.timeline.widgets  :refer [timeline-progress timeline-pin collapsible-v-panel]]))
 
 
 ;; later can be dynamic to control zoom
