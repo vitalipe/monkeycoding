@@ -79,25 +79,25 @@
 
 (defn render-wave! [{:keys [ctx width height] :as wave}  segements]
   (.clearRect ctx 0 0 width height)
-
   (doseq [[current index] (map vector segements (range))]
     (let [
           h (* height (min 0.6, (* 0.15 (* 1.2 (count current)))))
           w (/ (- segement-ms 20) ms-to-px-ratio)
           x (/ (* index segement-ms) ms-to-px-ratio)
-          y (- (/ height 2) (/ h 2))]
+          y (- (/ height 2) (/ h 2))
+          [r -r] (if (empty? current) [1 -2] [4 -4])]
 
       (doto ctx
         (.beginPath)
-        (.moveTo           (+ x 4),    y)
-        (.lineTo           (+ x w -4), y)
-        (.quadraticCurveTo (+ x w),    y,            (+ x w),    (+ y 4))
-        (.lineTo           (+ x w),    (+ y h -4))
-        (.quadraticCurveTo (+ x w),    (+ y h)       (+ x w -4), (+ y h))
-        (.lineTo           (+ x 4),    (+ y h))
-        (.quadraticCurveTo x,          (+ y h)       x,          (+ y h -4))
-        (.lineTo           x,          (+ y 4))
-        (.quadraticCurveTo x,          y             (+ x 4),    y)
+        (.moveTo           (+ x r),    y)
+        (.lineTo           (+ x w -r), y)
+        (.quadraticCurveTo (+ x w),    y,            (+ x w),    (+ y r))
+        (.lineTo           (+ x w),    (+ y h -r))
+        (.quadraticCurveTo (+ x w),    (+ y h)       (+ x w -r), (+ y h))
+        (.lineTo           (+ x r),    (+ y h))
+        (.quadraticCurveTo x,          (+ y h)       x,          (+ y h -r))
+        (.lineTo           x,          (+ y r))
+        (.quadraticCurveTo x,          y             (+ x r),    y)
         (.closePath)
 
         (aset "fillStyle" "#006495")
