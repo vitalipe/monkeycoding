@@ -258,20 +258,24 @@
     right: 0px;
     background-color: $side-panel-bg-color;
     color: $side-panel-font-color;
-    height: 0%;
     overflow: hidden;
     z-index: 100;
 
     max-width: 260px;
     min-width: 260px;
 
-    transition-property: height;
+    color: transparent;
+      height: 0%;
+
+
+    transition-property: height, color;
   	transition-duration: 0.2s;
     transition-timing-function: cubic-bezier(0, 1, 0.5, 1);
 
 
     &.open {
       height: 100%;
+      color: $font-color;
     }
   }
 
@@ -300,6 +304,7 @@
     padding: 0px;
     padding-top: 40px;
     padding-right: 5px;
+    overflow-x: hidden;
 
     .icon-record {
       color: #F42C04;
