@@ -4,6 +4,14 @@
       [monkeycoding.util  :refer [as-component]]))
 
 
+(defn scroll-panel [initial-props]
+  (as-component {
+                  :on-mount #(new js/SimpleBar (r/dom-node %))
+                  :render (fn [props & children]
+                            (if (map? props)
+                              (into [] (concat [:div.scroll-panel props] children))
+                              (into [] (concat [:div.scroll-panel] [props] children))))}))
+
 
 (defn icon [icon-name]
   (->> (case icon-name
