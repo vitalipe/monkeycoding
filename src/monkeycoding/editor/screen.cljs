@@ -3,7 +3,7 @@
       [reagent.core :as r :refer [atom with-let cursor]]
 
       [monkeycoding.util                       :refer [as-component]]
-      [monkeycoding.editor.player              :refer [player preview-player]]
+      [monkeycoding.editor.player              :refer [player preview-player player-config->js]]
       [monkeycoding.editor.timeline            :refer [timeline-panel]]
 
       [monkeycoding.editor.codemirror.recorder     :as recorder]
@@ -68,12 +68,26 @@
           [:button.btn.btn-primary {:on-click #(on-add @info)} "add"]]]))
 
 
+(defn export-modal[{:keys [playback config on-close]}]
+    [modal {
+            :class "export-modal"
+            :on-close on-close}
+
+        [modal-content
+          [:h4 "player config:"]
+          [:textarea {:default-value (.stringify js/JSON (player-config->js config))}]
+
+          [:h4 "stream:"]
+          [:textarea {:default-value (.stringify js/JSON playback)}]]])
+
+
 
 
 (defn editor-screen []
   (with-let [state (r/atom {
                             :next-highlight nil
-                            :dt-cap 500
+                            :dt-cap 200
+                            :exporting false
                             :timeline-open false
                             :side-panel-open false})]
     (let [{:keys [
@@ -99,6 +113,13 @@
                                 :on-add  #(do
                                               (store/record-highlight (:next-highlight @state) %)
                                               (swap! state assoc :next-highlight nil))}])
+        (when (:exporting @state)
+          [export-modal {
+                          :config config
+                          :playback (stream->playback recording)
+                          :on-close #(swap! state assoc :exporting false)}])
+
+
         ;; editor header
         [:div.editor-navbar.navbar.top
           [:div.form-inline
@@ -148,7 +169,10 @@
                               :on-click store/redo!}]
 
             [toolbar-spacer]
-            [toolbar-button :export]
+            [toolbar-button {
+                              :icon :export
+                              :on-click #(swap! state assoc :exporting true)}]
+
             [toolbar-spacer]
             [toolbar-button {
                               :selected (:side-panel-open @state)
