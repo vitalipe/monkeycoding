@@ -36,9 +36,11 @@
 
 (defn position->segment-index [segements position]
   (let [segements (flatten segements)]
-    (when-not (empty? segements)
-        (:index (nth segements position) position))))
-
+    (cond
+        (empty? segements) nil
+        (> 0 position)     nil
+        :otherwise         (:index (nth segements position)))))
+  
 
 (defn px->position [segements px]
   (let [

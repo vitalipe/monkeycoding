@@ -229,8 +229,8 @@
                              :icon :timeline}]]
 
           [:div.timeline-controls.form-inline
-            [toolbar-button {:disabled (> 1 position) :on-click #(store/goto-postition 0)}   :goto-start]
-            [toolbar-button {:disabled (> 1 position) :on-click #(store/previous-postition)} :goto-prv]
+            [toolbar-button {:disabled (> 0 position) :on-click #(store/goto-postition -1)}   :goto-start]
+            [toolbar-button {:disabled (> 0 position) :on-click #(store/previous-postition)} :goto-prv]
 
             (if (empty? (:inputs recording))
               [:label "0/0"]
