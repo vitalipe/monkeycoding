@@ -82,6 +82,14 @@
 (defn rename [name]
   (swap! editor-state assoc :title name))
 
+
+(defn set-current-as-baseline []
+  (let [{:keys [recording position]} @editor-state]
+    (doto editor-state
+      (swap! assoc :recording (stream/squash recording position))
+      (swap! assoc :position -1))))
+
+
 ;; undo redo
 (def undo-state (r/atom {
                           :states  []
