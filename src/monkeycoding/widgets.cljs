@@ -22,14 +22,17 @@
           :record      "record"
           :menu        "navicon"
           :play        "play"
+          :pause       "ios-pause"
           :goto-next   "play.adjust-smaller"
           :goto-prv    "play.horizontal-flip.adjust-smaller"
           :goto-start  "ios-skipbackward"
           :goto-end    "ios-skipforward"
           :timeline    "ios-pulse-strong"
           :close       "close"
-          :add-mark    "ios-location"
+          :add-mark    "ios-pricetag.adjust-smaller"
+          :marks       "ios-pricetags.adjust-smaller"
           :delta-time  "android-stopwatch"
+          :baseline    "qr-scanner"
           icon-name)
 
     (str ".icon" ".ion-")
