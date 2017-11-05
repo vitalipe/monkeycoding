@@ -3,18 +3,21 @@
       [clojure.set :refer [difference]]))
 
 
-(def empty-stream {
-                    :inputs []
-                    :marks {}
-
-                    :next-mark-id 0})
-
-
 
 (def empty-snapshot {
                       :text ""
                       :selection {:from {:line 0 :ch 0} :to {:line 0 :ch 0}}
                       :marks {}})
+
+
+(def empty-stream {
+                    :inputs []
+                    :marks {}
+                    :initial empty-snapshot
+
+                    :next-mark-id 0})
+
+
 
 
 ;; helpers
@@ -59,25 +62,25 @@
 
 
 ;; stream
-(defn stream->playback [{marks :marks inputs :inputs}]
+(defn stream->playback [{:keys [marks inputs initial]}]
   (let [raw-inputs (map #(dissoc % :snapshot) inputs)]
     (clj->js {
-               "initial" empty-snapshot
+               "initial" initial
                "inputs"  (insert-marks-into-input-stream raw-inputs marks)
                "marksInfo" (reduce-kv #(assoc %1 %2 (:info %3)) {} marks)})))
 
 
-(defn stream->playback-snapshot [{marks :marks inputs :inputs} index]
+(defn stream->playback-snapshot [{:keys [initial inputs marks]} index]
   (let [raw-inputs (map #(dissoc % :snapshot) inputs)]
     (clj->js {
-               "initial" (if (= -1 index) empty-snapshot (get-in inputs [index :snapshot]))
+               "initial" (if (= -1 index) initial (get-in inputs [index :snapshot]))
                "inputs"  []
                "marksInfo" (reduce-kv #(assoc %1 %2 (:info %3)) {} marks)})))
 
 
 (defn stream->snapshot
-  ([{inputs :inputs :as snapshot}]   (stream->snapshot snapshot (dec (count inputs))))
-  ([{inputs :inputs marks :marks} i] (snapshot-with-marks-info (:snapshot (nth inputs i nil)) marks)))
+  ([{inputs :inputs :as snapshot}]    (stream->snapshot snapshot (dec (count inputs))))
+  ([{:keys [initial marks inputs]} i] (snapshot-with-marks-info (get (nth inputs i nil) :snapshot initial) marks)))
 
 
 (defn append-mark [stream  {:keys [info to from]}]
@@ -104,6 +107,15 @@
     (update :inputs conj (merge step {:snapshot snapshot, :dt dt}))
     (update :marks sync-marks-with-snapshot snapshot (count (:inputs stream)))))
 
+
+(defn squash [{:keys [inputs marks]} index]
+  (let [
+        [_ rest-inputs] (split-at (inc index) inputs)
+        initial (get-in inputs [index :snapshot])]
+
+    {:initial initial
+     :inputs (into [] rest-inputs)
+     :marks marks}))
 
 
 ;; inputs
