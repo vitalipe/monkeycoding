@@ -212,6 +212,7 @@
               :playback-mode [player {
                                       :paused false
                                       :config config
+                                      :on-done #(store/stop-playback)
                                       :on-progress #(store/update-player-progress %)
                                       :playback (stream->playback recording)}])]
 
