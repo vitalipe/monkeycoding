@@ -11,7 +11,9 @@
 
 
       [monkeycoding.editor.stream     :as stream :refer [stream->playback-snapshot stream->snapshot stream->playback]]
-      [monkeycoding.editor.state      :as store :refer [editor-state]]
+      [monkeycoding.editor.state      :as store  :refer [editor-state]]
+      [monkeycoding.editor.undo                  :refer [undo! redo! can-undo? can-redo?]]
+
 
       [monkeycoding.widgets :refer [
                                     keyboard-shortcuts
@@ -104,8 +106,8 @@
 
         (when-not (= current-mode :playback-mode)
           [keyboard-shortcuts
-              [:ctrl :z] store/undo!
-              [:ctrl :y] store/redo!])
+              [:ctrl :z] undo!
+              [:ctrl :y] redo!])
 
         (when (:next-highlight @state)
           [add-highlight-modal {
@@ -167,13 +169,13 @@
 
             [toolbar-button {
                               :icon :undo
-                              :disabled (not (store/can-undo?))
-                              :on-click store/undo!}]
+                              :disabled (not (can-undo?))
+                              :on-click undo!}]
 
             [toolbar-button {
                               :icon :redo
-                              :disabled (not (store/can-redo?))
-                              :on-click store/redo!}]
+                              :disabled (not (can-redo?))
+                              :on-click redo!}]
 
             [toolbar-spacer]
 
