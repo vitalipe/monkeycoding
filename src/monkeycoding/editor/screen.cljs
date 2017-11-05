@@ -149,8 +149,15 @@
                               :selected (contains? #{:recording-mode :highlighting-mode} current-mode)
                               :icon :record}]
 
+            [toolbar-button {
+                              :icon :baseline
+                              :disabled (> 0 position)
+                              :on-click store/set-current-as-baseline}]
+
+            [toolbar-spacer]
+
             (if (= current-mode :playback-mode)
-              [toolbar-button {:on-click store/stop-playback} "stop"]
+              [toolbar-button {:on-click store/stop-playback} :pause]
               [toolbar-button {
                                 :icon :play
                                 :disabled (empty? (:inputs recording))
@@ -169,6 +176,7 @@
                               :on-click store/redo!}]
 
             [toolbar-spacer]
+
             [toolbar-button {
                               :icon :export
                               :on-click #(swap! state assoc :exporting true)}]
@@ -177,7 +185,7 @@
             [toolbar-button {
                               :selected (:side-panel-open @state)
                               :on-click #(swap! state update :side-panel-open not)
-                              :icon :add-mark}]]]
+                              :icon :marks}]]]
 
 
 
