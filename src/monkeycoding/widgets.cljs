@@ -4,6 +4,14 @@
       [monkeycoding.util  :refer [as-component]]))
 
 
+;; helper functions
+
+(defn- element-has-class? [target class]
+  (.contains (.. target -target -classList) class))
+
+
+;; widgets
+
 (defn scroll-panel [initial-props]
   (as-component {
                   :on-mount #(new js/SimpleBar (r/dom-node %))
@@ -107,10 +115,10 @@
 
 
 (defn modal [{:keys [class on-close]} & content]
-  (let [target-has-class? #(.contains (.. %1 -target -classList) %2)]
-    [:div.modal.modal-bg {:on-click #(when (target-has-class? % "modal-bg") (on-close))}
+    [:div.modal.modal-bg {:on-click #(when (element-has-class? % "modal-bg") (on-close))}
       [:div.modal-dialog {:class class}
-        (apply conj [:div.modal-content] content)]]))
+        (apply conj [:div.modal-content] content)]])
+
 
 (defn modal-header  [& content] (apply conj [:div.modal-header] content))
 (defn modal-content [& content]  (apply conj [:div.modal-body] content))
