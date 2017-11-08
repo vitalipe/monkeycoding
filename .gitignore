@@ -17,3 +17,7 @@ pom.xml.asc
 /.env
 pad
 figwheel_server.log
+node_modules
+public/css
+package.json
+package-lock.json
