@@ -41,6 +41,8 @@
           :marks       "ios-pricetags.adjust-smaller"
           :delta-time  "android-stopwatch"
           :baseline    "qr-scanner"
+          :arrow-down  "ios-arrow-down"
+          :checked     "checkmark"
           icon-name)
 
     (str ".icon" ".ion-")
@@ -75,6 +77,20 @@
   [:span.toolbar-spacer])
 
 
+(defn dropdown-text-item [{:keys [text disabled on-click checked]}]
+  [:button.dropdown-item {
+                          :class (when disabled "disabled")
+                          :on-click on-click}
+
+                       (when checked [icon :checked])
+                       text])
+
+
+(defn dropdown-submenu [{text :text} & items]
+  [:button.dropdown-item.dropdown-submenu
+    [dropdown-text-item {:text text}]
+    [:div.dropdown-menu items]])
+
 
 (defn editable-label [{:keys [value on-change class] :or {on-change identity}}]
   (with-let [
@@ -94,6 +110,19 @@
                              :on-click #(.select (.-target %))
                              :on-change #(swap! state assoc :text (.. % -target -value))
                              :class class}]))
+
+
+(defn combo-label [{:keys [on-text-change text class]} & menu-items]
+  (with-let [open (r/atom false)]
+     [:div.combo-label.dropdown {:class class}
+       [:span {:on-click #(swap! open not)} [icon :arrow-down]]
+       [editable-label {
+                         :value text
+                         :on-change (or on-text-change)}]
+      [:div.dropdown-overlay {:class (when-not @open "hidden") :on-click #(swap! open not)}]
+      [:ul.dropdown-menu {:class (when @open "show")} menu-items]]))
+
+
 
 
 (defn keyboard-shortcuts [& key-list]

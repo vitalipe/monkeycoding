@@ -51,9 +51,64 @@
 
 .modal {
   display: block;
-  color: black;
+
+  .modal-content {
+      background-color: $modal-bg-color;
+      border-top-color: $modal-border-color;
+      border-bottom-color: $modal-border-color;
+      border-width: 2px;
+
+  }
 }
 
+
+.dropdown {
+  .dropdown-submenu {
+    position: relative;
+  }
+
+  .dropdown-submenu>.dropdown-menu {
+    top: 0;
+    left: 100%;
+    margin-top: -6px;
+    margin-left: -1px;
+    -webkit-border-radius: 0 6px 6px 6px;
+    -moz-border-radius: 0 6px 6px;
+    border-radius: 0 6px 6px 6px;
+  }
+
+
+  .dropdown-submenu:hover>.dropdown-menu {
+      display: block;
+  }
+
+  .dropdown-submenu>.dropdown-item:after {
+      display: block;
+      content: " ";
+      float: right;
+      width: 0;
+      height: 0;
+      border-color: transparent;
+      border-style: solid;
+      border-width: 5px 0 5px 5px;
+      border-left-color: #ccc;
+      margin-top: 5px;
+      margin-right: -10px;
+  }
+
+  .dropdown-submenu:hover>.dropdown-item:after {
+      border-left-color: #fff;
+  }
+
+  .dropdown-overlay {
+      position: fixed;
+      top: 0px;
+      bottom: 0px;
+      right: 0px;
+      left: 0px;
+      z-index: 1;
+  }
+}
 
 .icon {
   display: inline-block;
