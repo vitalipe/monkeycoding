@@ -8,6 +8,7 @@
 
       [monkeycoding.editor.codemirror.recorder     :as recorder]
       [monkeycoding.editor.codemirror.highlighter  :as highlighter]
+      [monkeycoding.editor.codemirror.exporter     :as exporter]
 
 
       [monkeycoding.editor.stream     :as stream :refer [stream->playback-snapshot stream->snapshot stream->playback]]
@@ -76,6 +77,7 @@
 
 
 (defn export-modal[{:keys [playback config on-close]}]
+  (with-let [options (r/atom exporter/default-options)]
     [modal {
             :class "export-modal"
             :on-close on-close}
@@ -98,7 +100,7 @@
 
           [:section
             [:h5 "Dependecies:"]
-            [:textarea {:default-value (.stringify js/JSON (player-config->js config))}]]]])
+            [:textarea {:default-value (exporter/compile-dependecies @options)}]]]]))
 
 
 
