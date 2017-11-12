@@ -52,12 +52,21 @@
 .modal {
   display: block;
 
+  .modal-header {
+    border-bottom: none;
+    display: flex;
+    justify-content: center;
+  }
+
   .modal-content {
       background-color: $modal-bg-color;
       border-top-color: $modal-border-color;
       border-bottom-color: $modal-border-color;
       border-width: 2px;
 
+      max-width: 600px !important;
+      min-width: 600px;
+      margin-top: 100px !important;
   }
 }
 
@@ -119,4 +128,26 @@
 
 .simplebar-scrollbar {
   background: $scrollbar-color!important;
+}
+
+
+.option-item {
+  display: flex;
+  justify-content: space-between;
+
+  margin-bottom: 0.5rem;
+  border-bottom-style:solid;
+  border-bottom-width: 1px;
+  border-color: transparent;;
+
+  &:hover {
+    border-color: $modal-border-color;
+  }
+
+  .title {
+    margin-bottom: 0px;
+  }
+  .padding {
+    flex-grow: 2;
+  }
 }
