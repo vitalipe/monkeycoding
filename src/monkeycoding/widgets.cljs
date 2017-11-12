@@ -37,8 +37,8 @@
           :goto-end    "ios-skipforward"
           :timeline    "ios-pulse-strong"
           :close       "close"
-          :add-mark    "ios-pricetag.adjust-smaller"
-          :marks       "ios-pricetags.adjust-smaller"
+          :add-mark    "pricetag.adjust-smaller"
+          :marks       "pricetags.adjust-smaller"
           :delta-time  "android-stopwatch"
           :baseline    "qr-scanner"
           :arrow-down  "ios-arrow-down"
@@ -152,3 +152,10 @@
 (defn modal-header  [& content] (apply conj [:div.modal-header] content))
 (defn modal-content [& content]  (apply conj [:div.modal-body] content))
 (defn modal-footer  [& content]   (apply conj [:div.modal-footer] content))
+
+
+(defn- option-item [title widget]
+  [:div.option-item
+    [:label.title title]
+    [:div.padding]
+    widget])

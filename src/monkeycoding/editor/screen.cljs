@@ -18,10 +18,14 @@
       [monkeycoding.widgets :refer [
                                     keyboard-shortcuts
                                     icon
+                                    dropdown-text-item
                                     editable-label
+                                    combo-label
                                     toolbar-button
                                     toolbar-spacer
                                     modal
+                                    option-item
+                                    modal-header
                                     modal-content
                                     modal-footer
                                     scroll-panel]]))
@@ -70,18 +74,31 @@
           [:button.btn.btn-primary {:on-click #(on-add @info)} "add"]]]))
 
 
+
 (defn export-modal[{:keys [playback config on-close]}]
     [modal {
             :class "export-modal"
             :on-close on-close}
 
+        [modal-header
+          [combo-label {:class "h3" :text "CodeMirror Exporter"}
+            [dropdown-text-item {:key 0 :checked true :text "CodeMirror Exporter"}]
+            [dropdown-text-item {:key 1 :disabled true :text "Add Exporter.."}]]]
+
         [modal-content
-          [:h4 "player config:"]
-          [:textarea {:default-value (.stringify js/JSON (player-config->js config))}]
+          [option-item "theme:" "seti"]
+          [option-item "show highlights:" "true"]
+          [option-item "show line numbers:" "true"]
+          [option-item "playback speed:" "1x"]
+          [option-item "parent selector:" "me-1337"]
 
-          [:h4 "stream:"]
-          [:textarea {:default-value (.stringify js/JSON playback)}]]])
+          [:section
+            [:h5 "Playback:"]
+            [:textarea {:default-value (.stringify js/JSON playback)}]]
 
+          [:section
+            [:h5 "Dependecies:"]
+            [:textarea {:default-value (.stringify js/JSON (player-config->js config))}]]]])
 
 
 
@@ -139,11 +156,9 @@
                 [toolbar-button {:on-click store/toggle-record-highlight} :delta-time]
                 [icon "ios-arrow-down"]]
               ;; else
-              [:div.project-title-menu
-                [icon "ios-arrow-down"]
-                [editable-label {
-                                  :value title
-                                  :on-change store/rename}]])]
+              [combo-label {
+                            :text title
+                            :on-text-change store/rename}])]
 
           [:div.btn-group.project-toobar.form-inline
             [toolbar-button {
