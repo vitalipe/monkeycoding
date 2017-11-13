@@ -3,12 +3,13 @@
       [reagent.core :as r :refer [atom with-let cursor]]
 
       [monkeycoding.util                       :refer [as-component]]
-      [monkeycoding.editor.player              :refer [player preview-player player-config->js]]
+      [monkeycoding.editor.player              :refer [player preview-player]]
       [monkeycoding.editor.timeline            :refer [timeline-panel]]
 
       [monkeycoding.editor.codemirror.recorder     :as recorder]
       [monkeycoding.editor.codemirror.highlighter  :as highlighter]
       [monkeycoding.editor.codemirror.exporter     :as exporter]
+      [monkeycoding.editor.codemirror.preview      :refer [js-preview html-preview]]
 
 
       [monkeycoding.editor.stream     :as stream :refer [stream->playback-snapshot stream->snapshot stream->playback]]
@@ -37,7 +38,6 @@
               tab-state (r/atom :all)
               active? (fn [pos {:keys [remove insert]}] (<= insert pos (dec (or remove Infinity))))]
 
-
     [:div.marks-panel.side-panel {:class (when open "open")}
       [:div.tabs
         [:div.tab.left  {
@@ -46,7 +46,6 @@
         [:div.tab.right {
                           :on-click #(reset! tab-state :active)
                           :class (when (= :active @tab-state) "selected")} "active"]]
-
 
       [scroll-panel
         [:div.mark-list
@@ -96,12 +95,10 @@
 
           [:section
             [:h5 "Playback:"]
-            [:textarea {:default-value (exporter/compile-playback @options recording)}]]
-
+            [js-preview (exporter/compile-playback @options recording)]]
           [:section
             [:h5 "Dependecies:"]
-            [:textarea {:default-value (exporter/compile-dependecies @options)}]]]]))
-
+            [html-preview (exporter/compile-dependecies @options)]]]]))
 
 
 (defn editor-screen []
