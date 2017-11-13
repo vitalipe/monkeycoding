@@ -349,12 +349,20 @@
 // export
 .export-modal {
 
-  textarea {
-    width: 100%;
+  .code-export {
+    margin-top: 2rem;
   }
 
-  section {
-    margin-top: 2rem;
+  .option-items {
+    margin-bottom: 2rem;
+  }
+
+  .playback-code .CodeMirror {
+    max-height: 140px;
+  }
+
+  .dependecies-code .CodeMirror {
+    max-height: 80px;
   }
 }
 

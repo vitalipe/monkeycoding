@@ -87,16 +87,17 @@
             [dropdown-text-item {:key 1 :disabled true :text "Add Exporter.."}]]]
 
         [modal-content
-          [option-item "theme:" "seti"]
-          [option-item "show highlights:" "true"]
-          [option-item "show line numbers:" "true"]
-          [option-item "playback speed:" "1x"]
-          [option-item "parent selector:" "me-1337"]
+          [:div.option-items
+            [option-item "theme:" "seti"]
+            [option-item "show highlights:" "true"]
+            [option-item "show line numbers:" "true"]
+            [option-item "playback speed:" "1x"]
+            [option-item "parent selector:" "me-1337"]]
 
-          [:section
+          [:div.code-export.playback-code
             [:h5 "Playback:"]
             [js-preview (exporter/compile-playback @options recording)]]
-          [:section
+          [:div.code-export.dependecies-code
             [:h5 "Dependecies:"]
             [html-preview (exporter/compile-dependecies @options)]]]]))
 
