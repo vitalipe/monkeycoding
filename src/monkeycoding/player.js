@@ -157,12 +157,13 @@ class Player {
                           highlightActiveLine = true,
                           HighlightActiveMark = true,
                           rawConfig = {},
+                          showLineNumbers = true,
                           theme = "",
                           language = "c"}) {
       let config = {
         mode : language,
         theme,
-        lineNumbers : true,
+        lineNumbers : showLineNumbers,
         readOnly : true,
         customClassName : null
       };
@@ -363,6 +364,7 @@ class Player {
         this._cancelNext = null;
     }
 }
+
 
 
 
