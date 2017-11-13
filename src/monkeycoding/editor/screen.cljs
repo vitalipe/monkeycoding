@@ -76,7 +76,7 @@
 
 
 
-(defn export-modal[{:keys [playback config on-close]}]
+(defn export-modal[{:keys [recording config on-close]}]
   (with-let [options (r/atom exporter/default-options)]
     [modal {
             :class "export-modal"
@@ -96,7 +96,7 @@
 
           [:section
             [:h5 "Playback:"]
-            [:textarea {:default-value (.stringify js/JSON playback)}]]
+            [:textarea {:default-value (exporter/compile-playback @options recording)}]]
 
           [:section
             [:h5 "Dependecies:"]
@@ -137,7 +137,7 @@
         (when (:exporting @state)
           [export-modal {
                           :config config
-                          :playback (stream->playback recording)
+                          :recording recording
                           :on-close #(swap! state assoc :exporting false)}])
 
 

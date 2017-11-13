@@ -1,4 +1,8 @@
-(ns monkeycoding.editor.codemirror.exporter)
+(ns monkeycoding.editor.codemirror.exporter
+  (:require
+    [monkeycoding.editor.stream     :as stream]
+    [monkeycoding.editor.player     :refer [player-config->js]]))
+
 
 
 (def default-options
@@ -7,6 +11,7 @@
      :language        "clojure"
      :theme           "seti"
      :playback-speed  1
+     :auto-play false
      :parent-selector "me-1337"})
 
 
@@ -30,4 +35,22 @@
 
 
 
-(defn compile-fragment-text [options stream] "")
+(defn compile-playback [{:keys [parent-selector auto-play] :as options} recording]
+  (let [
+        playback (.stringify js/JSON (stream/stream->playback recording))
+        player-config (.stringify js/JSON (player-config->js options))]
+    (str
+      "(function(MonkeyCoding) { \n"
+      "var node = document.querySelector(" parent-selector ")); \n"
+      "var Player = MonkeyCoding.latestPlayerByVersion(" 0 "," 0 "," 1 ", \"codemirror\"); \n"
+      "var playback = Player.createPlayback(node, \n"
+                                                  "// player config: \n"
+                                                  player-config ", \n"
+                                                  "// playback: \n"
+                                                  playback "\n"
+                                                  "," auto-play "); \n"
+      "\n"
+      "MonkeyCoding.playbacks[" 42 "] = playback); \n"
+      "return playback; \n"
+      "\n"
+      "})(MonkeyCoding);")))
