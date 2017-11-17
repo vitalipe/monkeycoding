@@ -1,0 +1,41 @@
+@import "theme";
+
+
+
+// fix for seti theme
+.CodeMirror.cm-s-seti {
+  .CodeMirror-selected {
+    background: rgba(255, 255, 255, 0.10);
+  }
+}
+
+
+// custom scrollbars
+.CodeMirror {
+
+  .CodeMirror-gutter-filler, .CodeMirror-scrollbar-filler {
+    background: $background-color;
+  }
+
+  .CodeMirror-overlayscroll-vertical div {
+    width: 6px;
+    background: $scrollbar-color;
+  }
+
+  .CodeMirror-overlayscroll-horizontal div {
+    height: 6px;
+    background: $scrollbar-color;
+  }
+
+  .CodeMirror-overlayscroll-vertical, .CodeMirror-overlayscroll-horizontal  {
+    opacity: 0;
+    transition: opacity .2s linear;
+  }
+
+  .CodeMirror-overlayscroll-vertical:hover,
+  &:hover .CodeMirror-overlayscroll-vertical,
+  .CodeMirror-overlayscroll-horizontal:hover,
+  &:hover .CodeMirror-overlayscroll-horizontal  {
+    opacity: 0.5;
+  }
+}
