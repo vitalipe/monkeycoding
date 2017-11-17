@@ -76,7 +76,7 @@
 
 
 (defn export-modal[{:keys [recording config on-close]}]
-  (with-let [options (r/atom exporter/default-options)]
+  (with-let [options (r/atom (merge exporter/default-options config))]
     [modal {
             :class "export-modal"
             :on-close on-close}
