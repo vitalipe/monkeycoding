@@ -2,7 +2,7 @@
     (:require
       [reagent.core :as r :refer [atom]]
 
-      [monkeycoding.util                      :refer [as-component]]
+      [monkeycoding.widgets.util                      :refer [as-component]]
       [monkeycoding.editor.codemirror         :refer [create-codemirror!]]
       [monkeycoding.editor.codemirror.parse   :as parse]
       [monkeycoding.editor.codemirror.snapshot   :as snapshot]))

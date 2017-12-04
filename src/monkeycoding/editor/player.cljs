@@ -1,7 +1,7 @@
 (ns monkeycoding.editor.player
     (:require
       [reagent.core :as r :refer [atom]]
-      [monkeycoding.util :refer [as-component]]
+      [monkeycoding.widgets.util :refer [as-component]]
       [monkeycoding.player :as player]))
 
 

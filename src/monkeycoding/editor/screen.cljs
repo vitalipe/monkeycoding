@@ -2,7 +2,6 @@
     (:require
       [reagent.core :as r :refer [atom with-let cursor]]
 
-      [monkeycoding.util                       :refer [as-component]]
       [monkeycoding.editor.player              :refer [player preview-player]]
       [monkeycoding.editor.timeline            :refer [timeline-panel]]
 
@@ -17,20 +16,15 @@
       [monkeycoding.editor.undo                  :refer [undo! redo! can-undo? can-redo?]]
 
 
-      [monkeycoding.widgets :refer [
-                                    keyboard-shortcuts
-                                    icon
-                                    dropdown-text-item
-                                    editable-label
-                                    combo-label
-                                    toolbar-button
-                                    toolbar-spacer
-                                    modal
-                                    option-item
-                                    modal-header
-                                    modal-content
-                                    modal-footer
-                                    scroll-panel]]))
+      [monkeycoding.widgets.keyboard :refer [keyboard-shortcuts]]
+      [monkeycoding.widgets.icon     :refer [icon]]
+      [monkeycoding.widgets.dropdown :refer [dropdown-text-item dropdown-submenu]]
+      [monkeycoding.widgets.label    :refer [combo-label editable-label]]
+      [monkeycoding.widgets.modal    :refer [modal modal-header modal-content modal-footer]]
+      [monkeycoding.widgets.scroll   :refer [scroll-panel]]
+      [monkeycoding.widgets.option   :refer [option-item]]
+      [monkeycoding.widgets.toolbar  :refer [toolbar-spacer toolbar-button]]))
+
 
 
 (defn- marks-panel [{:keys [open marks position]}]

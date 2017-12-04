@@ -1,8 +1,8 @@
 (ns monkeycoding.editor.timeline.wave
     (:require
       [reagent.core :as r]
-      [monkeycoding.util :refer [as-component]]
-      [monkeycoding.widgets  :refer [scroll-panel]]
+      [monkeycoding.widgets.util :refer [as-component]]
+      [monkeycoding.widgets.scroll  :refer [scroll-panel]]
       [monkeycoding.editor.timeline.widgets  :refer [timeline-progress timeline-pin collapsible-v-panel]]))
 
 
@@ -40,7 +40,7 @@
         (empty? segements) nil
         (> 0 position)     nil
         :otherwise         (:index (nth segements position)))))
-  
+
 
 (defn px->position [segements px]
   (let [

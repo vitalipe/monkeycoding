@@ -1,7 +1,7 @@
 (ns monkeycoding.editor.codemirror.preview
   (:require
     [reagent.core :as r]
-    [monkeycoding.util              :refer [as-component]]
+    [monkeycoding.widgets.util      :refer [as-component]]
     [monkeycoding.editor.codemirror :refer [create-codemirror!]]))
 
 
