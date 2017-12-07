@@ -9,7 +9,7 @@
                           :class (when disabled "disabled")
                           :on-click on-click}
 
-                       (when checked [icon :checked])
+                       [icon (if checked :checked :transparent)]
                        text])
 
 
