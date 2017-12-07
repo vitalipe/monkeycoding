@@ -6,18 +6,18 @@
 
 
 
-(def editor-state (r/atom {
+(defonce editor-state (r/atom {
 
-                            :title "new banana"
-                            :config {
-                                      :language "javascript"
-                                      :theme "seti"
-                                      :show-line-numbers true}
+                                :title "new banana"
+                                :config {
+                                          :language "javascript"
+                                          :theme "seti"
+                                          :show-line-numbers true}
 
-                            :recording stream/empty-stream
-                            :position -1
+                                :recording stream/empty-stream
+                                :position -1
 
-                            :current-mode :preview-mode}))
+                                :current-mode :preview-mode}))
 
 
 ;; recording actions
