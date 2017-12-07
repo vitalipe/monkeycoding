@@ -72,6 +72,15 @@
 
 
 .dropdown {
+
+  .dropdown-menu {
+    background-color: $dropdown-menu-bg-color;
+  }
+
+  .dropdown-item .icon {
+    width: 22px;
+  }
+
   .dropdown-submenu {
     position: relative;
   }

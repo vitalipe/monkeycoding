@@ -87,6 +87,10 @@
     height: 8px;
     border-radius: 0;
     background-color: $toolbar-icon-hover-color;
+
+    .progress-bar {
+      transition-duration: 0s;
+    }
   }
 
   .timeline-pins {
@@ -169,22 +173,6 @@
   .CodeMirror-linewidget {
     overflow: inherit;
     z-index: 99;
-  }
-
-
-  .highliting-mark-start::before {
-    content: "";
-     border: 3px solid rgb(123, 66, 84);
-     border-radius: 3px;
-     -webkit-border-radius: 3px;
-     height: 0;
-     left: -4px;
-     top: -4px;
-     position: absolute;
-     width: 0;
-     animation-name: beacon;
-     animation-duration: 2.5s;
-     animation-iteration-count: infinite;
   }
 
 
@@ -338,21 +326,4 @@
 @keyframes fade-in {
     from {opacity: 0}
     to {opacity: 1}
-}
-
-@keyframes beacon {
-   0% {
-       border-color: rgba(163, 163, 163, 1);
-       border-radius: 3px;
-       -webkit-border-radius: 3px;
-       padding: 10;
-   }
-   100% {
-       border-color: rgba(163, 163, 163, 0);
-       border-radius: 20px;
-       -webkit-border-radius: 25px;
-       left: -16px;
-       padding: 21px;
-       top: -18px;
-   }
 }
