@@ -22,7 +22,7 @@
       [monkeycoding.widgets.label    :refer [combo-label editable-label]]
       [monkeycoding.widgets.modal    :refer [modal modal-header modal-content modal-footer]]
       [monkeycoding.widgets.scroll   :refer [scroll-panel]]
-      [monkeycoding.widgets.option   :refer [option-item]]
+      [monkeycoding.widgets.option   :refer [option-item boolean-option label-option]]
       [monkeycoding.widgets.toolbar  :refer [toolbar-spacer toolbar-button]]))
 
 
@@ -83,10 +83,19 @@
         [modal-content
           [:div.option-items
             [option-item "theme:" "seti"]
-            [option-item "show highlights:" "true"]
-            [option-item "show line numbers:" "true"]
+            [boolean-option {
+                              :title "show highlights:"
+                              :value (:show-hightlights @options)
+                              :on-change #(swap! options assoc :show-hightlights %)}]
+            [boolean-option {
+                              :title "show line numbers:"
+                              :value (:show-line-numbers @options)
+                              :on-change #(swap! options assoc :show-line-numbers %)}]
             [option-item "playback speed:" "1x"]
-            [option-item "parent selector:" "me-1337"]]
+            [label-option {
+                            :title "parent selector:"
+                            :value (:parent-selector @options)
+                            :on-edit #(swap! options assoc :parent-selector %)}]]
 
           [:div.code-export.playback-code
             [:h5 "Playback:"]
