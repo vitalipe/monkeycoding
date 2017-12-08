@@ -4,8 +4,6 @@
       [monkeycoding.widgets.icon :refer [icon]]))
 
 
-
-
 (defn editable-label [{ :keys [value on-change class on-edit]
                         :or {on-edit identity on-change identity}}]
   (with-let [
@@ -30,9 +28,14 @@
 
 
 (defn combo-label [{:keys [on-text-change text class]} & menu-items]
-  (with-let [open (r/atom false)]
+  (with-let [state (r/atom {:open false :hover false})]
      [:div.combo-label.dropdown {:class class}
-       [:span {:on-click #(swap! open not)} [icon :arrow-down]]
+       [:span.icon-wrapper {
+                            :on-mouse-enter #(swap! state assoc :hover true)
+                            :on-mouse-leave #(swap! state assoc :hover false)
+                            :on-click #(swap! state update :open not)}
+          [:span.icon-displacement {:class (when (or (:open @state) (:hover @state)) "active")}
+            [icon :arrow-down]]]
 
        (cond
          (nil? on-text-change) [:label.label text]
@@ -40,5 +43,7 @@
                                      :value text
                                      :on-change on-text-change}])
 
-      [:div.dropdown-overlay {:class (when-not @open "hidden") :on-click #(swap! open not)}]
-      [:ul.dropdown-menu {:class (when @open "show")} menu-items]]))
+      [:div.dropdown-overlay {
+                              :class (when-not (:open  @state) "hidden")
+                              :on-click #(swap! state update :open not)}]
+      [:ul.dropdown-menu {:class (when (:open  @state) "show")} menu-items]]))

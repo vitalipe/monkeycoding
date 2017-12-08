@@ -40,8 +40,17 @@
 }
 
 .combo-label {
+  .icon-wrapper .icon {
+    font-size: 0.7em;
+  }
+
+  .icon-displacement.active {
+    position: relative;
+    top: 0.2em;
+  }
+
   .label, .editable-label {
-    margin-left: 5px; 
+    margin-left: 5px;
   }
 
 }
@@ -84,6 +93,14 @@
 
   .dropdown-item .icon {
     width: 22px;
+  }
+
+  .dropdown-item.disabled {
+    color: $dropdown-menu-disabled-color;
+  }
+
+  .dropdown-item {
+    color: $dropdown-menu-font-color;
   }
 
   .dropdown-submenu {
