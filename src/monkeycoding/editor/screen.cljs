@@ -76,7 +76,7 @@
             :on-close on-close}
 
         [modal-header
-          [combo-label {:class "h3" :text "CodeMirror Exporter"}
+          [combo-label {:class "h4" :text "CodeMirror Exporter (default)"}
             [dropdown-text-item {:key 0 :checked true :text "CodeMirror Exporter"}]
             [dropdown-text-item {:key 1 :disabled true :text "Add Exporter.."}]]]
 
