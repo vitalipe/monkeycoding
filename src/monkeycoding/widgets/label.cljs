@@ -6,7 +6,8 @@
 
 
 
-(defn editable-label [{:keys [value on-change class] :or {on-change identity}}]
+(defn editable-label [{ :keys [value on-change class on-edit]
+                        :or {on-edit identity on-change identity}}]
   (with-let [
               state (r/atom {:text value :value value})
               commit #(do
@@ -22,7 +23,9 @@
                              :on-key-down #(when (= 13 (.-keyCode %)) (.blur (.-target %)))
                              :on-blur commit
                              :on-click #(.select (.-target %))
-                             :on-change #(swap! state assoc :text (.. % -target -value))
+                             :on-change #(do
+                                          (swap! state assoc :text (.. % -target -value))
+                                          (on-edit (:text @state)))
                              :class class}]))
 
 
