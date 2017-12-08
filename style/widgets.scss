@@ -159,4 +159,39 @@
   .padding {
     flex-grow: 2;
   }
+
+  // inner widgets
+  .editable-label {
+    text-align: right;
+  }
+
+  .boolean-switch {
+    .spacer {
+      margin-left: 0.3rem;
+      margin-right: 0.3rem;
+    }
+
+    .bool-false {
+      cursor: pointer;
+      color: grey;
+    }
+
+    .bool-true {
+      cursor: pointer;
+      color: grey;
+    }
+
+    .active {
+      font-weight: bolder;
+      cursor: default;
+    }
+
+    .bool-true.active {
+      color: #32CD32
+    }
+
+    .bool-false.active {
+      color: red;
+    }
+  }
 }
