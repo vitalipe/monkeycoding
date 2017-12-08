@@ -12,7 +12,7 @@
      :theme           "seti"
      :playback-speed  1
      :auto-play false
-     :parent-selector "me-1337"})
+     :parent-selector "#id-1337"})
 
 
 (def codemirror-cdn "https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.24.0")
@@ -41,7 +41,7 @@
         player-config (.stringify js/JSON (player-config->js options))]
     (str
       "(function(MonkeyCoding) { \n"
-      "var node = document.querySelector(" parent-selector ")); \n"
+      "var node = document.querySelector(" "\"" parent-selector "\"" ")); \n"
       "var Player = MonkeyCoding.latestPlayerByVersion(" 0 "," 0 "," 1 ", \"codemirror\"); \n"
       "var playback = Player.createPlayback(node, \n"
                                                   "// player config: \n"
