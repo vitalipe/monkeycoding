@@ -33,8 +33,12 @@
   (with-let [open (r/atom false)]
      [:div.combo-label.dropdown {:class class}
        [:span {:on-click #(swap! open not)} [icon :arrow-down]]
-       [editable-label {
-                         :value text
-                         :on-change (or on-text-change)}]
+
+       (cond
+         (nil? on-text-change) [:label.label text]
+         :otherwise [editable-label {
+                                     :value text
+                                     :on-change on-text-change}])
+
       [:div.dropdown-overlay {:class (when-not @open "hidden") :on-click #(swap! open not)}]
       [:ul.dropdown-menu {:class (when @open "show")} menu-items]]))

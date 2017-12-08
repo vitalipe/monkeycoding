@@ -39,13 +39,18 @@
   }
 }
 
+.combo-label {
+  .label, .editable-label {
+    margin-left: 5px; 
+  }
+
+}
 
 .editable-label {
   color: $font-color;
   background: rgba(0, 0, 0, 0);
   border: none;
   outline: none;
-  margin-left: 5px;
 }
 
 
