@@ -1,7 +1,9 @@
 (ns monkeycoding.widgets.label
     (:require
       [reagent.core :as r :refer [atom with-let]]
-      [monkeycoding.widgets.icon :refer [icon]]))
+      [monkeycoding.widgets.icon :refer [icon]]
+      [monkeycoding.widgets.util :refer [target-of-class?]]))
+
 
 
 (defn editable-label [{ :keys [value on-change class on-edit]
@@ -36,7 +38,6 @@
                             :on-click #(swap! state update :open not)}
           [:span.icon-displacement {:class (when (or (:open @state) (:hover @state)) "active")}
             [icon :arrow-down]]]
-
        (cond
          (nil? on-text-change) [:label.label text]
          :otherwise [editable-label {
@@ -46,4 +47,11 @@
       [:div.dropdown-overlay {
                               :class (when-not (:open  @state) "hidden")
                               :on-click #(swap! state update :open not)}]
-      [:ul.dropdown-menu {:class (when (:open  @state) "show")} menu-items]]))
+      [:ul.dropdown-menu {
+                          :on-click #(when (and
+                                              (target-of-class? % "dropdown-item")
+                                              (not (target-of-class? % "disabled")))
+                                        (swap! state assoc :open false))
+
+                          :class (when (:open  @state) "show")}
+        menu-items]]))
