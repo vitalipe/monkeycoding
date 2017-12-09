@@ -1,11 +1,9 @@
-(ns monkeycoding.widgets.util
+ (ns monkeycoding.widgets.util
     (:require [reagent.core :refer [create-class]]))
 
 
-
-
-(defn- element-has-class? [target class]
-  (.contains (.. target -target -classList) class))
+(defn target-of-class? [evt class]
+  (.contains (.. evt -target -classList) class))
 
 
 (defn as-component [{:keys [on-mount

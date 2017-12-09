@@ -1,11 +1,11 @@
 (ns monkeycoding.widgets.modal
     (:require
-      [monkeycoding.widgets.util :refer [element-has-class?]]))
+      [monkeycoding.widgets.util :refer [target-of-class?]]))
 
 
 
 (defn modal [{:keys [class on-close]} & content]
-    [:div.modal.modal-bg {:on-click #(when (element-has-class? % "modal-bg") (on-close))}
+    [:div.modal.modal-bg {:on-click #(when (target-of-class? % "modal-bg") (on-close))}
       [:div.modal-dialog {:class class}
         (apply conj [:div.modal-content] content)]])
 
