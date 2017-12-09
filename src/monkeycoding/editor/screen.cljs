@@ -85,9 +85,7 @@
             [select-option {:title "theme:"
                             :on-select #(swap! options assoc :theme %)
                             :selected (:theme @options)
-                            :options [
-                                      {:title "seti"  :value "seti"}
-                                      {:title "other" :value "other"}]}]
+                            :options (map #(clojure.set/rename-keys % {:display-name :title}) (vals exporter/themes))}]
 
             [boolean-option {
                               :title "show highlights:"
