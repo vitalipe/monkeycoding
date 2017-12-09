@@ -22,7 +22,7 @@
       [monkeycoding.widgets.label    :refer [combo-label editable-label]]
       [monkeycoding.widgets.modal    :refer [modal modal-header modal-content modal-footer]]
       [monkeycoding.widgets.scroll   :refer [scroll-panel]]
-      [monkeycoding.widgets.option   :refer [option-item boolean-option label-option]]
+      [monkeycoding.widgets.option   :refer [select-option boolean-option label-option]]
       [monkeycoding.widgets.toolbar  :refer [toolbar-spacer toolbar-button]]))
 
 
@@ -82,7 +82,13 @@
 
         [modal-content
           [:div.option-items
-            [option-item "theme:" "seti"]
+            [select-option {:title "theme:"
+                            :on-select #(swap! options assoc :theme %)
+                            :selected (:theme @options)
+                            :options [
+                                      {:title "seti"  :value "seti"}
+                                      {:title "other" :value "other"}]}]
+
             [boolean-option {
                               :title "show highlights:"
                               :value (:show-hightlights @options)
@@ -91,7 +97,16 @@
                               :title "show line numbers:"
                               :value (:show-line-numbers @options)
                               :on-change #(swap! options assoc :show-line-numbers %)}]
-            [option-item "playback speed:" "1x"]
+
+            [select-option {:title "playback speed:"
+                            :on-select #(swap! options assoc :playback-speed %)
+                            :selected (:playback-speed @options)
+                            :options [
+                                      {:title ".5x"  :value 0.5}
+                                      {:title "1x"   :value 1}
+                                      {:title "1.5x" :value 1.5}
+                                      {:title "2x"   :value 2}]}]
+
             [label-option {
                             :title "parent selector:"
                             :value (:parent-selector @options)
