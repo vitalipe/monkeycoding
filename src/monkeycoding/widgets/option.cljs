@@ -1,13 +1,28 @@
 (ns monkeycoding.widgets.option
   (:require
-    [monkeycoding.widgets.label :refer [editable-label]]))
+    [monkeycoding.widgets.label    :refer [editable-label combo-label]]
+    [monkeycoding.widgets.dropdown :refer [dropdown-text-item]]))
 
-(defn option-item [title widget]
+
+(defn- option-item [title widget]
   [:div.option-item
     [:label.title title]
     [:div.padding]
     widget])
 
+
+(defn select-option [{:keys [title options on-select selected]}]
+  (let [selected-title (:title (first (drop-while #(not= (:value %) selected) options)))]
+    [option-item title
+      [combo-label {:text selected-title}
+        (->> options
+          (map-indexed
+            (fn [index {:keys [value title key]}]
+              [dropdown-text-item {
+                                    :text title
+                                    :checked (= selected value)
+                                    :on-click #(on-select value)
+                                    :key (or key index)}])))]]))
 
 
 (defn label-option [{:keys [title value on-change on-edit]
