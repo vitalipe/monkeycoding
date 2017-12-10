@@ -8,7 +8,7 @@
 
 ;; widgets
 
-(defn scroll-panel [initial-props]
+(defn scroll-panel [_]
   (as-component {
                   :on-mount #(new js/SimpleBar (r/dom-node %))
                   :render (fn [props & children]
