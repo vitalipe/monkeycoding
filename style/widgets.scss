@@ -89,19 +89,34 @@
 
   .dropdown-menu {
     background-color: $dropdown-menu-bg-color;
+
+    // HACK: a special workaround for internal "SimpleBar" scrollbars
+    .simplebar-track {
+      background-color: $dropdown-menu-bg-color;
+    }
   }
 
-  .dropdown-item .icon {
-    width: 22px;
-  }
-
-  .dropdown-item.disabled {
-    color: $dropdown-menu-disabled-color;
-  }
 
   .dropdown-item {
     color: $dropdown-menu-font-color;
+
+    &:focus, &:hover {
+      background-color: $dropdown-menu-hover-color;
+    }
+
+    &.disabled {
+      color: $dropdown-menu-disabled-color;
+
+      &:hover {
+        background-color: $dropdown-menu-bg-color;
+      }
+    }
+
+    .icon {
+      width: 22px;
+    }
   }
+
 
   .dropdown-submenu {
     position: relative;
