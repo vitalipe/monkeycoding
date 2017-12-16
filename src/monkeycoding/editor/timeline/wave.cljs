@@ -11,6 +11,9 @@
 (def segement-ms 80)
 (def look-ahead-ms 3000)
 
+(def wave-height-px 75)
+(def timeline-container-height-px 150)
+
 
 (defn inputs->wave-segements [inputs]
   (let [into-segements (fn [segements item items-left]
@@ -69,6 +72,7 @@
         segement-width (/ (* (count segements) segement-ms) ms-to-px-ratio)
         look-ahead-pad (/ look-ahead-ms ms-to-px-ratio)]
 
+    (set! (.-height canvas) wave-height-px)
     (set! (.-width canvas) (max parent-width (+ segement-width look-ahead-pad)))
     ;; this hack should disable sub-pixel AA
     ;; setting canvas size will reset the transform matrix, so we do this for every size change..
@@ -86,14 +90,14 @@
 
   (doseq [[current index] (map vector segements (range))]
     (let [
-          h (* height (min 0.6, (* 0.15 (* 1.2 (count current)))))
+          h (* height (min 0.8 (+ 0.25 (* 0.15 (dec (count current))))))
           w (/ (- segement-ms 20) ms-to-px-ratio)
           x (/ (* index segement-ms) ms-to-px-ratio)
-          y (- (/ height 2) (/ h 2))
-          [r -r] [4 -4]]
+          y (- height h)
+          [r -r] [0 0]]
 
       (when (empty? current)
-        (.fillRect ctx x y w 2))
+        (.fillRect ctx x (- height 2) w 2))
 
       (when-not (empty? current)
         (doto ctx
@@ -184,7 +188,7 @@
             active-segment-index (position->segment-index segements position)]
 
         [:div.timeline-container
-          [collapsible-v-panel {:show open}
+          [collapsible-v-panel {:show open :style {:max-height timeline-container-height-px}}
             [scroll-panel
                 [wave-progress {
                                 :open open

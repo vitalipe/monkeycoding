@@ -70,10 +70,10 @@
     transition-timing-function: cubic-bezier(0, 1, 0.5, 1);
 
     overflow: hidden;
-    max-height: 250px;
 
-    &.hide {
-      max-height: 0;
+    &.hide { // max-height is set by the actual code
+             // because we need to set inner canvas height as a prop
+      max-height: 0 !important;
     }
   }
 

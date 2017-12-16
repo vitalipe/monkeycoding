@@ -43,5 +43,5 @@
           [:div.progress-bar {:role "progressbar" :style {:width complete}}]]]))
 
 
-(defn collapsible-v-panel [{show :show} child]
-  [:div.collapsible-v-panel {:class (if-not show "hide" "")} child])
+(defn collapsible-v-panel [{:keys [show style]} child]
+  [:div.collapsible-v-panel {:style style :class (if-not show "hide" "")} child])
