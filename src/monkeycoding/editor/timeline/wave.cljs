@@ -68,12 +68,12 @@
 
 (defn adjust-wave-size! [{:keys [canvas ctx] :as wave} segements] nil
   (let [
-        parent-width  (.-width (.getBoundingClientRect (.-parentElement canvas)))
+        window-width  (.-innerWidth js/window)
         segement-width (/ (* (count segements) segement-ms) ms-to-px-ratio)
         look-ahead-pad (/ look-ahead-ms ms-to-px-ratio)]
 
     (set! (.-height canvas) wave-height-px)
-    (set! (.-width canvas) (max parent-width (+ segement-width look-ahead-pad)))
+    (set! (.-width canvas) (max window-width (+ segement-width look-ahead-pad)))
     ;; this hack should disable sub-pixel AA
     ;; setting canvas size will reset the transform matrix, so we do this for every size change..
     (.translate ctx 0.5 0.5))
@@ -145,35 +145,6 @@
 
                       :render (fn [] [:canvas])})))
 
-
-
-(defn wave-progress [{:keys [
-                              open
-                              segements
-                              marks
-                              on-seek
-                              position
-                              width]}]
-
-  [timeline-progress {
-                      :on-seek #(when-let [index (px->position segements %2)] (on-seek index))
-                      :progress [width (/ (* position segement-ms) ms-to-px-ratio)]
-                      :open open}
-
-                    (let [
-                          marks (group-by :insert (vals marks))
-                          segements (->> (flatten segements)
-                                      (sort-by :input-index)
-                                      (map :index)
-                                      (into []))]
-                      [:div.timeline-pins
-                       (->> marks
-                         (map (fn [[position all-marks-in-pos]]
-                                 [timeline-pin {
-                                                 :key position
-                                                 :count (count all-marks-in-pos)
-                                                 :position (/ (* (nth segements position) segement-ms) ms-to-px-ratio)
-                                                 :on-click #(on-seek position)}])))])])
 
 (defn wave-panel [{:keys [
                                 inputs
