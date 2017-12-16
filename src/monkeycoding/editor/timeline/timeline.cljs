@@ -37,14 +37,16 @@
                                                             :last-size input-size
                                                             :last-progress progress
                                                             :last-position position})))}
-          (->> (vals marks)
-            (group-by :insert)
-            (map (fn [[position all-marks-in-pos]]
-                    [timeline-pin {
-                                    :key position
-                                    :position (str (calc-% input-size (inc position)) "%")
-                                    :on-click #(on-seek position)
-                                    :count (count all-marks-in-pos)}])))])))
+          [:div.timeline-pins
+           (->> (vals marks)
+             (group-by :insert)
+             (map (fn [[position all-marks-in-pos]]
+                     [timeline-pin {
+                                     :key position
+                                     :position (str (calc-% input-size (inc position)) "%")
+                                     :on-click #(on-seek position)
+                                     :count (count all-marks-in-pos)}])))]])))
+
 
 (defn timeline-panel [{:keys [
                                 stream

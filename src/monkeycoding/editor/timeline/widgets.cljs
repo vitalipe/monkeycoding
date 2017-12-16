@@ -27,7 +27,7 @@
 (defn timeline-progress [{:keys [
                                  open
                                  progress
-                                 on-seek]} & pins]
+                                 on-seek]} content]
   (let [[total complete] (cond
                           (vector? progress) (map #(str % "px") progress)
                           (number? progress) ["100%" (str progress "%")])]
@@ -38,9 +38,10 @@
                           ;; looks like that shitty scroller widget breaks ".pageX"
                           ;; so we need to use the non standard "offsetX", should be fine unless you use IE7 :P
                           :on-click #(on-seek (event->progress-width %) (.. % -nativeEvent -offsetX))}
-        [:div.timeline-pins pins]
+        content
         [:div.progress.timeline-progress {:style {:width total}}
           [:div.progress-bar {:role "progressbar" :style {:width complete}}]]]))
+
 
 
 (defn collapsible-v-panel [{:keys [show style]} child]

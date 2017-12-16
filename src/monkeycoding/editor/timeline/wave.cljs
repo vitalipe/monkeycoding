@@ -166,14 +166,14 @@
                                       (sort-by :input-index)
                                       (map :index)
                                       (into []))]
-
-                      (->> marks
-                        (map (fn [[position all-marks-in-pos]]
-                                [timeline-pin {
-                                                :key position
-                                                :count (count all-marks-in-pos)
-                                                :position (/ (* (nth segements position) segement-ms) ms-to-px-ratio)
-                                                :on-click #(on-seek position)}]))))])
+                      [:div.timeline-pins
+                       (->> marks
+                         (map (fn [[position all-marks-in-pos]]
+                                 [timeline-pin {
+                                                 :key position
+                                                 :count (count all-marks-in-pos)
+                                                 :position (/ (* (nth segements position) segement-ms) ms-to-px-ratio)
+                                                 :on-click #(on-seek position)}])))])])
 
 (defn wave-panel [{:keys [
                                 inputs
@@ -190,14 +190,27 @@
         [:div.timeline-container
           [collapsible-v-panel {:show open :style {:max-height timeline-container-height-px}}
             [scroll-panel
-                [wave-progress {
-                                :open open
-                                :width (:width-px @state)
-                                :position active-segment-index
-                                :segements segements
-                                :marks marks
-                                :on-seek on-seek}]
-                [wave-canvas {
-                              :segements segements
-                              :position  active-segment-index
-                              :on-resize #(swap! state assoc :width-px %)}]]]])))
+               [timeline-progress {
+                                   :on-seek #(when-let [index (px->position segements %2)] (on-seek index))
+                                   :progress [(:width-px @state) (/ (* active-segment-index segement-ms) ms-to-px-ratio)]
+                                   :open open}
+
+                         [:div
+                          [:div.timeline-pins
+                             (let [
+                                   marks (group-by :insert (vals marks))
+                                   segements (->> (flatten segements)
+                                               (sort-by :input-index)
+                                               (map :index)
+                                               (into []))]
+                               (->> marks
+                                 (map (fn [[position all-marks-in-pos]]
+                                         [timeline-pin {
+                                                         :key position
+                                                         :count (count all-marks-in-pos)
+                                                         :position (/ (* (nth segements position) segement-ms) ms-to-px-ratio)
+                                                         :on-click #(on-seek position)}]))))]
+                          [wave-canvas {
+                                        :segements segements
+                                        :position  active-segment-index
+                                        :on-resize #(swap! state assoc :width-px %)}]]]]]])))
