@@ -2,7 +2,6 @@
     (:require
       [reagent.core :as r]
       [monkeycoding.widgets.util :refer [as-component]]
-      [monkeycoding.widgets.scroll  :refer [scroll-panel]]
       [monkeycoding.editor.timeline.widgets  :refer [timeline-progress timeline-pin collapsible-v-panel]]))
 
 
@@ -57,6 +56,14 @@
           :otherwise                      (get-in segements [index 0 :input-index])))))
 
 
+(defn segments->width-px [segements]
+  (let [
+        window-width  (.-innerWidth js/window)
+        segement-width (/ (* (count segements) segement-ms) ms-to-px-ratio)
+        look-ahead-pad (/ look-ahead-ms ms-to-px-ratio)]
+
+    (max window-width (+ segement-width look-ahead-pad))))
+
 
 (defn init-wave! [canvas]
     {
@@ -67,16 +74,11 @@
 
 
 (defn adjust-wave-size! [{:keys [canvas ctx] :as wave} segements] nil
-  (let [
-        window-width  (.-innerWidth js/window)
-        segement-width (/ (* (count segements) segement-ms) ms-to-px-ratio)
-        look-ahead-pad (/ look-ahead-ms ms-to-px-ratio)]
-
     (set! (.-height canvas) wave-height-px)
-    (set! (.-width canvas) (max window-width (+ segement-width look-ahead-pad)))
+    (set! (.-width canvas) (segments->width-px segements))
     ;; this hack should disable sub-pixel AA
     ;; setting canvas size will reset the transform matrix, so we do this for every size change..
-    (.translate ctx 0.5 0.5))
+    (.translate ctx 0.5 0.5)
 
   (merge wave {
                 :width  (.-width (.getBoundingClientRect canvas))
@@ -95,9 +97,6 @@
           x (/ (* index segement-ms) ms-to-px-ratio)
           y (- height h)
           [r -r] [0 0]]
-
-      (when (empty? current)
-        (.fillRect ctx x (- height 2) w 2))
 
       (when-not (empty? current)
         (doto ctx
@@ -125,25 +124,36 @@
 
 (defn wave-canvas [{:keys [
                             position
-                            segements
-                            on-resize]}]
-
-  (let [
-        the-wave   (r/atom nil)]
-
+                            segements]}]
+  (let [the-wave   (r/atom nil)]
     (as-component {
                       :on-mount (fn [this]
                                   (reset! the-wave
                                       (-> (r/dom-node this)
                                         (init-wave!)
-                                        (sync-wave! segements)))
-                                  (on-resize (:width @the-wave)))
+                                        (sync-wave! segements))))
 
                       :on-props (fn [{:keys [position, segements]}]
-                                    (swap! the-wave sync-wave!  segements)
-                                    (on-resize (:width @the-wave)))
-
+                                    (swap! the-wave sync-wave!  segements))
                       :render (fn [] [:canvas])})))
+
+
+(defn wave-progress [{:keys [
+                                inputs
+                                open
+                                on-seek
+                                position]}]
+  (let [
+        segements            (inputs->wave-segements inputs)
+        active-segment-index (position->segment-index segements position)
+        width                (segments->width-px segements)
+        progress-px          (/ (* active-segment-index segement-ms) ms-to-px-ratio)]
+
+    [timeline-progress {
+                        :class "wave-progress"
+                        :on-seek #(when-let [index (px->position segements %2)] (on-seek index))
+                        :progress [width progress-px]
+                        :open open}]))
 
 
 (defn wave-panel [{:keys [
@@ -152,36 +162,29 @@
                                 open
                                 on-seek
                                 position]}]
+  (let [
+        segements            (inputs->wave-segements inputs)
+        active-segment-index (position->segment-index segements position)
+        width (segments->width-px segements)]
 
-    (r/with-let [state (r/atom {:width-px 0})]
-      (let [
-            segements            (inputs->wave-segements inputs)
-            active-segment-index (position->segment-index segements position)]
-
-        [:div.timeline-container
-          [collapsible-v-panel {:show open :style {:max-height timeline-container-height-px}}
-            [scroll-panel
-               [timeline-progress {
-                                   :on-seek #(when-let [index (px->position segements %2)] (on-seek index))
-                                   :progress [(:width-px @state) (/ (* active-segment-index segement-ms) ms-to-px-ratio)]
-                                   :open open}
-
-                         [:div
-                          [:div.timeline-pins
-                             (let [
-                                   marks (group-by :insert (vals marks))
-                                   segements (->> (flatten segements)
-                                               (sort-by :input-index)
-                                               (map :index)
-                                               (into []))]
-                               (->> marks
-                                 (map (fn [[position all-marks-in-pos]]
-                                         [timeline-pin {
-                                                         :key position
-                                                         :count (count all-marks-in-pos)
-                                                         :position (/ (* (nth segements position) segement-ms) ms-to-px-ratio)
-                                                         :on-click #(on-seek position)}]))))]
-                          [wave-canvas {
-                                        :segements segements
-                                        :position  active-segment-index
-                                        :on-resize #(swap! state assoc :width-px %)}]]]]]])))
+    [collapsible-v-panel {:show open :style {
+                                              :width width
+                                              :max-height timeline-container-height-px}}
+      [:div
+       [:div.timeline-pins {:class (when-not open "hidden")}
+          (let [
+                marks (group-by :insert (vals marks))
+                segements (->> (flatten segements)
+                            (sort-by :input-index)
+                            (map :index)
+                            (into []))]
+            (->> marks
+              (map (fn [[position all-marks-in-pos]]
+                      [timeline-pin {
+                                      :key position
+                                      :count (count all-marks-in-pos)
+                                      :position (/ (* (nth segements position) segement-ms) ms-to-px-ratio)
+                                      :on-click #(on-seek position)}]))))]
+       [wave-canvas {
+                     :segements segements
+                     :position  active-segment-index}]]]))

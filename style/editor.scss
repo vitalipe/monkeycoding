@@ -63,13 +63,16 @@
 
 .timeline-container {
   @include no-select;
+  overflow: hidden;
 
   .collapsible-v-panel {
     transition-property: max-height;
-  	transition-duration: 0.3s;
+  	transition-duration: 0.7s;
     transition-timing-function: cubic-bezier(0, 1, 0.5, 1);
-
     overflow: hidden;
+
+    position: relative;
+    bottom: -7px;
 
     &.hide { // max-height is set by the actual code
              // because we need to set inner canvas height as a prop
@@ -77,18 +80,31 @@
     }
   }
 
+  .wave-progress {
+      .timeline-progress  {
+        height: 10px;
+      }
+  }
+
+  .percentage-progress {
+    .timeline-progress  {
+      height: 16px;
+    }
+
+  }
+
   .progress-panel {
-    padding-top: 10px;
     cursor: pointer;
     position: relative;
   }
 
   .timeline-progress {
-    height: 8px;
     border-radius: 0;
     background-color: $toolbar-icon-hover-color;
 
     .progress-bar {
+      height: 100%;
+      background-color: #006495;
       transition-duration: 0s;
     }
   }

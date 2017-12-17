@@ -26,6 +26,7 @@
 
 (defn timeline-progress [{:keys [
                                  open
+                                 class
                                  progress
                                  on-seek]} content]
   (let [[total complete] (cond
@@ -34,7 +35,7 @@
 
     [:div.progress-panel {
                           :style {:width total}
-                          :class (when-not open "hidden")
+                          :class (conj [class] (when-not open "hidden"))
                           ;; looks like that shitty scroller widget breaks ".pageX"
                           ;; so we need to use the non standard "offsetX", should be fine unless you use IE7 :P
                           :on-click #(on-seek (event->progress-width %) (.. % -nativeEvent -offsetX))}
