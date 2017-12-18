@@ -20,8 +20,7 @@
                                   (.stopPropagation evt)
                                   (on-click))
 
-                      :style {:left position}}
-                (or count "?")])
+                      :style {:left position}}])
 
 
 (defn timeline-progress [{:keys [
