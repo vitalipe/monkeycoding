@@ -17,9 +17,9 @@
 (defn drag-scroll-panel [{ :keys [scrollable]}]
   (let [
         last-width (r/atom nil)
-        sync! #(when (= @last-width (.-scrollWidth %)
-                       (.reset js/dragscroll)
-                       (reset! last-width (.-scrollWidth %))))]
+        sync! #(when (not= @last-width (.-scrollWidth %))
+                 (.reset js/dragscroll)
+                 (reset! last-width (.-scrollWidth %)))]
     (as-component {
                     :on-mount #(.reset js/dragscroll)
                     :on-props #(do
