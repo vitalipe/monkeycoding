@@ -64,14 +64,15 @@
                             next-input]
 
   (let [now  (.now js/Date)]
-    (merge state {:last-input next-input}
+    (merge state {
+                  :last-input next-input
+                  :selecting  (not (empty-selection? next-input))}
       (when-not (redundant-event? next-input last-input selecting)
         (on-input next-input
                              (take-adjusted-snapshot codemirror marks next-input)
                              (calc-dt now (:last-time state) dt-cap))
-        {
-          :last-time now
-          :selecting  (= :selection (:type next-input))}))))
+        {:last-time now}))))
+
 
 
 (defn init-input-events! [codemirror callback]
