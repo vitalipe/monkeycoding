@@ -43,7 +43,7 @@
 
 
 (defn- calc-dt
-        ([now last] (calc-dt now last (* 999  1000)))
+        ([now last] (calc-dt now last Infinity))
         ([now last dt-cap] (min dt-cap (if last (- now last) 0))))
 
 
