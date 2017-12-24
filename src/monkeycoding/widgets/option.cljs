@@ -11,7 +11,7 @@
     widget])
 
 
-(defn select-option [{:keys [title options on-select selected]}]
+(defn dropdown-option [{:keys [title options on-select selected]}]
   (let [selected-title (:title (first (drop-while #(not= (:value %) selected) options)))]
     [option-item title
       [combo-label {:text selected-title}
