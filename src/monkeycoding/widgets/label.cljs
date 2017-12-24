@@ -6,6 +6,11 @@
       [monkeycoding.widgets.scroll :refer [scroll-panel]]))
 
 
+(defn- props->label-class [{:keys [selected disabled class]}]
+  (let [ class-names (if (coll? class) class [class])]
+    (conj class-names
+      (when selected "selected")
+      (when disabled "disabled"))))
 
 
 
@@ -58,5 +63,21 @@
                                           (swap! state assoc :open false))
 
                             :class (when (:open  @state) "show")}
-          [scroll-panel                  
+          [scroll-panel
             menu-items]]]))
+
+
+(defn select-label [{:keys [class on-select]} & items]
+  (apply vector :div.select-label {:class class}
+    (->> items
+      (map (fn [{:keys [value label] :as props}]
+              [:label.select-label-item {
+                                          :on-click #(on-select value)
+                                          :class (props->label-class props)} label]))
+      (interpose [:label.spacer "|"]))))
+
+
+(defn bool-select-label [{:keys [value on-select]}]
+  [select-label {:class "bool-select-label" :on-select on-select}
+      {:value false :label "false" :class "bool-false" :selected (false? value)}
+      {:value true  :label "true"  :class "bool-true"  :selected (true?  value)}])

@@ -62,6 +62,40 @@
   outline: none;
 }
 
+.select-label {
+  display: flex;
+
+  .select-label-item {
+    cursor: pointer;
+    color: grey;
+    margin: 0;
+  }
+
+  .spacer {
+    margin-left: 0.3rem;
+    margin-right: 0.3rem;
+    margin-bottom: 0;
+    margin-top: 0;
+  }
+
+  .selected {
+    font-weight: bolder;
+    cursor: default;
+  }
+
+}
+
+
+.bool-select-label {
+  .bool-true.selected {
+    color: #32CD32
+  }
+
+  .bool-false.selected {
+    color: red;
+  }
+}
+
 
 .modal {
   display: block;
@@ -200,33 +234,5 @@
   // inner widgets
   .editable-label {
     text-align: right;
-  }
-
-  .boolean-switch {
-    .spacer {
-      margin-left: 0.3rem;
-      margin-right: 0.3rem;
-      margin-bottom: 0;
-      margin-top: 0;
-    }
-
-    .bool-false, .bool-true {
-      cursor: pointer;
-      color: grey;
-      margin: 0;
-    }
-
-    .active {
-      font-weight: bolder;
-      cursor: default;
-    }
-
-    .bool-true.active {
-      color: #32CD32
-    }
-
-    .bool-false.active {
-      color: red;
-    }
   }
 }

@@ -1,6 +1,6 @@
 (ns monkeycoding.widgets.option
   (:require
-    [monkeycoding.widgets.label    :refer [editable-label combo-label]]
+    [monkeycoding.widgets.label    :refer [editable-label combo-label bool-select-label]]
     [monkeycoding.widgets.dropdown :refer [dropdown-text-item]]))
 
 
@@ -32,15 +32,4 @@
 
 
 (defn boolean-option [{:keys [title value on-change]}]
-  [option-item
-    title
-    [:div.boolean-switch
-      [:label.bool-false {
-                          :on-click #(on-change false)
-                          :class (when-not value "active")}
-        "false"]
-      [:label.spacer "|"]
-      [:label.bool-true {
-                          :on-click #(on-change true)
-                          :class (when value "active")}
-        "true"]]])
+  [option-item title [bool-select-label {:value value :on-select on-change}]])
