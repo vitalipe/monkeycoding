@@ -63,13 +63,19 @@
 }
 
 .select-label {
-  display: flex;
+  cursor: pointer;
+  color: grey;
+  margin: 0;
 
-  .select-label-item {
-    cursor: pointer;
-    color: grey;
-    margin: 0;
+  &.selected {
+    font-weight: bolder;
+    color: white;
+    cursor: default;
   }
+}
+
+.multi-select-label {
+  display: flex;
 
   .spacer {
     margin-left: 0.3rem;
@@ -77,18 +83,12 @@
     margin-bottom: 0;
     margin-top: 0;
   }
-
-  .selected {
-    font-weight: bolder;
-    cursor: default;
-  }
-
 }
 
 
 .bool-select-label {
   .bool-true.selected {
-    color: #32CD32
+    color: #32CD32;
   }
 
   .bool-false.selected {

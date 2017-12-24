@@ -67,17 +67,21 @@
             menu-items]]]))
 
 
-(defn select-label [{:keys [class on-select]} & items]
-  (apply vector :div.select-label {:class class}
+(defn select-label [{:keys [value text key on-select] :as props}]
+  [:label.select-label {
+                        :on-click #(on-select value)
+                        :key key
+                        :class (props->label-class props)} text])
+
+
+(defn multi-select-label [{:keys [class on-select]} & items]
+  (apply vector :div.multi-select-label {:class class}
     (->> items
-      (map (fn [{:keys [value label] :as props}]
-              [:label.select-label-item {
-                                          :on-click #(on-select value)
-                                          :class (props->label-class props)} label]))
+      (map #(assoc-in % [1 :on-select] (partial on-select (get-in % [1 :value]))))
       (interpose [:label.spacer "|"]))))
 
 
 (defn bool-select-label [{:keys [value on-select]}]
-  [select-label {:class "bool-select-label" :on-select on-select}
-      {:value false :label "false" :class "bool-false" :selected (false? value)}
-      {:value true  :label "true"  :class "bool-true"  :selected (true?  value)}])
+  [multi-select-label {:class "bool-select-label" :on-select on-select}
+      [select-label {:value false :text "false" :class "bool-false" :selected (false? value)}]
+      [select-label {:value true  :text "true"  :class "bool-true"  :selected (true?  value)}]])
