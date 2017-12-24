@@ -19,10 +19,10 @@
       [monkeycoding.widgets.keyboard :refer [keyboard-shortcuts]]
       [monkeycoding.widgets.icon     :refer [icon]]
       [monkeycoding.widgets.dropdown :refer [dropdown-text-item dropdown-submenu]]
-      [monkeycoding.widgets.label    :refer [combo-label editable-label]]
+      [monkeycoding.widgets.label    :refer [multi-select-label combo-label editable-label select-label]]
       [monkeycoding.widgets.modal    :refer [modal modal-header modal-content modal-footer]]
       [monkeycoding.widgets.scroll   :refer [scroll-panel]]
-      [monkeycoding.widgets.option   :refer [select-option boolean-option label-option]]
+      [monkeycoding.widgets.option   :refer [dropdown-option boolean-option label-option]]
       [monkeycoding.widgets.toolbar  :refer [toolbar-spacer toolbar-button]]))
 
 
@@ -82,11 +82,13 @@
 
         [modal-content
           [:div.option-items
-            [select-option {:title "theme:"
-                            :on-select #(swap! options assoc :theme %)
-                            :selected (:theme @options)
-                            :options (map #(clojure.set/rename-keys % {:display-name :title}) (vals exporter/themes))}]
-
+            [dropdown-option {
+                              :title "theme:"
+                              :on-select #(swap! options assoc :theme %)
+                              :selected (:theme @options)
+                              :options (map
+                                            #(clojure.set/rename-keys % {:display-name :title})
+                                            (vals exporter/themes))}]
             [boolean-option {
                               :title "show highlights:"
                               :value (:show-hightlights @options)
@@ -96,14 +98,15 @@
                               :value (:show-line-numbers @options)
                               :on-change #(swap! options assoc :show-line-numbers %)}]
 
-            [select-option {:title "playback speed:"
-                            :on-select #(swap! options assoc :playback-speed %)
-                            :selected (:playback-speed @options)
-                            :options [
-                                      {:title ".5x"  :value 0.5}
-                                      {:title "1x"   :value 1}
-                                      {:title "1.5x" :value 1.5}
-                                      {:title "2x"   :value 2}]}]
+            [dropdown-option {
+                              :title "playback speed:"
+                              :on-select #(swap! options assoc :playback-speed %)
+                              :selected (:playback-speed @options)
+                              :options [
+                                        {:title ".5x"  :value 0.5}
+                                        {:title "1x"   :value 1}
+                                        {:title "1.5x" :value 1.5}
+                                        {:title "2x"   :value 2}]}]
 
             [label-option {
                             :title "parent selector:"
@@ -121,7 +124,7 @@
 (defn editor-screen []
   (with-let [state (r/atom {
                             :next-highlight nil
-                            :dt-cap 200
+                            :dt-cap 500
                             :exporting false
                             :timeline-open false
                             :side-panel-open false})]
@@ -164,14 +167,19 @@
 
           [:div.mode-toobar.form-inline
 
-            (if (contains? #{:recording-mode :highlighting-mode} current-mode)
-              [:div.recording-toobar.form-inline
-                [toolbar-button {:on-click store/finish-recording} :close]
-                [toolbar-spacer]
-                [toolbar-button {:selected (= current-mode :highlighting-mode) :on-click store/toggle-record-highlight} :add-mark]
-                [toolbar-button {:on-click store/toggle-record-highlight} :delta-time]
-                [icon "ios-arrow-down"]]
-              ;; else
+            (case current-mode
+              :recording-mode
+                  [:div.recording-toobar.form-inline
+                    [multi-select-label {:on-select #(swap! state assoc :dt-cap %)}
+                     [select-label {:value Infinity :text "no cap"  :selected (= Infinity (:dt-cap @state))}]
+                     [select-label {:value 100      :text ".1s"     :selected (= 100      (:dt-cap @state))}]
+                     [select-label {:value 500      :text ".5s"     :selected (= 500      (:dt-cap @state))}]
+                     [select-label {:value 1000     :text "1s"      :selected (= 1000     (:dt-cap @state))}]]]
+
+              :highlighting-mode
+                  [:label "select text..."]
+
+              ;; default
               [combo-label {
                             :text title
                             :on-text-change store/rename}])]
@@ -181,6 +189,10 @@
                               :on-click store/toggle-recording
                               :selected (contains? #{:recording-mode :highlighting-mode} current-mode)
                               :icon :record}]
+            [toolbar-button {
+                             :selected (= current-mode :highlighting-mode)
+                             :on-click store/toggle-record-highlight
+                             :icon :add-mark}]
 
             [toolbar-button {
                               :icon :baseline
