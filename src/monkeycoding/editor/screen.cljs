@@ -121,11 +121,39 @@
             [html-preview (exporter/compile-dependecies @options)]]]]))
 
 
+(defn settings-modal[{:keys [config on-close]}]
+    [modal {
+            :class "config-modal"
+            :on-close on-close}
+
+        [modal-header
+          [:label.combo-label.h4 "Settings"]]
+
+        [modal-content
+         [:div "todo"]]])
+
+
+(defn about-modal[{:keys [on-close]}]
+    [modal {
+            :class "about-modal"
+            :on-close on-close}
+
+        [modal-header
+          [:label.combo-label.h4 "About"]]
+
+        [modal-content
+         [:div "todo!"]]])
+
+
 (defn editor-screen []
   (with-let [state (r/atom {
                             :next-highlight nil
                             :dt-cap 500
-                            :exporting false
+
+                            :export-open false
+                            :settings-open false
+                            :about-open false
+
                             :timeline-open false
                             :side-panel-open false})]
     (let [{:keys [
@@ -145,17 +173,23 @@
               [:ctrl :z] undo!
               [:ctrl :y] redo!])
 
-        (when (:next-highlight @state)
-          [add-highlight-modal {
-                                :on-close #(swap! state assoc :next-highlight nil)
-                                :on-add  #(do
-                                              (store/record-highlight (:next-highlight @state) %)
-                                              (swap! state assoc :next-highlight nil))}])
-        (when (:exporting @state)
-          [export-modal {
-                          :config config
-                          :recording recording
-                          :on-close #(swap! state assoc :exporting false)}])
+        (cond
+          (:next-highlight @state) [add-highlight-modal {
+                                                         :on-close #(swap! state assoc :next-highlight nil)
+                                                         :on-add  #(do
+                                                                       (store/record-highlight (:next-highlight @state) %)
+                                                                       (swap! state assoc :next-highlight nil))}]
+          (:export-open @state) [export-modal {
+                                                :config config
+                                                :recording recording
+                                                :on-close #(swap! state assoc :export-open false)}]
+
+          (:settings-open @state) [settings-modal {
+                                                    :config config
+                                                    :on-close #(swap! state assoc :settings-open false)}]
+
+          (:about-open @state) [about-modal {
+                                              :on-close #(swap! state assoc :about-open false)}])
 
 
         ;; editor header
@@ -164,9 +198,7 @@
             [toolbar-button :menu]
             [:a.navbar-brand "Monkey Coding Editor (alpha)"]]
 
-
           [:div.mode-toobar.form-inline
-
             (case current-mode
               :recording-mode
                   [:div.recording-toobar.form-inline
@@ -182,7 +214,9 @@
               ;; default
               [combo-label {
                             :text title
-                            :on-text-change store/rename}])]
+                            :on-text-change store/rename}
+                [dropdown-text-item {:text "settings" :on-click #(swap! state assoc :settings-open true)}]
+                [dropdown-text-item {:text "about"    :on-click #(swap! state assoc :about-open  true)}]])]
 
           [:div.btn-group.project-toobar.form-inline
             [toolbar-button {
@@ -193,12 +227,10 @@
                              :selected (= current-mode :highlighting-mode)
                              :on-click store/toggle-record-highlight
                              :icon :add-mark}]
-
             [toolbar-button {
                               :icon :baseline
                               :disabled (> 0 position)
                               :on-click store/set-current-as-baseline}]
-
             [toolbar-spacer]
 
             (if (= current-mode :playback-mode)
@@ -207,36 +239,27 @@
                                 :icon :play
                                 :disabled (empty? (:inputs recording))
                                 :on-click store/start-playback}])
-
             [toolbar-spacer]
-
             [toolbar-button {
                               :icon :undo
                               :disabled (not (can-undo?))
                               :on-click undo!}]
-
             [toolbar-button {
                               :icon :redo
                               :disabled (not (can-redo?))
                               :on-click redo!}]
-
             [toolbar-spacer]
-
             [toolbar-button {
                               :icon :export
-                              :on-click #(swap! state assoc :exporting true)}]
-
+                              :on-click #(swap! state assoc :export-open true)}]
             [toolbar-spacer]
             [toolbar-button {
                               :selected (:side-panel-open @state)
                               :on-click #(swap! state update :side-panel-open not)
                               :icon :marks}]]]
 
-
-
         [:div.stage-container
           [:div.code-area
-
             (case current-mode
               :preview-mode [preview-player {:config config :playback (stream->playback-snapshot recording position)}]
               :highlighting-mode [highlighter/component {
@@ -244,14 +267,12 @@
                                                           :selection (:selection snapshot)
                                                           :marks  (:marks snapshot)
                                                           :config config
-
                                                           :on-highlight #(swap! state assoc :next-highlight {:from %1 :to %2})}]
               :recording-mode [recorder/component {
                                                     :text (:text snapshot)
                                                     :selection (:selection snapshot)
                                                     :marks  (:marks snapshot)
                                                     :config config
-
                                                     :dt-cap (:dt-cap @state)
                                                     :on-input store/record-input}]
               :playback-mode [player {
