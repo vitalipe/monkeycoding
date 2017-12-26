@@ -5,7 +5,7 @@
 
 
 (defn modal [{:keys [class on-close]} & content]
-    [:div.modal.modal-bg {:on-click #(when (target-of-class? % "modal-bg") (on-close))}
+    [:div.modal.modal-bg {:on-click #(when (target-of-class? "modal-bg" %) (on-close))}
       [:div.modal-dialog {:class class}
         (apply conj [:div.modal-content] content)]])
 

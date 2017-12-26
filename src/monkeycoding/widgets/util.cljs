@@ -2,7 +2,7 @@
     (:require [reagent.core :refer [create-class]]))
 
 
-(defn target-of-class? [evt class]
+(defn target-of-class? [class evt]
   (.contains (.. evt -target -classList) class))
 
 
