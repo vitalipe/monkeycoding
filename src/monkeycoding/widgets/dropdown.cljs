@@ -11,12 +11,12 @@
     (not (target-of-class? "dropdown-submenu" evt))))
 
 
-(defn dropdown-text-item [{:keys [text disabled on-click checked]}]
+(defn dropdown-text-item [{:keys [text disabled on-click checked] icon-name :icon}]
   [:button.dropdown-item {
                           :class (when disabled "disabled")
-                          :on-click on-click}
+                          :on-click (when-not disabled on-click)}
 
-                       [icon (if checked :checked :transparent)]
+                       [icon (if checked :checked (or icon-name :transparent))]
                        text])
 
 
@@ -27,7 +27,7 @@
           items])
 
 
-(defn dropdown-submenu [{text :text} & items]
+(defn dropdown-submenu [{text :text icon :icon} & items]
   [:div.dropdown-item.dropdown-submenu
-    [dropdown-text-item {:text text}]
+    [dropdown-text-item {:text text :icon icon}]
     [:div.dropdown-menu items]])
