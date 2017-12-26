@@ -127,10 +127,31 @@
             :on-close on-close}
 
         [modal-header
-          [:label.combo-label.h4 "Settings"]]
+          [:label.h4 "Settings"]]
 
         [modal-content
-         [:div "todo"]]])
+         [:div.option-items
+            [dropdown-option {
+                               :title "editor theme:"
+                               :on-select #()
+                               :selected "seti"
+                               :options [{:value "seti" :title "seti" :selected true}]}]
+
+            [dropdown-option {
+                              :title "language:"
+                              :on-select #()
+                              :selected nil
+                              :options []}]
+
+            [boolean-option {
+                             :title "show line numers:"
+                             :value (:show-line-numbers config)
+                             :on-change #()}]
+
+            [boolean-option {
+                             :title "show border hints:"
+                             :value false
+                             :on-change #()}]]]])
 
 
 (defn about-modal[{:keys [on-close]}]
@@ -139,7 +160,7 @@
             :on-close on-close}
 
         [modal-header
-          [:label.combo-label.h4 "About"]]
+          [:label.h4 "About"]]
 
         [modal-content
          [:div "todo!"]]])
@@ -215,22 +236,38 @@
               [combo-label {
                             :text title
                             :on-text-change store/rename}
-                [dropdown-text-item {:text "settings" :on-click #(swap! state assoc :settings-open true)}]
-                [dropdown-text-item {:text "about"    :on-click #(swap! state assoc :about-open  true)}]])]
+                [dropdown-text-item {
+                                     :key "settings"
+                                     :text "Settings"
+                                     :icon :settings
+                                     :on-click #(swap! state assoc :settings-open true)}]
+                [dropdown-submenu {:key "actions" :text "Recording" :icon :recording}
+                 [dropdown-text-item {
+                                      :key "Squash"
+                                      :text "Squash"
+                                      :disabled (> 0 position)
+                                      :on-click store/set-current-as-baseline
+                                      :icon :squash}]
+                 [dropdown-text-item {
+                                      :key "Clear Marks"
+                                      :text "Clear Marks"
+                                      :disabled true}]]
+                [dropdown-text-item {
+                                     :key "About"
+                                     :text "About"
+                                     :icon :about
+                                     :on-click #(swap! state assoc :about-open  true)}]])]
 
           [:div.btn-group.project-toobar.form-inline
             [toolbar-button {
                               :on-click store/toggle-recording
-                              :selected (contains? #{:recording-mode :highlighting-mode} current-mode)
+                              :selected (= :recording-mode current-mode)
                               :icon :record}]
             [toolbar-button {
                              :selected (= current-mode :highlighting-mode)
                              :on-click store/toggle-record-highlight
+                             :disabled (empty? (:inputs recording))
                              :icon :add-mark}]
-            [toolbar-button {
-                              :icon :baseline
-                              :disabled (> 0 position)
-                              :on-click store/set-current-as-baseline}]
             [toolbar-spacer]
 
             (if (= current-mode :playback-mode)
