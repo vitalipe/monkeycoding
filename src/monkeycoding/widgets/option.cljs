@@ -1,7 +1,8 @@
 (ns monkeycoding.widgets.option
   (:require
     [monkeycoding.widgets.label    :refer [editable-label combo-label bool-select-label]]
-    [monkeycoding.widgets.dropdown :refer [dropdown-text-item]]))
+    [monkeycoding.widgets.dropdown :refer [dropdown-text-item]]
+    [monkeycoding.widgets.scroll :refer [scroll-panel]]))
 
 
 (defn- option-item [title widget]
@@ -15,6 +16,7 @@
   (let [selected-title (:title (first (drop-while #(not= (:value %) selected) options)))]
     [option-item title
       [combo-label {:text selected-title}
+       [scroll-panel {:key "option-scroll-panel"}
         (->> options
           (map-indexed
             (fn [index {:keys [value title key]}]
@@ -22,7 +24,7 @@
                                     :text title
                                     :checked (= selected value)
                                     :on-click #(on-select value)
-                                    :key (or key index)}])))]]))
+                                    :key (or key index)}])))]]]))
 
 
 (defn label-option [{:keys [title value on-change on-edit]
