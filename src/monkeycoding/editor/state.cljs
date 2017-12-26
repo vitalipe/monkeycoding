@@ -8,7 +8,7 @@
 
 (defonce editor-state (r/atom {
 
-                                :title "new banana"
+                                :title "new project"
                                 :config {
                                           :language "javascript"
                                           :theme "seti"
