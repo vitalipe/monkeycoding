@@ -8,6 +8,7 @@
           :redo        "forward"
           :undo        "reply"
           :record      "record"
+          :recording   "ios-albums"
           :menu        "navicon"
           :play        "play"
           :pause       "ios-pause"
@@ -17,12 +18,14 @@
           :goto-end    "ios-skipforward"
           :timeline    "ios-pulse-strong"
           :close       "close"
-          :add-mark    "pricetag.adjust-smaller"
-          :marks       "pricetags.adjust-smaller"
+          :add-mark    "code"
+          :marks       "code-working"
           :delta-time  "android-stopwatch"
-          :baseline    "qr-scanner"
+          :squash      "arrow-shrink"
           :arrow-down  "ios-arrow-down"
           :checked     "checkmark"
+          :settings    "wrench"
+          :about       "ios-heart"
           icon-name)
 
     (str ".icon" ".ion-")
