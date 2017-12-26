@@ -2,8 +2,8 @@
     (:require
       [reagent.core :as r :refer [atom with-let]]
       [monkeycoding.widgets.icon :refer [icon]]
-      [monkeycoding.widgets.util :refer [target-of-class?]]
-      [monkeycoding.widgets.scroll :refer [scroll-panel]]))
+      [monkeycoding.widgets.dropdown :refer [dropdown-menu]]))
+
 
 
 (defn- props->label-class [{:keys [selected disabled class]}]
@@ -56,15 +56,10 @@
                               :class (when-not (:open  @state) "hidden")
                               :on-click #(swap! state update :open not)}]
 
-      [:div.dropdown-menu {
-                            :on-click #(when (and
-                                                (target-of-class? % "dropdown-item")
-                                                (not (target-of-class? % "disabled")))
-                                          (swap! state assoc :open false))
-
-                            :class (when (:open  @state) "show")}
-          [scroll-panel
-            menu-items]]]))
+      [dropdown-menu {
+                      :open (:open @state)
+                      :on-item-select #(swap! state assoc :open false)}
+        menu-items]]))
 
 
 (defn select-label [{:keys [value text key on-select] :as props}]
