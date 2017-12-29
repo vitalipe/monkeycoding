@@ -121,7 +121,7 @@
             [html-preview (exporter/compile-dependecies @options)]]]]))
 
 
-(defn settings-modal[{:keys [config on-close]}]
+(defn settings-modal[{:keys [config on-change on-close]}]
     [modal {
             :class "config-modal"
             :on-close on-close}
@@ -146,7 +146,7 @@
             [boolean-option {
                              :title "show line numers:"
                              :value (:show-line-numbers config)
-                             :on-change #()}]
+                             :on-change #(on-change (assoc config :show-line-numbers %))}]
 
             [boolean-option {
                              :title "show border hints:"
@@ -206,6 +206,7 @@
                                                 :on-close #(swap! state assoc :export-open false)}]
 
           (:settings-open @state) [settings-modal {
+                                                    :on-change #(swap! editor-state assoc :config %)
                                                     :config config
                                                     :on-close #(swap! state assoc :settings-open false)}]
 

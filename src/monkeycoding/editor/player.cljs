@@ -5,14 +5,19 @@
       [monkeycoding.player :as player]))
 
 
-(defn player-config->js [config]
-  (js-obj
-    "showLineNumbers" (:show-line-numbers config)
-    "theme" (:theme config)
-    "language" (:language config)
-    "rawConfig" (js-obj
-                      "scrollbarStyle" "overlay"
-                      "coverGutterNextToScrollbar" true)))
+(defn player-config->js [{:keys [show-line-numbers theme language]}]
+  (->> {"showLineNumbers" show-line-numbers
+        "theme" theme
+        "language" language}
+    (remove (comp nil? second))
+    (flatten)
+    (apply js-obj)))
+
+
+(defn compare-and-set-config! [player old-config new-config]
+  (when-let [changed (second (clojure.data/diff old-config new-config))]
+    (.setConfig player (player-config->js changed))))
+
 
 
 (defn init-player! [dom paused playback on-progress on-done config]
@@ -45,7 +50,7 @@
                                                         on-progress
                                                         on-done
                                                         config)))
-                    :on-props (fn [{paused :paused}]
+                    :on-props (fn [{paused :paused config :config}]
                                   (if paused
                                     (.pause @pl)
                                     (.resume @pl)))
@@ -55,12 +60,17 @@
 
 
 (defn preview-player [{:keys [playback config]}]
-  (let [pl (atom nil)]
+  (let [
+        pl (atom nil)
+        last-config (atom config)]
     (as-component {
                     :on-mount (fn [this] (reset! pl (init-player! (r/dom-node this) true playback #() #() config)))
-                    :on-props (fn [{playback :playback}]
+                    :on-props (fn [{playback :playback config :config}]
                                 (doto @pl
                                   (.play playback (clj->js playback))
-                                  (.pause)))
+                                  (.pause))
+
+                                (compare-and-set-config! @pl @last-config config)
+                                (reset! last-config config))
 
                     :render (fn [] [:div.player-content {:style {:height "100%"}}])})))
