@@ -12,7 +12,7 @@ function initCodemirror(dom, config) {
     let cm = new CodeMirror(dom, config);
 
     dom.classList.add("CodeMirror-focused"); // always display cursor
-    dom.classList.add("mokey-code-player");
+    dom.classList.add("monkey-code-player");
 
     if (config.customClassName)
       dom.classList.add(config.customClassName);
