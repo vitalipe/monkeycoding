@@ -6,7 +6,9 @@
 
 (defn- target-dropdown-item? [evt]
   (and
-    (target-of-class? "dropdown-item" evt)
+    (or
+      (target-of-class? "dropdown-item-icon" evt)
+      (target-of-class? "dropdown-item" evt))
     (not (target-of-class? "disabled" evt))
     (not (target-of-class? "dropdown-submenu" evt))))
 
@@ -16,7 +18,9 @@
                           :class (when disabled "disabled")
                           :on-click (when-not disabled on-click)}
 
-                       [icon (if checked :checked (or icon-name :transparent))]
+                       [icon {
+                              :class "dropdown-item-icon"
+                              :icon (if checked :checked (or icon-name :transparent))}]
                        text])
 
 
