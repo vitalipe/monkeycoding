@@ -40,7 +40,9 @@
                       on-progress
                       on-done]}]
 
-  (let [pl (atom nil)]
+  (let [
+        pl (atom nil)
+        last-config (atom config)]
     (as-component {
                     :on-mount (fn [this]
                                 (reset! pl (init-player!
@@ -53,7 +55,10 @@
                     :on-props (fn [{paused :paused config :config}]
                                   (if paused
                                     (.pause @pl)
-                                    (.resume @pl)))
+                                    (.resume @pl))
+
+                                  (compare-and-set-config! @pl @last-config config)
+                                  (reset! last-config config))
 
                     :on-unmount (fn [_] (.pause @pl))
                     :render (fn [] [:div.player-content {:style {:height "100%"}}])})))
