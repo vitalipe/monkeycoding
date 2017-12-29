@@ -20,6 +20,19 @@ function initCodemirror(dom, config) {
     return cm;
 }
 
+
+function encodeCodeMirrorConfig({language, theme, showLineNumbers, rawConfig = {}}) {
+    let withoutUndefined = (obj) => JSON.parse(JSON.stringify(obj));
+    let config = withoutUndefined({
+      mode : language,
+      theme,
+      lineNumbers : showLineNumbers,
+    });
+
+    return Object.assign(rawConfig, config);
+}
+
+
 function registerInteractionEvents(codemirror, ...handlers) {
   let dom = codemirror.getWrapperElement();
   let fromXY = ({pageX, pageY}) => codemirror.coordsChar({top: pageY, left : pageX});
@@ -155,20 +168,27 @@ class Player {
 
     constructor(domNode, {
                           highlightActiveLine = true,
-                          HighlightActiveMark = true,
-                          rawConfig = {},
+                          highlightActiveMark = true,
                           showLineNumbers = true,
                           theme = "",
                           language = "c"}) {
-      let config = {
-        mode : language,
-        theme,
-        lineNumbers : showLineNumbers,
+
+      let config = encodeCodeMirrorConfig({
+        language, theme,showLineNumbers,
+      });
+
+      let hardcodedCodeMirrorConfig = {
         readOnly : true,
-        customClassName : null
+        customClassName : null,
+
+        // for custom scrollbars
+        scrollbarStyle : "overlay",
+        coverGutterNextToScrollbar : true
       };
 
-      this._codemirror = initCodemirror(domNode, Object.assign(rawConfig, config));
+      this._codemirror = initCodemirror(
+        domNode,
+        Object.assign(config, hardcodedCodeMirrorConfig))
 
       registerInteractionEvents(
           this._codemirror,
@@ -178,7 +198,7 @@ class Player {
       this._markNode = createInlineMarkNode();
 
       // config
-      this._isHighlightActiveMark = HighlightActiveMark;
+      this._isHighlightActiveMark = highlightActiveMark;
       this._isHighlightActiveLine = highlightActiveLine;
 
 
@@ -270,6 +290,17 @@ class Player {
     onMarkHighlight(callback)  { this._markHighlightHandler = (callback || noop)}
     onLineHighlight(callback)   { this._lineHighlightHandler  = (callback || noop)}
     onProgressUpdate(callback) { this._progressHandler      = (callback || noop)}
+
+    setConfig(config) {
+      config = encodeCodeMirrorConfig(config);
+      Object.keys(config).forEach(key => this._codemirror.setOption(key, config[key]));
+
+      if (config.hasOwnProperty("highlightActiveMark"))
+        this._isHighlightActiveMark =  config.highlightActiveMark;
+
+      if (config.hasOwnProperty("highlightActiveLine"))
+        this._isHighlightActiveLine =  config.highlightActiveLine;
+    }
 
     // private
     _highlightLine({line, outside}) {
