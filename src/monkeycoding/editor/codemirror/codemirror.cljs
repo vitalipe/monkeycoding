@@ -19,7 +19,6 @@
       [cljsjs.codemirror.mode.css]
       [cljsjs.codemirror.mode.d]
       [cljsjs.codemirror.mode.dart]
-      [cljsjs.codemirror.mode.django]
       [cljsjs.codemirror.mode.dockerfile]
       [cljsjs.codemirror.mode.dylan]
       [cljsjs.codemirror.mode.eiffel]
@@ -116,7 +115,6 @@
                 :css {:value "css" :display-name "CSS"}
                 :d {:value "d" :display-name "D"}
                 :dart {:value "dart" :display-name "Dart"}
-                :django {:value "django" :display-name "Django Templates"}
                 :dockerfile {:value "dockerfile" :display-name "Dockerfile"}
                 :dylan {:value "dylan" :display-name "Dylan"}
                 :eiffel {:value "eiffel" :display-name "Eiffel"}
