@@ -103,7 +103,88 @@
       [cljsjs.codemirror.mode.z80]))
 
 
-;; config options that override everything
+(def languages {
+                :apl {:value "apl" :display-name "APL"}
+                :asn.1 {:value "asn.1" :display-name "ASN.1"}
+                :brainfuck {:value "brainfuck" :display-name "Brainfuck"}
+                :clike {:value "clike" :display-name "C/C++/C#/Objective-C"}
+                :clojure {:value "clojure" :display-name "Clojure"}
+                :cmake {:value "cmake" :display-name "CMake"}
+                :cobol {:value "cobol" :display-name "COBOL"}
+                :coffeescript {:value "coffeescript" :display-name "CoffeeScript"}
+                :commonlisp {:value "commonlisp" :display-name "Common LISP"}
+                :css {:value "css" :display-name "CSS"}
+                :d {:value "d" :display-name "D"}
+                :dart {:value "dart" :display-name "Dart"}
+                :django {:value "django" :display-name "Django Templates"}
+                :dockerfile {:value "dockerfile" :display-name "Dockerfile"}
+                :dylan {:value "dylan" :display-name "Dylan"}
+                :eiffel {:value "eiffel" :display-name "Eiffel"}
+                :elm {:value "elm" :display-name "Elm"}
+                :erlang {:value "erlang" :display-name "Erlang"}
+                :factor {:value "factor" :display-name "Factor"}
+                :forth {:value "forth" :display-name "Forth"}
+                :fortran {:value "fortran" :display-name "Fortran"}
+                :gas {:value "gas" :display-name "AT&T assembly (GAS)"}
+                :go {:value "go" :display-name "Go"}
+                :groovy {:value "groovy" :display-name "Groovy"}
+                :haml {:value "haml" :display-name "HAML"}
+                :handlebars {:value "handlebars" :display-name "Handlebars"}
+                :haskell {:value "haskell" :display-name "Haskell"}
+                :haxe {:value "haxe" :display-name "Haxe"}
+                :htmlembedded {:value "htmlembedded" :display-name "HTML (embedded)"}
+                :htmlmixed {:value "htmlmixed" :display-name "HTML (mixed mode)"}
+                :idl {:value "idl" :display-name "IDL"}
+                :javascript {:value "javascript" :display-name "JavaScript"}
+                :julia {:value "julia" :display-name "Julia"}
+                :livescript {:value "livescript" :display-name "LiveScript"}
+                :lua {:value "lua" :display-name "Lua"}
+                :markdown {:value "markdown" :display-name "Markdown (github)"}
+                :mathematica {:value "mathematica" :display-name "Mathematica"}
+                :mllike {:value "mllike" :display-name "OCaml/F# (ML like)"}
+                :nginx {:value "nginx" :display-name "NGINX config"}
+                :octave {:value "octave" :display-name "Octave"}
+                :oz {:value "oz" :display-name "Oz"}
+                :pascal {:value "pascal" :display-name "Pascal"}
+                :perl {:value "perl" :display-name "Perl"}
+                :php {:value "php" :display-name "PHP"}
+                :puppet {:value "puppet" :display-name "Puppet"}
+                :r {:value "r" :display-name "R"}
+                :ruby {:value "ruby" :display-name "Ruby"}
+                :rust {:value "rust" :display-name "Rust"}
+                :sass {:value "sass" :display-name "SASS"}
+                :scheme {:value "scheme" :display-name "Scheme"}
+                :shell {:value "shell" :display-name "Shell (bash/sh)"}
+                :sieve {:value "sieve" :display-name "Sieve"}
+                :slim {:value "slim" :display-name "SLIM"}
+                :smalltalk {:value "smalltalk" :display-name "Smalltalk"}
+                :sql {:value "sql" :display-name "SQL"}
+                :stex {:value "stex" :display-name "sTeX"}
+                :stylus {:value "stylus" :display-name "Stylus"}
+                :swift {:value "swift" :display-name "Swift"}
+                :tcl {:value "tcl" :display-name "TCL"}
+                :vb {:value "vb" :display-name "VB.NET"}
+                :vbscript {:value "vbscript" :display-name "VBScript"}
+                :verilog {:value "verilog" :display-name "Verilog"}
+                :vhdl {:value "vhdl" :display-name "VHDL"}
+                :vue {:value "vue" :display-name "Vue.js Templates"}
+                :xml {:value "xml" :display-name "XML"}
+                :yaml {:value "yaml" :display-name "YAML"}
+                :z80 {:value "z80" :display-name "Z80 Assembly"}})
+
+
+
+
+
+
+
+
+
+
+
+
+
+;; config options that override everything})
 (def hardcoded-options {
                           "scrollbarStyle" "overlay"
                           "coverGutterNextToScrollbar" true})
