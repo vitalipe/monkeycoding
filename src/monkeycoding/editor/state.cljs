@@ -84,8 +84,12 @@
 (defn rename [name]
   (swap! editor-state assoc :title name))
 
+(defn reset [name]
+  (swap! editor-state assoc
+                            :recording stream/empty-stream
+                            :position -1))
 
-(defn set-current-as-baseline []
+(defn squash []
   (let [{:keys [recording position]} @editor-state]
     (doto editor-state
       (swap! assoc :recording (stream/squash recording position))

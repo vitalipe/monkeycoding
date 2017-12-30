@@ -255,11 +255,17 @@
                                       :key "Squash"
                                       :text "Squash"
                                       :disabled (> 0 position)
-                                      :on-click store/set-current-as-baseline
+                                      :on-click store/squash
                                       :icon :squash}]
                  [dropdown-text-item {
-                                      :key "Clear Marks"
-                                      :text "Clear Marks"
+                                      :key "Discard"
+                                      :text "Discard"
+                                      :icon :delete
+                                      :on-click store/reset
+                                      :disabled (empty? (:inputs recording))}]
+                 [dropdown-text-item {
+                                      :key "Strip Marks"
+                                      :text "Strip Marks"
                                       :disabled true}]]
                 [dropdown-text-item {
                                      :key "About"

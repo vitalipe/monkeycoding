@@ -28,6 +28,7 @@
             :checked     "checkmark"
             :settings    "wrench"
             :about       "ios-heart"
+            :delete      "trash-b"
             (:icon props))
       (str ".icon" ".ion-")
       (str "." (:class props))
