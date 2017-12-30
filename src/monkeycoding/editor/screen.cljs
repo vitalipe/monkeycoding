@@ -27,15 +27,14 @@
       [monkeycoding.widgets.toolbar  :refer [toolbar-spacer toolbar-button]]))
 
 
-(def theme-options-list (map
-                          #(clojure.set/rename-keys % {:display-name :title})
-                          (vals exporter/themes)))
-
-(def language-options-list (map
-                             #(clojure.set/rename-keys % {:display-name :title})
-                             (vals codemirror/languages)))
+(def theme-options-list (->> (vals exporter/themes)
+                          (map #(clojure.set/rename-keys % {:display-name :title}))
+                          (sort-by :title)))
 
 
+(def language-options-list (->> (vals codemirror/languages)
+                             (map #(clojure.set/rename-keys % {:display-name :title}))
+                             (sort-by :title)))
 
 
 (defn- marks-panel [{:keys [open marks position]}]
