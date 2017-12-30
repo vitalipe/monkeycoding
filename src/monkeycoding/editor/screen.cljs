@@ -5,6 +5,7 @@
       [monkeycoding.editor.player              :refer [player preview-player]]
       [monkeycoding.editor.timeline            :refer [timeline-panel]]
 
+      [monkeycoding.editor.codemirror              :as codemirror]
       [monkeycoding.editor.codemirror.recorder     :as recorder]
       [monkeycoding.editor.codemirror.highlighter  :as highlighter]
       [monkeycoding.editor.codemirror.exporter     :as exporter]
@@ -24,6 +25,16 @@
       [monkeycoding.widgets.scroll   :refer [scroll-panel]]
       [monkeycoding.widgets.option   :refer [dropdown-option boolean-option label-option]]
       [monkeycoding.widgets.toolbar  :refer [toolbar-spacer toolbar-button]]))
+
+
+(def theme-options-list (map
+                          #(clojure.set/rename-keys % {:display-name :title})
+                          (vals exporter/themes)))
+
+(def language-options-list (map
+                             #(clojure.set/rename-keys % {:display-name :title})
+                             (vals codemirror/languages)))
+
 
 
 
@@ -86,9 +97,7 @@
                               :title "theme:"
                               :on-select #(swap! options assoc :theme %)
                               :selected (:theme @options)
-                              :options (map
-                                            #(clojure.set/rename-keys % {:display-name :title})
-                                            (vals exporter/themes))}]
+                              :options theme-options-list}]
             [boolean-option {
                               :title "show highlights:"
                               :value (:show-hightlights @options)
@@ -139,9 +148,9 @@
 
             [dropdown-option {
                               :title "language:"
-                              :on-select #()
-                              :selected nil
-                              :options []}]
+                              :on-select #(on-change (assoc config :language %))
+                              :selected (:language config)
+                              :options language-options-list}]
 
             [boolean-option {
                              :title "show line numers:"
