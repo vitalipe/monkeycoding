@@ -82,13 +82,13 @@
 
   .wave-progress {
       .timeline-progress  {
-        height: 10px;
+        height: 5px;
       }
   }
 
   .percentage-progress {
     .timeline-progress  {
-      height: 16px;
+      height: 10px;
     }
 
   }
@@ -134,6 +134,18 @@
           border-style: solid;
           border-color: #FFBE11 transparent transparent transparent;
           top: 20px;
+          left: -13px;
+    }
+
+    .timeline-pin:hover:before {
+          content: "";
+          position: absolute;
+          width: 0;
+          height: 0;
+          border-width: 13px;
+          border-style: solid;
+          border-color: #FFBE11 transparent transparent transparent;
+          top: 22px;
           left: -13px;
     }
   }

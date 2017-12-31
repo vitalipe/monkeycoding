@@ -41,12 +41,17 @@
 
 .combo-label {
   .icon-wrapper .icon {
-    font-size: 0.7em;
+    font-size: 0.9em;
   }
 
-  .icon-displacement.active {
+  .icon-displacement {
+    top: 0.1em;
     position: relative;
-    top: 0.2em;
+
+    &.active {
+      top: 0.4em;
+      cursor: pointer;
+    }
   }
 
   .label, .editable-label {
@@ -134,7 +139,9 @@
   .dropdown-item {
     color: $dropdown-menu-font-color;
 
+
     &:focus, &:hover {
+      outline: none;
       background-color: $dropdown-menu-hover-color;
     }
 
