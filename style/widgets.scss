@@ -138,7 +138,10 @@
 
   .dropdown-item {
     color: $dropdown-menu-font-color;
+    display: flex;
 
+    padding: 0;
+    padding-left: 10px;
 
     &:focus, &:hover {
       outline: none;
@@ -155,11 +158,17 @@
 
     .icon {
       width: 22px;
+      margin-right: 4px;
+    }
+
+    .text {
+      margin-right: 10px;
     }
   }
 
 
   .dropdown-submenu {
+    padding-left: 0px;
     position: relative;
   }
 
@@ -188,7 +197,7 @@
       border-style: solid;
       border-width: 5px 0 5px 5px;
       border-left-color: #ccc;
-      margin-top: 5px;
+      margin-top: 8px;
       margin-right: -10px;
   }
 

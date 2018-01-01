@@ -8,7 +8,8 @@
   (and
     (or
       (target-of-class? "dropdown-item-icon" evt)
-      (target-of-class? "dropdown-item" evt))
+      (target-of-class? "dropdown-item" evt)
+      (target-of-class? "text" evt))
     (not (target-of-class? "disabled" evt))
     (not (target-of-class? "dropdown-submenu" evt))))
 
@@ -19,9 +20,9 @@
                           :on-click (when-not disabled on-click)}
 
                        [icon {
-                              :class "dropdown-item-icon"
+                              :class ["dropdown-item-icon" (when disabled "disabled")]
                               :icon (if checked :checked (or icon-name :transparent))}]
-                       text])
+                       [:label.text {:class (when disabled "disabled")} text]])
 
 
 (defn dropdown-menu [{:keys [open on-item-select]} & items]
