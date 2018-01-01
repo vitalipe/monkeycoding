@@ -31,7 +31,7 @@
             :delete      "trash-b"
             (:icon props))
       (str ".icon" ".ion-")
-      (str "." (:class props))
+      (str "." (apply str (:class props)))
       (str "i." "icon-" (name (:icon props)))
       (keyword)
       (vector))))
