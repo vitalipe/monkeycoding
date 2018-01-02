@@ -9,15 +9,20 @@
                       :selection {:from {:line 0 :ch 0} :to {:line 0 :ch 0}}
                       :marks {}})
 
-
 (def empty-stream {
                     :inputs []
                     :marks {}
                     :initial empty-snapshot
-
                     :next-mark-id 0})
 
-
+(def empty-mark {
+                 :id 0
+                 :insert nil
+                 :remove nil
+                 :from {:ch 0 :line 0}
+                 :to   {:ch 0 :line 0}
+                 :info "add description..."
+                 :class-names []})
 
 
 ;; helpers
@@ -83,23 +88,16 @@
   ([{:keys [initial marks inputs]} i] (snapshot-with-marks-info (get (nth inputs i nil) :snapshot initial) marks)))
 
 
-(defn append-mark [stream  {:keys [info to from]}]
+(defn append-mark [stream mark]
   (let [
-        id (inc (:next-mark-id stream))
-        index (dec (count (:inputs stream)))]
+        index (dec (count (:inputs stream)))
+        mark  (assoc mark :insert index)
+        id    (:id mark)]
     (-> stream
-      (assoc :next-mark-id id)
-      (update-in [:inputs index :snapshot :marks] assoc id {
-                                                            :id id
-                                                            :from from
-                                                            :to to})
-      (update :marks assoc id {
-                                :id id
-                                :from from
-                                :to to
-                                :insert index
-                                :remove nil
-                                :info info}))))
+      (update :next-mark-id inc)
+      (assoc-in [:inputs index :snapshot :marks id] mark)
+      (assoc-in [:marks id] mark))))
+
 
 
 (defn append-input [stream step snapshot dt]
@@ -118,15 +116,19 @@
      :marks marks}))
 
 
+(defn create-mark-template [stream]
+  (assoc empty-mark :id (:next-mark-id stream)))
+
+
 ;; inputs
-(defn- create-selection-input [from to]
+(defn create-selection-input [from to]
   {
     :type :selection
     :from from
     :to to})
 
 
-(defn- create-text-input [insert remove position]
+(defn create-text-input [insert remove position]
   {
     :type :input
     :insert insert
@@ -135,7 +137,7 @@
 
 
 
-(defn- create-cursor-input [position]
+(defn create-cursor-input [position]
   {
     :type :cursor
     :position position})

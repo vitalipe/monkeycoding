@@ -64,18 +64,18 @@
 
 
 
-(defn add-highlight-modal[{:keys [on-close on-add]}]
-  (with-let [info (r/atom "add description...")]
+(defn highlight-modal[{:keys [on-close on-add mark]}]
+  (with-let [mark-ref (r/atom mark)]
     [modal {
             :class "add-highlight-modal"
             :on-close on-close}
 
         [modal-content
           [editable-label {
-                            :on-change #(reset! info %)
-                            :value @info}]]
+                            :on-change #(swap! mark-ref assoc :info %)
+                            :value (:info @mark-ref)}]]
         [modal-footer
-          [:button.btn.btn-primary {:on-click #(on-add @info)} "add"]]]))
+          [:button.btn.btn-primary {:on-click #(on-add @mark-ref)} "add"]]]))
 
 
 
@@ -203,10 +203,11 @@
               [:ctrl :y] redo!])
 
         (cond
-          (:next-highlight @state) [add-highlight-modal {
+          (:next-highlight @state) [highlight-modal {
+                                                         :mark (:next-highlight @state)
                                                          :on-close #(swap! state assoc :next-highlight nil)
                                                          :on-add  #(do
-                                                                       (store/record-highlight (:next-highlight @state) %)
+                                                                       (store/record-highlight %)
                                                                        (swap! state assoc :next-highlight nil))}]
           (:export-open @state) [export-modal {
                                                 :config config
@@ -239,7 +240,7 @@
                      [select-label {:value 1000     :text "1s"      :selected (= 1000     (:dt-cap @state))}]]]
 
               :highlighting-mode
-                  [:label "select text..."]
+                  [:label "select any text region..."]
 
               :playback-mode
                   [multi-select-label {:on-select #(swap! editor-state assoc-in [:config :playback-speed] %)}
@@ -327,7 +328,9 @@
                                                           :selection (:selection snapshot)
                                                           :marks  (:marks snapshot)
                                                           :config config
-                                                          :on-highlight #(swap! state assoc :next-highlight {:from %1 :to %2})}]
+                                                          :on-highlight #(->> {:from %1 :to %2}
+                                                                           (merge (stream/create-mark-template recording))
+                                                                           (swap! state assoc :next-highlight))}]
               :recording-mode [recorder/component {
                                                     :text (:text snapshot)
                                                     :selection (:selection snapshot)
