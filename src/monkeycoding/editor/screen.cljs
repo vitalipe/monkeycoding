@@ -241,6 +241,14 @@
               :highlighting-mode
                   [:label "select text..."]
 
+              :playback-mode
+                   [multi-select-label {:on-select #(swap! editor-state assoc-in [:config :playback-speed] %)}
+                      [select-label {:value 0.5 :text "0.5x"  :selected (= 0.5  (:playback-speed config))}]
+                      [select-label {:value 1   :text "1x"    :selected (= 1    (:playback-speed config))}]
+                      [select-label {:value 1.5 :text "1.5x"  :selected (= 1.5  (:playback-speed config))}]
+                      [select-label {:value 2   :text "2x"    :selected (= 2    (:playback-speed config))}]]
+
+
               ;; default
               [combo-label {
                             :text title

@@ -12,7 +12,8 @@
                                 :config {
                                           :language "javascript"
                                           :theme "seti"
-                                          :show-line-numbers true}
+                                          :show-line-numbers true
+                                          :playback-speed 1}
 
                                 :recording stream/empty-stream
                                 :position -1

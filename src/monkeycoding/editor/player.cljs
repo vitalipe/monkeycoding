@@ -5,10 +5,11 @@
       [monkeycoding.player :as player]))
 
 
-(defn player-config->js [{:keys [show-line-numbers theme language]}]
+(defn player-config->js [{:keys [show-line-numbers theme language playback-speed]}]
   (->> {"showLineNumbers" show-line-numbers
         "theme" theme
-        "language" language}
+        "language" language
+        "playbackSpeed" playback-speed}
     (remove (comp nil? second))
     (flatten)
     (apply js-obj)))
@@ -17,7 +18,6 @@
 (defn compare-and-set-config! [player old-config new-config]
   (when-let [changed (second (clojure.data/diff old-config new-config))]
     (.setConfig player (player-config->js changed))))
-
 
 
 (defn init-player! [dom paused playback on-progress on-done config]
