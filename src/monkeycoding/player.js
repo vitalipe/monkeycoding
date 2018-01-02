@@ -8,6 +8,7 @@ const NullMark = Object.freeze({id :null, info: null, isNull: true});
 
 function noop() {}
 
+
 function initCodemirror(dom, config) {
     let cm = new CodeMirror(dom, config);
 
@@ -170,6 +171,7 @@ class Player {
                           highlightActiveLine = true,
                           highlightActiveMark = true,
                           showLineNumbers = true,
+                          playbackSpeed   = 1,
                           theme = "",
                           language = "c"}) {
 
@@ -200,7 +202,7 @@ class Player {
       // config
       this._isHighlightActiveMark = highlightActiveMark;
       this._isHighlightActiveLine = highlightActiveLine;
-
+      this._playbackSpeed         = playbackSpeed;
 
       // stream
       this._stream     = null;
@@ -292,14 +294,17 @@ class Player {
     onProgressUpdate(callback) { this._progressHandler      = (callback || noop)}
 
     setConfig(config) {
-      config = encodeCodeMirrorConfig(config);
-      Object.keys(config).forEach(key => this._codemirror.setOption(key, config[key]));
+      let cmConfig = encodeCodeMirrorConfig(config);
+      Object.keys(cmConfig).forEach(key => this._codemirror.setOption(key, cmConfig[key]));
 
       if (config.hasOwnProperty("highlightActiveMark"))
         this._isHighlightActiveMark =  config.highlightActiveMark;
 
       if (config.hasOwnProperty("highlightActiveLine"))
         this._isHighlightActiveLine =  config.highlightActiveLine;
+
+      if (config.hasOwnProperty("playbackSpeed"))
+        this._playbackSpeed = config.playbackSpeed;
     }
 
     // private
@@ -381,6 +386,7 @@ class Player {
 
     _nextTick() {
       let nextAction = this._stream[this._position];
+      let speed = this._playbackSpeed;
       let onTick = () => {
         this._execAction(nextAction);
         this._position++;
@@ -390,7 +396,7 @@ class Player {
       }
 
       if (nextAction)
-        this._cancelNext = nextAnimationTick(nextAction.dt, onTick);
+        this._cancelNext = nextAnimationTick(nextAction.dt/speed, onTick);
       else
         this._cancelNext = null;
     }
