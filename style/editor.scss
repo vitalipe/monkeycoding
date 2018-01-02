@@ -118,10 +118,6 @@
         position: absolute;
         bottom: 30px;
         z-index: 99;
-         &.last {
-           display: none;
-         }
-
         cursor: pointer;
     }
 
@@ -145,7 +141,7 @@
           border-width: 13px;
           border-style: solid;
           border-color: #FFBE11 transparent transparent transparent;
-          top: 22px;
+          top: 21px;
           left: -13px;
     }
   }
