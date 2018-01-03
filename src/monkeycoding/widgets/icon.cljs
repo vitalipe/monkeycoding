@@ -29,6 +29,8 @@
             :settings    "wrench"
             :about       "ios-heart"
             :delete      "trash-b"
+            :id          "pound"
+            :add          "plus"
             (:icon props))
       (str ".icon" ".ion-")
       (str "." (apply str (:class props)))
