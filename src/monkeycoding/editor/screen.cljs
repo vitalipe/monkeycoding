@@ -10,6 +10,7 @@
       [monkeycoding.editor.codemirror.highlighter  :as highlighter]
       [monkeycoding.editor.codemirror.exporter     :as exporter]
       [monkeycoding.editor.codemirror.preview      :refer [js-preview html-preview]]
+      [monkeycoding.editor.codemirror.textarea      :refer [json-text-area markdown-text-area]]
 
 
       [monkeycoding.editor.stream     :as stream :refer [stream->playback-snapshot stream->snapshot stream->playback]]
@@ -63,19 +64,47 @@
                       [:div.info-preview info]])))]]]))
 
 
+(defn add-highlight-modal[{:keys [on-close on-add mark]}]
+  (with-let [mark-ref (r/atom mark)]
+    [modal {:class "add-highlight-modal"}
+        [modal-header
+         [:h5 "Add Highlight"]]
 
-(defn highlight-modal[{:keys [on-close on-add mark]}]
+        [modal-content
+         [:div.mark-summary
+           [:label.record-info  (inc (:insert @mark-ref)) " "[icon :record]]
+           [:label [icon :id] " " (:id @mark-ref)]]
+         [markdown-text-area {
+                              :class "mark-description"
+                              :on-change #(swap! mark-ref assoc :info %)
+                              :text (:info @mark-ref)}]]
+        [modal-footer
+          [:button.btn.btn-danger  {:on-click on-close}            [icon :delete] " " "discard"]
+          [:button.btn.btn-success {:on-click #(on-add @mark-ref)} [icon "plus"]     " " "create"]]]))
+
+
+
+(defn highlight-raw-edit-modal[{:keys [on-close on-add mark]}]
   (with-let [mark-ref (r/atom mark)]
     [modal {
             :class "add-highlight-modal"
             :on-close on-close}
 
+        [modal-header
+         [:h4 "Mark Editor"]]
+
         [modal-content
-          [editable-label {
-                            :on-change #(swap! mark-ref assoc :info %)
-                            :value (:info @mark-ref)}]]
+
+         [:div.code-export.playback-code
+           [:h5 "Editable Fields:"]
+           [js-preview (.stringify js/JSON (clj->js (select-keys @mark-ref  [:info :class-names])) nil 2)]
+
+           [:h5 "Preview:"]
+           [js-preview (.stringify js/JSON (clj->js @mark-ref) nil 2)]]]
+
         [modal-footer
-          [:button.btn.btn-primary {:on-click #(on-add @mark-ref)} "add"]]]))
+          [:button.btn.btn-primary {:on-click #(on-add @mark-ref)} "discard"]
+          [:button.btn.btn-primary {:on-click #(on-add @mark-ref)} "save"]]]))
 
 
 
@@ -203,7 +232,7 @@
               [:ctrl :y] redo!])
 
         (cond
-          (:next-highlight @state) [highlight-modal {
+          (:next-highlight @state) [add-highlight-modal {
                                                          :mark (:next-highlight @state)
                                                          :on-close #(swap! state assoc :next-highlight nil)
                                                          :on-add  #(do
@@ -328,7 +357,7 @@
                                                           :selection (:selection snapshot)
                                                           :marks  (:marks snapshot)
                                                           :config config
-                                                          :on-highlight #(->> {:from %1 :to %2}
+                                                          :on-highlight #(->> {:from %1 :to %2 :insert position}
                                                                            (merge (stream/create-mark-template recording))
                                                                            (swap! state assoc :next-highlight))}]
               :recording-mode [recorder/component {

@@ -198,9 +198,61 @@
 
 
 .add-highlight-modal {
-  .editable-label {
-        color: black;
-        width: 100%;
+  .modal-header {
+    padding-bottom: 0;
+  }
+  .mark-summary {
+        display: flex;
+        flex-direction:row-reverse;
+        padding-bottom: 5px;
+
+      .record-info {
+        padding-left: 10px;
+      }
+
+      .icon-record {
+          color :red;
+      }
+
+      .icon-id {
+        color: $toolbar-icon-color;
+      }
+  }
+
+  .btn,  {
+    background-color: transparent;
+    border: 0;
+    color: white;
+    cursor: pointer;
+    font-size: 1.1rem;
+
+    &:hover {
+      font-weight: 900;
+    }
+
+    .icon-plus {
+      color: #28a745;
+      font-size: 1.1em;
+      position: relative;
+      top: 0.05em;
+    }
+
+    .icon-delete {
+      color: #c82333;
+      font-size: 1.1em;
+    }
+  }
+
+  .mark-description .CodeMirror {
+    max-height: 100px;
+    font-size: 16px;
+  }
+
+  .modal-footer {
+    display: flex;
+    justify-content: space-between;
+    border: 0;
+    padding-top: 0;
   }
 }
 

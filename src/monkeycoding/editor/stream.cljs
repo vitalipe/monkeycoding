@@ -13,7 +13,7 @@
                     :inputs []
                     :marks {}
                     :initial empty-snapshot
-                    :next-mark-id 0})
+                    :next-mark-id 1})
 
 (def empty-mark {
                  :id 0
@@ -116,8 +116,12 @@
      :marks marks}))
 
 
-(defn create-mark-template [stream]
-  (assoc empty-mark :id (:next-mark-id stream)))
+(defn create-mark-template [{id :next-mark-id}]
+  (assoc empty-mark
+          :id id
+          :class-names [
+                        "highliting-mark"
+                        (str "highliting-mark-id-" id)]))
 
 
 ;; inputs
