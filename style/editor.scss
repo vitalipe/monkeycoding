@@ -206,30 +206,12 @@
         flex-direction:row-reverse;
         padding-bottom: 5px;
 
-      .record-info {
-        padding-left: 10px;
-      }
-
-      .icon-record {
-          color :red;
-      }
-
       .icon-id {
         color: $toolbar-icon-color;
       }
   }
 
-  .btn,  {
-    background-color: transparent;
-    border: 0;
-    color: white;
-    cursor: pointer;
-    font-size: 1.1rem;
-
-    &:hover {
-      font-weight: 900;
-    }
-
+  .btn  {
     .icon-plus {
       color: #28a745;
       font-size: 1.1em;
@@ -249,6 +231,37 @@
   }
 }
 
+
+.highlight-edit-modal {
+  .mark-description .CodeMirror {
+    max-height: 80px;
+    margin-bottom: 20px;
+  }
+
+  .json-edit .CodeMirror {
+    max-height: 160px;
+    margin-bottom: 20px;
+  }
+
+  .modal-header {
+      .icon-id {
+        color: $toolbar-icon-color;
+      }
+  }
+
+  .btn  {
+    .icon-ok {
+      color: #28a745;
+      position: relative;
+      top: 0.05em;
+    }
+
+    .icon-undo {
+      color: #c82333;
+      font-size: 1.2em;
+    }
+  }
+}
 
 .marks-panel {
 
@@ -322,12 +335,13 @@
 
     .mark-list-item {
       padding: 12px;
-
+      cursor: pointer;
+      
       border-left-color: $side-panel-item-color;
       border-left-width: 4px;
       border-left-style: solid;
 
-      &:hover {
+      &:hover, &.being-edited {
           background-color: $side-panel-item-hover-color;
       }
 

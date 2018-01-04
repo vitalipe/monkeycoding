@@ -38,41 +38,67 @@
                              (sort-by :title)))
 
 
-(defn- marks-panel [{:keys [open marks position]}]
+(defn- mark->json-text [mark]
+  (.stringify js/JSON (clj->js (dissoc mark :from :to :id :info :insert :remove)) nil 2))
+
+
+(defn- json-text->mark [text]
+  (try
+    (-> (.parse js/JSON text)
+      (js->clj :keywordize-keys true)
+      (dissoc :from :to :id :info :insert :remove))
+    (catch :default e nil)))
+
+
+(defn highlight-edit-modal[{:keys [on-close on-done mark]}]
   (with-let [
-              tab-state (r/atom :all)
-              active? (fn [pos {:keys [remove insert]}] (<= insert pos (dec (or remove Infinity))))]
+             state (r/atom {
+                            :parse-error? false
+                            :json-text (mark->json-text mark)
+                            :info-text (:info mark)})
+             on-done #(when-not (:parse-error?  @state)
+                        (-> mark
+                          (select-keys [:from :to :id :insert :remove])
+                          (assoc :info (:info-text  @state))
+                          (merge (json-text->mark (:json-text  @state)))
+                          (on-done)))]
 
-    [:div.marks-panel.side-panel {:class (when open "open")}
-      [:div.tabs
-        [:div.tab.left  {
-                          :on-click #(reset! tab-state :all)
-                          :class (when (= :all @tab-state) "selected")}  "all"]
-        [:div.tab.right {
-                          :on-click #(reset! tab-state :active)
-                          :class (when (= :active @tab-state) "selected")} "active"]]
+    [modal {:class "highlight-edit-modal"}
+        [modal-header
+         [:h4 "Edit Highlight"]]
 
-      [scroll-panel
-        [:div.mark-list
-          (->> (vals marks)
-            (filter (if (= :active @tab-state) (partial active? position) identity))
-            (map (fn [{:keys [id insert remove info] :as mark}]
-                    [:div.mark-list-item {:key id :class (when (active? position mark) "active")}
-                      [:div.header
-                        [:label.preview [icon :add-mark] (str " " id)]
-                        [:label.insert (str (inc insert) " ") [icon :record]]]
-                      [:div.info-preview info]])))]]]))
+        [modal-content
+         [:h5 "Text:"]
+         [markdown-text-area {
+                              :class "mark-description"
+                              :on-change #(swap! state assoc :info-text %)
+                              :text (:info-text @state)}]
+
+         [:div.code-export.playback-code
+           [:h5 "JSON Metadata:"]
+           [json-text-area
+                      {
+                        :class "json-edit"
+                        :on-change #(swap! state assoc
+                                            :json-text %
+                                            :parse-error? (nil? (json-text->mark %)))
+                        :text (:json-text @state)}]]]
+        [modal-footer
+          [:button.btn.btn-danger   {:on-click on-close} [icon :undo]   " " "cancel"]
+          [:button.btn.btn-success  {
+                                     :on-click #(on-done mark)
+                                     :disabled (:parse-error? @state)}
+                [icon :ok] " " "save"]]]))
 
 
 (defn add-highlight-modal[{:keys [on-close on-add mark]}]
   (with-let [mark-ref (r/atom mark)]
     [modal {:class "add-highlight-modal"}
         [modal-header
-         [:h5 "Add Highlight"]]
+         [:h4 "Add Highlight"]]
 
         [modal-content
          [:div.mark-summary
-           [:label.record-info  (inc (:insert @mark-ref)) " "[icon :record]]
            [:label [icon :id] " " (:id @mark-ref)]]
          [markdown-text-area {
                               :class "mark-description"
@@ -83,28 +109,6 @@
           [:button.btn.btn-success {:on-click #(on-add @mark-ref)} [icon "plus"]     " " "create"]]]))
 
 
-
-(defn highlight-raw-edit-modal[{:keys [on-close on-add mark]}]
-  (with-let [mark-ref (r/atom mark)]
-    [modal {
-            :class "add-highlight-modal"
-            :on-close on-close}
-
-        [modal-header
-         [:h4 "Mark Editor"]]
-
-        [modal-content
-
-         [:div.code-export.playback-code
-           [:h5 "Editable Fields:"]
-           [js-preview (.stringify js/JSON (clj->js (select-keys @mark-ref  [:info :class-names])) nil 2)]
-
-           [:h5 "Preview:"]
-           [js-preview (.stringify js/JSON (clj->js @mark-ref) nil 2)]]]
-
-        [modal-footer
-          [:button.btn.btn-primary {:on-click #(on-add @mark-ref)} "discard"]
-          [:button.btn.btn-primary {:on-click #(on-add @mark-ref)} "save"]]]))
 
 
 
@@ -201,6 +205,44 @@
 
         [modal-content
          [:div "todo!"]]])
+
+
+(defn- marks-panel [{:keys [open marks position]}]
+  (with-let [
+              editing-mark (r/atom nil)
+              tab-state (r/atom :all)
+              active? (fn [pos {:keys [remove insert]}] (<= insert pos (dec (or remove Infinity))))]
+
+    [:div.marks-panel.side-panel {:class (when open "open")}
+      (when @editing-mark
+        [highlight-edit-modal {
+                               :on-close #(reset! editing-mark nil)
+                               :on-done  #(print "FIXME!" %)
+                               :mark @editing-mark}])
+      [:div.tabs
+        [:div.tab.left  {
+                          :on-click #(reset! tab-state :all)
+                          :class (when (= :all @tab-state) "selected")}  "all"]
+        [:div.tab.right {
+                          :on-click #(reset! tab-state :active)
+                          :class (when (= :active @tab-state) "selected")} "active"]]
+
+      [scroll-panel
+        [:div.mark-list
+         (let [active-id (:id @editing-mark)]
+           (->> (vals marks)
+             (filter (if (= :active @tab-state) (partial active? position) identity))
+             (map (fn [{:keys [id insert remove info] :as mark}]
+                     [:div.mark-list-item {
+                                           :on-click #(reset! editing-mark mark)
+                                           :key id
+                                           :class [
+                                                   (when (= id active-id) "being-edited")
+                                                   (when (active? position mark) "active")]}
+                       [:div.header
+                         [:label.preview [icon :add-mark] (str " " id)]
+                         [:label.insert (str (inc insert) " ") [icon :record]]]
+                       [:div.info-preview info]]))))]]]))
 
 
 (defn editor-screen []
