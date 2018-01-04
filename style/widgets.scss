@@ -135,6 +135,10 @@
       cursor: pointer;
       font-size: 1.1rem;
 
+      &:disabled {
+        cursor: default;
+        font-weight: initial !important;
+      }
       &:hover {
         font-weight: 900;
       }
