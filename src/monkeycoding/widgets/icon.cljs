@@ -30,7 +30,8 @@
             :about       "ios-heart"
             :delete      "trash-b"
             :id          "pound"
-            :add          "plus"
+            :add         "plus"
+            :ok          "checkmark-round"   
             (:icon props))
       (str ".icon" ".ion-")
       (str "." (apply str (:class props)))
