@@ -32,24 +32,22 @@
 (defn js->mark [obj]
   (-> {}
     (merge (js->range  (.find obj)))
-    (assoc :id (str->int (re-find #"\bhighliting-mark-id-\w" (.-className obj))))))
+    (assoc :data-id (str->int (re-find #"\bhighliting-mark-id-\w" (.-className obj))))))
 
 
-(defn mark->js [{:keys [from to id]}]
+(defn mark->js [{:keys [from to data-id]}]
   [
     (position->js from)
     (position->js to)
     (js-obj
-            "className" (str "highliting-mark " "highliting-mark-id-" id)
+            "className" (str "highliting-mark " "highliting-mark-id-" data-id)
             "startStyle" "highliting-mark-start")])
 
-(defn js->marks [obj]
-  (->> obj
+(defn js->marks [marks-array]
+  (->> marks-array
     (js->clj)
     (map js->mark)
-    (map #(vector (:id %) %))
-    (into {})))
-
+    (into [])))
 
 (defn js->input [data]
   (let [

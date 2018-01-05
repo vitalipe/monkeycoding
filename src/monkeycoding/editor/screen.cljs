@@ -38,15 +38,15 @@
                              (sort-by :title)))
 
 
-(defn- mark->json-text [mark]
-  (.stringify js/JSON (clj->js (dissoc mark :from :to :id :info :insert :remove)) nil 2))
+(defn- mark-data->json-text [mark]
+  (.stringify js/JSON (clj->js (dissoc mark :id :info :inserted-at)) nil 2))
 
 
-(defn- json-text->mark [text]
+(defn- json-text->mark-data [text]
   (try
     (-> (.parse js/JSON text)
       (js->clj :keywordize-keys true)
-      (dissoc :from :to :id :info :insert :remove))
+      (dissoc :id :info :inserted-at))
     (catch :default e nil)))
 
 
@@ -54,13 +54,13 @@
   (with-let [
              state (r/atom {
                             :parse-error? false
-                            :json-text (mark->json-text mark)
+                            :json-text (mark-data->json-text mark)
                             :info-text (:info mark)})
              on-done #(when-not (:parse-error?  @state)
                         (-> mark
-                          (select-keys [:from :to :id :insert :remove])
+                          (select-keys [:id])
                           (assoc :info (:info-text  @state))
-                          (merge (json-text->mark (:json-text  @state)))
+                          (merge (json-text->mark-data (:json-text  @state)))
                           (on-done)))]
 
     [modal {:class "highlight-edit-modal"}
@@ -81,7 +81,7 @@
                         :class "json-edit"
                         :on-change #(swap! state assoc
                                             :json-text %
-                                            :parse-error? (nil? (json-text->mark %)))
+                                            :parse-error? (nil? (json-text->mark-data %)))
                         :text (:json-text @state)}]]]
         [modal-footer
           [:button.btn.btn-danger   {:on-click on-close} [icon :undo]   " " "cancel"]
@@ -211,7 +211,7 @@
   (with-let [
               editing-mark (r/atom nil)
               tab-state (r/atom :all)
-              active? (fn [pos {:keys [remove insert]}] (<= insert pos (dec (or remove Infinity))))]
+              active? #(= %1 (:inserted-at %2))]
 
     [:div.marks-panel.side-panel {:class (when open "open")}
       (when @editing-mark
@@ -232,7 +232,7 @@
          (let [active-id (:id @editing-mark)]
            (->> (vals marks)
              (filter (if (= :active @tab-state) (partial active? position) identity))
-             (map (fn [{:keys [id insert remove info] :as mark}]
+             (map (fn [{:keys [id inserted-at remove info] :as mark}]
                      [:div.mark-list-item {
                                            :on-click #(reset! editing-mark mark)
                                            :key id
@@ -241,7 +241,7 @@
                                                    (when (active? position mark) "active")]}
                        [:div.header
                          [:label.preview [icon :add-mark] (str " " id)]
-                         [:label.insert (str (inc insert) " ") [icon :record]]]
+                         [:label.insert (str (inc inserted-at) " ") [icon :record]]]
                        [:div.info-preview info]]))))]]]))
 
 
@@ -265,7 +265,6 @@
 
           last-index (dec (count (:inputs recording)))
           snapshot (stream->snapshot recording position)]
-
       [:div.editor-screen-layout
 
         (when-not (= current-mode :playback-mode)
@@ -275,11 +274,11 @@
 
         (cond
           (:next-highlight @state) [add-highlight-modal {
-                                                         :mark (:next-highlight @state)
+                                                         :mark stream/empty-mark-data
                                                          :on-close #(swap! state assoc :next-highlight nil)
-                                                         :on-add  #(do
-                                                                       (store/record-highlight %)
-                                                                       (swap! state assoc :next-highlight nil))}]
+                                                         :on-add  #(let [{:keys [from to]} (:next-highlight @state)]
+                                                                     (store/record-highlight from to %)
+                                                                     (swap! state assoc :next-highlight nil))}]
           (:export-open @state) [export-modal {
                                                 :config config
                                                 :recording recording
@@ -292,8 +291,6 @@
 
           (:about-open @state) [about-modal {
                                               :on-close #(swap! state assoc :about-open false)}])
-
-
         ;; editor header
         [:div.editor-navbar.navbar.top
           [:div.form-inline
@@ -399,9 +396,7 @@
                                                           :selection (:selection snapshot)
                                                           :marks  (:marks snapshot)
                                                           :config config
-                                                          :on-highlight #(->> {:from %1 :to %2 :insert position}
-                                                                           (merge (stream/create-mark-template recording))
-                                                                           (swap! state assoc :next-highlight))}]
+                                                          :on-highlight #(swap! state assoc :next-highlight {:from %1 :to %2})}]
               :recording-mode [recorder/component {
                                                     :text (:text snapshot)
                                                     :selection (:selection snapshot)
@@ -415,10 +410,9 @@
                                       :on-done #(store/stop-playback)
                                       :on-progress #(store/update-player-progress %)
                                       :playback (stream->playback recording)}])]
-
           [marks-panel
             {
-              :marks (:marks recording)
+              :marks (:marks-data recording)
               :position position
               :open (:side-panel-open @state)}]]
 

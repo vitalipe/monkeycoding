@@ -46,9 +46,9 @@
     (swap! editor-state assoc :current-mode :highlighting-mode)))
 
 
-(defn record-highlight [mark]
+(defn record-highlight [from to data]
     (doto editor-state
-      (swap! update :recording stream/append-mark mark)
+      (swap! update :recording stream/attach-mark-on from to data)
       (swap! assoc  :current-mode :recording-mode)))
 
 

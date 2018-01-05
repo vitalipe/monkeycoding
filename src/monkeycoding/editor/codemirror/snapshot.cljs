@@ -5,18 +5,11 @@
                                                           mark->js
                                                           position->js]]))
 
-(defn- merge-with-prv-marks [current prv]
-  (into {}
-    (->> (keys current)
-      (map #(merge (prv %) (current %)))
-      (map #(hash-map (:id %) %)))))
-
 
 (defn- take-marks [codemirror prv-marks]
   (-> codemirror
     (.getAllMarks)
-    (js->marks)
-    (merge-with-prv-marks prv-marks)))
+    (js->marks)))
 
 
 (defn- take-selection [codemirror]
@@ -27,7 +20,7 @@
 
 
 (defn- apply-marks! [codemirror marks]
-  (doseq [[_ mark] marks]
+  (doseq [mark marks]
       (let [[from to options] (mark->js mark)]
         (.markText codemirror from to options))))
 
