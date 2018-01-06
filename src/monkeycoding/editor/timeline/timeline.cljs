@@ -18,7 +18,7 @@
                              on-seek]}]
   (let [
         input-size (count inputs)
-        pins (group-by :insert (vals marks))]
+        pins (group-by :inserted-at (vals marks))]
     [:div.timeline-pins {:class (when-not open "hidden")}
        (->> pins
          (map (fn [[position all-marks-in-pos]]
@@ -66,19 +66,19 @@
                                 on-seek
                                 position]}]
 
-      [drag-scroll-panel {:scrollable open 
+      [drag-scroll-panel {:scrollable open
                           :class :timeline-container}
         [:div.data-area
          [timeline-pins {
                          :inputs (:inputs stream)
-                         :marks  (:marks stream)
+                         :marks  (:marks-data stream)
                          :position position
                          :on-seek on-seek
                          :open (not open)}]
          [wave-panel
                      {:open open
                       :inputs (:inputs stream)
-                      :marks  (:marks stream)
+                      :marks  (:marks-data stream)
                       :position position
                       :on-seek on-seek}]]
 
@@ -90,7 +90,6 @@
                                 :on-seek on-seek}]
           [wave-progress {
                           :inputs (:inputs stream)
-                          :marks  (:marks stream)
                           :open open
                           :position position
                           :on-seek on-seek}]]])
