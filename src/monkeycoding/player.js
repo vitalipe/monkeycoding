@@ -46,11 +46,17 @@ function registerInteractionEvents(codemirror, ...handlers) {
 }
 
 
-function applySnapshot(codemirror, {text = "", marks = {}, selection = EmptySelection}) {
+function applySnapshot(codemirror, {text = "", marks = {}, selection = EmptySelection}, meta) {
+    let fetchClassMeta = (id) => goog.object.get(meta[id], "class-names", []);
+
     codemirror.setValue(text);
     codemirror.setSelection(selection.from, selection.to);
 
-    Object.values(marks).forEach(({from, to, id}) => mark(codemirror, from, to, id))
+    Object.values(marks).forEach(({from, to, id}) => mark(
+                                                          codemirror,
+                                                          from, to,
+                                                          id,
+                                                          fetchClassMeta(id)))
 }
 
 
@@ -97,7 +103,7 @@ function createInlineMarkNode() {
 }
 
 function extractMarkID(className) {
-  let prefix = "monkey-highliting-mark-id-"
+  let prefix = "monkey-mark-id-"
   let index = className.indexOf(prefix);
 
   if(index === -1)
@@ -138,11 +144,11 @@ function findMarkAt(sortedMarks, pos) {
 }
 
 
-function mark(cm, from, to, id) {
+function mark(cm, from, to, id, classNames) {
     cm.markText(from, to,
                 {
-                  className : ["highliting-mark", " ", "monkey-highliting-mark-id-", id].join(""),
-                  startStyle : "highliting-mark-start"});
+                  className : [...classNames, "monkey-mark", "monkey-mark-id-" + id].join(" "),
+                  startStyle : "monkey-mark-start"});
 }
 
 const commands = {
@@ -240,7 +246,7 @@ class Player {
       this._lastActiveLine = null;
 
 
-      applySnapshot(this._codemirror, initial);
+      applySnapshot(this._codemirror, initial, this._marksInfo);
 
       this._syncMarksCacheInfo();
       this._nextTick();
@@ -361,9 +367,13 @@ class Player {
     _execAction(action) {
       let command = commands[action.type];
       let codemirror = this._codemirror;
+      let fetchClassMeta = (id) => goog.object.get(this._marksInfo[id], "class-names", []);
 
       command(codemirror, action);
-      (action.marks || []).map(({from, to, id}) => mark(codemirror, from, to, id));
+
+      (action.marks || [])
+        .forEach(({from, to, id}) => mark(codemirror, from, to, id, fetchClassMeta(id)));
+
       this._calcMarksCacheInfo(action);
     }
 

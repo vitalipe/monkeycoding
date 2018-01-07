@@ -163,7 +163,7 @@
   background-color: $background-color;
 
   // all modes
-  .highliting-mark{
+  .monkey-mark{
     border-bottom-width: 1px;
     border-bottom-color: gold;
     border-bottom-style: solid;
@@ -183,7 +183,7 @@
 
   // spesific modes
   .editor-mode-highlighting {
-    .highliting-mark {
+    .monkey-mark {
       background-color: rgba(183, 53, 66, 0.6);
     }
   }
@@ -336,7 +336,7 @@
     .mark-list-item {
       padding: 12px;
       cursor: pointer;
-      
+
       border-left-color: $side-panel-item-color;
       border-left-width: 4px;
       border-left-style: solid;

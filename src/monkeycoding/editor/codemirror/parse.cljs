@@ -32,7 +32,7 @@
 (defn js->mark [obj]
   (-> {}
     (merge (js->range  (.find obj)))
-    (assoc :data-id (str->int (re-find #"\bhighliting-mark-id-\w" (.-className obj))))))
+    (assoc :data-id (str->int (re-find #"\bmonkey-highliting-mark-id-\w" (.-className obj))))))
 
 
 (defn mark->js [{:keys [from to data-id]}]
@@ -40,7 +40,7 @@
     (position->js from)
     (position->js to)
     (js-obj
-            "className" (str "highliting-mark " "highliting-mark-id-" data-id)
+            "className" (str "monkey-mark " "monkey-mark-id-" data-id)
             "startStyle" "highliting-mark-start")])
 
 (defn js->marks [marks-array]
