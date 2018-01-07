@@ -1,5 +1,7 @@
 goog.provide("monkeycoding.player");
 goog.require("cljsjs.codemirror");
+goog.require("goog.object");
+
 
 
 const ZeroPosition = Object.freeze({line : 0, ch : 0});
@@ -95,7 +97,7 @@ function createInlineMarkNode() {
 }
 
 function extractMarkID(className) {
-  let prefix = "highliting-mark-id-"
+  let prefix = "monkey-highliting-mark-id-"
   let index = className.indexOf(prefix);
 
   if(index === -1)
@@ -139,7 +141,7 @@ function findMarkAt(sortedMarks, pos) {
 function mark(cm, from, to, id) {
     cm.markText(from, to,
                 {
-                  className : ["highliting-mark", " ", "highliting-mark-id-", id].join(""),
+                  className : ["highliting-mark", " ", "monkey-highliting-mark-id-", id].join(""),
                   startStyle : "highliting-mark-start"});
 }
 
@@ -336,7 +338,7 @@ class Player {
       let last = this._lastActiveMark;
       let mark = findMarkAt(this._sortedMarks, pos);
       let handler = this._markHighlightHandler;
-      let info = mark.isNull ? null : this._marksInfo[mark.id];
+      let meta = (mark.isNull ? {} : this._marksInfo[mark.id]);
 
       if (mark.id === last.id)
         return;
@@ -347,12 +349,12 @@ class Player {
       if (widget)
         widget.clear();
 
-      handler({id: mark.id, info});
+      handler(goog.object.clone(meta));
 
       if (mark.isNull || !this._isHighlightActiveMark)
         return;
 
-      node.innerHTML = info;
+      node.innerHTML = meta.info;
       this._markLineWidget = this._codemirror.addLineWidget(pos.line, node, {above : true});
     }
 
@@ -377,11 +379,12 @@ class Player {
     _notifyActionExec(action, currentPosition) {
       let total  = this._stream.length;
       let played = this._position; // next index, by starts at 0, so we're fine
+      let fetchMarkMeta = (id) => goog.object.clone(this._marksInfo[id]);
 
       this._progressHandler({total, played});
 
-      if (action.type === "mark")
-        this._markInsertHandler({id : action.id, info : action.info})
+      (action.marks || [])
+        .forEach(({id}) => this._markInsertHandler(fetchMarkMeta(id)));
     }
 
     _nextTick() {

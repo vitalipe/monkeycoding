@@ -1,6 +1,6 @@
 (ns monkeycoding.editor.stream
   (:require
-      [clojure.set :refer [difference]]))
+      [clojure.set :refer [rename-keys]]))
 
 
 ;; a single frame slice, used as an initial entery point,
@@ -64,6 +64,8 @@
                         "highliting-mark"
                         (str "highliting-mark-id-" id)]))
 
+(defn- encoded-snapshot [mark]
+  (rename-keys mark {:data-id :id}))
 
 (defn- inputs->compact-inputs [inputs]
   (if (empty? inputs)
@@ -71,10 +73,10 @@
     (loop [[input & rest] inputs,  inserted #{} stream []]
       (let [
             all-marks (get-in input [:snapshot :marks])
-            new-marks (filter #(contains? inserted (:data-id %)) all-marks)
+            new-marks (remove #(contains? inserted (:data-id %)) all-marks)
             compressed-input (-> input
                                (dissoc :snapshot)
-                               (assoc :marks new-marks))]
+                               (assoc :marks  (map encoded-snapshot new-marks)))]
            (if (empty? rest)
              (conj stream compressed-input)
              (recur
@@ -83,20 +85,24 @@
                 (conj stream compressed-input)))))))
 
 
+
+
 ;; stream
 (defn stream->playback [{:keys [marks-data inputs initial]}]
   (clj->js {
-             "initial"   initial
+             "initial"   (update initial :marks (partial map encoded-snapshot))
              "inputs"    (inputs->compact-inputs inputs)
-             "marksData" (reduce-kv #(assoc %1 %2 (dissoc %3 :inserted-at)) {} marks-data)}))
+             "marksInfo" (reduce-kv #(assoc %1 %2 (dissoc %3 :inserted-at)) {} marks-data)}))
 
 
 (defn stream->playback-snapshot [{:keys [initial inputs marks-data]} index]
   (let [raw-inputs (map #(dissoc % :snapshot) inputs)]
     (clj->js {
-               "initial" (if (= -1 index) initial (get-in inputs [index :snapshot]))
+               "initial" (->
+                           (if (= -1 index) initial (get-in inputs [index :snapshot]))
+                           (update :marks (partial map encoded-snapshot)))
                "inputs"  []
-               "marksData" (reduce-kv #(assoc %1 %2 (dissoc %3 :inserted-at)) {} marks-data)})))
+               "marksInfo" (reduce-kv #(assoc %1 %2 (dissoc %3 :inserted-at)) {} marks-data)})))
 
 
 (defn stream->snapshot
