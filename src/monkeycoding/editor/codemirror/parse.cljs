@@ -32,7 +32,7 @@
 (defn js->mark [obj]
   (-> {}
     (merge (js->range  (.find obj)))
-    (assoc :data-id (str->int (re-find #"\bmonkey-highliting-mark-id-\w" (.-className obj))))))
+    (assoc :data-id (str->int (re-find #"\bmonkey-mark-id-\w" (.-className obj))))))
 
 
 (defn mark->js [{:keys [from to data-id]}]
