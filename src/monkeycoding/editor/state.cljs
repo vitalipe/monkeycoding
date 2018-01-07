@@ -97,5 +97,8 @@
       (swap! assoc :position -1))))
 
 
+(defn update-marks [marks]
+  (swap! editor-state assoc-in [:recording :marks-data] marks))
+
 
 (undo/init! editor-state)

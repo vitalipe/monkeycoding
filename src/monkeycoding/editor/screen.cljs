@@ -58,7 +58,7 @@
                             :info-text (:info mark)})
              on-done #(when-not (:parse-error?  @state)
                         (-> mark
-                          (select-keys [:id])
+                          (select-keys [:id :inserted-at])
                           (assoc :info (:info-text  @state))
                           (merge (json-text->mark-data (:json-text  @state)))
                           (on-done)))]
@@ -96,10 +96,7 @@
     [modal {:class "add-highlight-modal"}
         [modal-header
          [:h4 "Add Highlight"]]
-
         [modal-content
-         [:div.mark-summary
-           [:label [icon :id] " " (:id @mark-ref)]]
          [markdown-text-area {
                               :class "mark-description"
                               :on-change #(swap! mark-ref assoc :info %)
@@ -107,9 +104,6 @@
         [modal-footer
           [:button.btn.btn-danger  {:on-click on-close}            [icon :delete] " " "discard"]
           [:button.btn.btn-success {:on-click #(on-add @mark-ref)} [icon "plus"]     " " "create"]]]))
-
-
-
 
 
 (defn export-modal[{:keys [recording config on-close]}]
@@ -207,7 +201,7 @@
          [:div "todo!"]]])
 
 
-(defn- marks-panel [{:keys [open marks position]}]
+(defn- marks-panel [{:keys [open marks position on-marks-change]}]
   (with-let [
               editing-mark (r/atom nil)
               tab-state (r/atom :all)
@@ -217,7 +211,9 @@
       (when @editing-mark
         [highlight-edit-modal {
                                :on-close #(reset! editing-mark nil)
-                               :on-done  #(print "FIXME!" %)
+                               :on-done  #(do
+                                            (on-marks-change (assoc marks (:id %) %))
+                                            (reset! editing-mark nil))
                                :mark @editing-mark}])
       [:div.tabs
         [:div.tab.left  {
@@ -225,7 +221,7 @@
                           :class (when (= :all @tab-state) "selected")}  "all"]
         [:div.tab.right {
                           :on-click #(reset! tab-state :active)
-                          :class (when (= :active @tab-state) "selected")} "active"]]
+                          :class (when (= :active @tab-state) "selected")} "frame"]]
 
       [scroll-panel
         [:div.mark-list
@@ -413,6 +409,7 @@
           [marks-panel
             {
               :marks (:marks-data recording)
+              :on-marks-change store/update-marks
               :position position
               :open (:side-panel-open @state)}]]
 
