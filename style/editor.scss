@@ -334,11 +334,11 @@
     }
 
     .mark-list-item {
-      padding: 12px;
+      padding: 8px;
       cursor: pointer;
 
       border-left-color: $side-panel-item-color;
-      border-left-width: 4px;
+      border-left-width: 3px;
       border-left-style: solid;
 
       &:hover, &.being-edited {
@@ -349,14 +349,47 @@
         border-left-color: $side-panel-item-active-color;
       }
 
+      &:hover .header-buttons {
+        visibility: visible !important;
+      }
+
+      &:hover .info-preview {
+        border-color: transparent;
+      }
+
       .header {
-        display: flex;
-        justify-content: space-between;
+          display: flex;
+          flex-direction: row-reverse;
+          justify-content: space-between;
+
+          .header-buttons {
+            font-size: 1.4em;
+            visibility: hidden;
+
+            * {
+              padding-right: 5px;
+            }
+
+          .icon-delete:hover {
+            color: red;
+            cursor: pointer;
+          }
+        }
+
+        .header-icons {
+          font-weight: 900;
+          .insert {
+            padding-left: 10px;
+          }
+        }
       }
 
       .info-preview {
-          padding-top: 20px;
-          padding-bottom: 10px;
+          border-bottom-style:solid;
+          border-bottom-width: 1px;
+          border-color: #2F4F4F;
+          margin-top: 20px;
+          margin-bottom: 10px;
           white-space: nowrap;
           overflow: hidden;
           text-overflow: ellipsis;
