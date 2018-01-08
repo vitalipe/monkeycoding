@@ -173,7 +173,9 @@
       [:div
        [:div.timeline-pins {:class (when-not open "hidden")}
           (let [
-                marks (group-by :inserted-at (vals marks))
+                marks (->> (vals marks)
+                        (remove #(= -1 (:inserted-at %)))
+                        (group-by :inserted-at))
                 segements (->> (flatten segements)
                             (sort-by :input-index)
                             (map :index)

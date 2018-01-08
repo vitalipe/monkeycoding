@@ -140,11 +140,17 @@
   (update stream :inputs conj (merge step {:snapshot snapshot, :dt dt})))
 
 
-(defn squash [{:keys [inputs marks-data]} index]
+(defn squash [{:keys [inputs marks-data next-mark-data-id]} index]
   (let [
         [_ rest-inputs] (split-at (inc index) inputs)
-        initial (get-in inputs [index :snapshot])]
+        initial (get-in inputs [index :snapshot])
+        marks-data (reduce-kv
+                     (fn [m id mark]
+                       (assoc m id
+                         (update mark :inserted-at #(max -1 (- % 1 index)))))
+                     {} marks-data)]
 
     {:initial initial
      :inputs (into [] rest-inputs)
-     :marks-data marks-data})) ;; FIXME :rebalace
+     :marks-data marks-data
+     :next-mark-data-id next-mark-data-id}))
