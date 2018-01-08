@@ -1,8 +1,16 @@
 (ns monkeycoding.widgets.keyboard
     (:require
+      [reagent.core :as r :refer [atom]]
       [monkeycoding.widgets.util :refer [as-component]]))
 
 
+(def keyboard-lock (r/atom 0))
+
+(defn keyboard-shortcuts-block []
+  (as-component {
+                 :on-mount (fn [_]  (swap! keyboard-lock inc))
+                 :on-unmount (fn [_] (swap! keyboard-lock dec))
+                 :render (fn [] [:div.keyboard-shortcuts-block])}))
 
 
 (defn keyboard-shortcuts [& key-list]
@@ -15,7 +23,8 @@
                         (disj nil))
 
         handler (fn [evt]
-                  (when-let [callback (get keys (event->keys evt))] (callback)))]
+                  (when (zero? @keyboard-lock)
+                    (when-let [callback (get keys (event->keys evt))] (callback))))]
 
       (as-component {
                       :on-mount (fn [_]  (.addEventListener js/window "keydown" handler))

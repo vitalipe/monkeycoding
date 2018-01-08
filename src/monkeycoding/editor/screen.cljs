@@ -18,7 +18,7 @@
       [monkeycoding.editor.undo                  :refer [undo! redo! can-undo? can-redo?]]
 
 
-      [monkeycoding.widgets.keyboard :refer [keyboard-shortcuts]]
+      [monkeycoding.widgets.keyboard :refer [keyboard-shortcuts keyboard-shortcuts-block]]
       [monkeycoding.widgets.icon     :refer [icon]]
       [monkeycoding.widgets.dropdown :refer [dropdown-text-item dropdown-submenu]]
       [monkeycoding.widgets.label    :refer [multi-select-label combo-label editable-label select-label]]
@@ -68,6 +68,8 @@
          [:h4 "Edit Highlight"]]
 
         [modal-content
+         [keyboard-shortcuts-block]
+
          [:h5 "Text:"]
          [markdown-text-area {
                               :class "mark-description"
