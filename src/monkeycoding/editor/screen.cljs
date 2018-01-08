@@ -75,7 +75,10 @@
                               :text (:info-text @state)}]
 
          [:div.code-export.playback-code
-           [:h5 "JSON Metadata:"]
+           [:div.meta-header
+             [:h5 "JSON Metadata:"]
+             [:label.parse-error {:class (when-not (:parse-error? @state) "hidden")}
+               "JSON parse error!"]]
            [json-text-area
                       {
                         :class "json-edit"
@@ -84,7 +87,10 @@
                                             :parse-error? (nil? (json-text->mark-data %)))
                         :text (:json-text @state)}]]]
         [modal-footer
-          [:button.btn.btn-danger   {:on-click on-close} [icon :undo]   " " "cancel"]
+          [:button.btn.btn-danger   {:on-click on-close}
+           [icon :undo]
+           " "
+           (if (:parse-error? @state) "I've made a huge mistake!" "cancel")]
           [:button.btn.btn-success  {
                                      :on-click #(on-done mark)
                                      :disabled (:parse-error? @state)}

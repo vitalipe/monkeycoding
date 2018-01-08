@@ -238,6 +238,16 @@
     margin-bottom: 20px;
   }
 
+  .meta-header {
+    display: flex;
+    justify-content: space-between;
+
+    .parse-error {
+      font-weight: 900;
+      color: #c82333;
+    }
+  }
+
   .json-edit .CodeMirror {
     max-height: 160px;
     margin-bottom: 20px;
