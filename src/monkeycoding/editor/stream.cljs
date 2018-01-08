@@ -124,6 +124,18 @@
       (assoc-in [:marks-data id] mark))))
 
 
+(defn delete-mark [stream id]
+  (let [
+        dead-mark-id? #(= (:data-id %) id)
+        remove-marks  #(into [] (remove dead-mark-id? %))]
+    (merge stream {
+                   :marks-data (dissoc (:marks-data stream) id)
+                   :inputs (->> (:inputs stream)
+                             (map #(update % :marks remove-marks))
+                             (map #(update-in % [:snapshot :marks] remove-marks))
+                             (into []))})))
+
+
 (defn append-input [stream step snapshot dt]
   (update stream :inputs conj (merge step {:snapshot snapshot, :dt dt})))
 
