@@ -31,7 +31,8 @@
             :delete      "trash-b"
             :id          "pound"
             :add         "plus"
-            :ok          "checkmark-round"   
+            :ok          "checkmark-round"
+            :edit        "edit"
             (:icon props))
       (str ".icon" ".ion-")
       (str "." (apply str (:class props)))
