@@ -201,7 +201,7 @@
          [:div "todo!"]]])
 
 
-(defn- marks-panel [{:keys [open marks position on-marks-change]}]
+(defn- marks-panel [{:keys [open marks position on-marks-change on-mark-delete]}]
   (with-let [
               editing-mark (r/atom nil)
               tab-state (r/atom :all)
@@ -236,8 +236,17 @@
                                                    (when (= id active-id) "being-edited")
                                                    (when (active? position mark) "active")]}
                        [:div.header
-                         [:label.preview [icon :add-mark] (str " " id)]
-                         [:label.insert (str (inc inserted-at) " ") [icon :record]]]
+                         [:div.header-icons
+                           [:label.preview  (str " " id) " " [icon :add-mark]]
+                           [:label.insert   (str (inc inserted-at) " ") " " [icon :record]]]
+                         [:div.header-buttons
+                           [:span {:on-click #(do
+                                                (.stopPropagation %)
+                                                (on-mark-delete id))}
+                            [icon :delete]]]]
+
+
+
                        [:div.info-preview info]]))))]]]))
 
 
@@ -410,6 +419,7 @@
             {
               :marks (:marks-data recording)
               :on-marks-change store/update-marks
+              :on-mark-delete store/delete-mark
               :position position
               :open (:side-panel-open @state)}]]
 

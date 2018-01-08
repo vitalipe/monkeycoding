@@ -85,10 +85,12 @@
 (defn rename [name]
   (swap! editor-state assoc :title name))
 
+
 (defn reset [name]
   (swap! editor-state assoc
                             :recording stream/empty-stream
                             :position -1))
+
 
 (defn squash []
   (let [{:keys [recording position]} @editor-state]
@@ -99,6 +101,10 @@
 
 (defn update-marks [marks]
   (swap! editor-state assoc-in [:recording :marks-data] marks))
+
+
+(defn delete-mark [id]
+  (swap! editor-state update :recording stream/delete-mark id))
 
 
 (undo/init! editor-state)
