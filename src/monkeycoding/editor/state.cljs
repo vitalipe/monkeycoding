@@ -21,11 +21,14 @@
                                 :current-mode :preview-mode}))
 
 
+(defn- last-position []
+  (dec (count (get-in @editor-state [:recording :inputs]))))
+
 ;; recording actions
 (defn toggle-recording []
   (if-not (= (:current-mode @editor-state) :recording-mode)
       (doto editor-state
-        (swap! assoc :position (dec (count (get-in @editor-state [:recording :inputs]))))
+        (swap! assoc :position (last-position))
         (swap! assoc :current-mode :recording-mode))
     (swap! editor-state assoc :current-mode :preview-mode)))
 
@@ -37,26 +40,26 @@
 (defn record-input [event snapshot dt]
   (doto editor-state
     (swap! update :recording stream/append-input event snapshot dt)
-    (swap! assoc  :position (dec (count (get-in @editor-state [:recording :inputs]))))))
+    (swap! assoc  :position (last-position))))
 
 
-(defn toggle-record-highlight [event]
-  (if (:current-mode :highlighting-mode)
-    (swap! editor-state assoc :current-mode :recording-mode)
-    (swap! editor-state assoc :current-mode :highlighting-mode)))
+(defn toggle-record-highlight []
+  (let [current (:current-mode @editor-state)
+        next (if (= current :highlighting-mode) :preview-mode :highlighting-mode)]
+    (swap! editor-state assoc
+                          :current-mode next
+                          :position (last-position))))
 
 
 (defn record-highlight [from to data]
-    (doto editor-state
-      (swap! update :recording stream/attach-mark-on from to data)
-      (swap! assoc  :current-mode :recording-mode)))
+  (swap! editor-state update :recording stream/attach-mark-on from to data))
 
 
 ;; playback actions
 (defn start-playback []
   (let [
         {:keys [position recording]} @editor-state
-        last-position? (= (inc position) (count (:inputs recording)))]
+        last-position? (= (last-position) position)]
     (swap! editor-state assoc
            :current-mode :playback-mode
            :position (if last-position? -1 position))))
