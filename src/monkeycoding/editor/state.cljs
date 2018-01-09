@@ -61,11 +61,10 @@
            :current-mode :playback-mode
            :position (if last-position? -1 position))))
 
-(defn toggle-playback-pause []
-  (swap! editor-state update-in [:current-mode :paused] not))
 
 (defn update-player-progress [position]
   (swap! editor-state assoc :position position))
+
 
 (defn goto-postition [position]
   (when-not (= position (:position @editor-state))
