@@ -1,6 +1,7 @@
 (ns monkeycoding.editor.player
     (:require
       [reagent.core :as r :refer [atom]]
+      [monkeycoding.editor.stream     :as stream :refer [stream->playback-snapshot stream->playback]]
       [monkeycoding.widgets.util :refer [as-component]]
       [monkeycoding.player :as player]))
 
@@ -34,7 +35,8 @@
 ;; player is just a nice React wrapper of the JS player
 (defn player [{:keys [
                       paused
-                      playback
+                      recording
+                      position
                       config
 
                       on-progress
@@ -48,9 +50,9 @@
                                 (reset! pl (init-player!
                                                         (r/dom-node this)
                                                         paused
-                                                        playback
-                                                        on-progress
-                                                        on-done
+                                                        (stream->playback recording position)
+                                                        #(on-progress (+ 1 position %))
+                                                        #(on-done) ;; strip args
                                                         config)))
                     :on-props (fn [{paused :paused config :config}]
                                   (if paused
@@ -64,16 +66,23 @@
                     :render (fn [] [:div.player-content {:style {:height "100%"}}])})))
 
 
-(defn preview-player [{:keys [playback config]}]
+(defn preview-player [{:keys [recording position config]}]
   (let [
         pl (atom nil)
         last-config (atom config)]
     (as-component {
-                    :on-mount (fn [this] (reset! pl (init-player! (r/dom-node this) true playback #() #() config)))
-                    :on-props (fn [{playback :playback config :config}]
-                                (doto @pl
-                                  (.play playback (clj->js playback))
-                                  (.pause))
+                    :on-mount (fn [this]
+                                (reset! pl
+                                        (init-player!
+                                          (r/dom-node this)
+                                          true
+                                          (stream->playback-snapshot recording position)
+                                          #() #() config)))
+                    :on-props (fn [{:keys [position config recording]}]
+                                (let [playback (stream->playback-snapshot recording position)]
+                                  (doto @pl
+                                    (.play playback (clj->js config))
+                                    (.pause)))
 
                                 (compare-and-set-config! @pl @last-config config)
                                 (reset! last-config config))

@@ -13,7 +13,7 @@
       [monkeycoding.editor.codemirror.textarea      :refer [json-text-area markdown-text-area]]
 
 
-      [monkeycoding.editor.stream     :as stream :refer [stream->playback-snapshot stream->snapshot stream->playback]]
+      [monkeycoding.editor.stream     :as stream :refer [stream->snapshot]]
       [monkeycoding.editor.state      :as store  :refer [editor-state]]
       [monkeycoding.editor.undo                  :refer [undo! redo! can-undo? can-redo?]]
 
@@ -403,7 +403,10 @@
         [:div.stage-container
           [:div.code-area
             (case current-mode
-              :preview-mode [preview-player {:config config :playback (stream->playback-snapshot recording position)}]
+              :preview-mode [preview-player {
+                                             :config config
+                                             :position position
+                                             :recording recording}]
               :highlighting-mode [highlighter/component {
                                                           :text (:text snapshot)
                                                           :selection (:selection snapshot)
@@ -420,9 +423,10 @@
               :playback-mode [player {
                                       :paused false
                                       :config config
-                                      :on-done #(store/stop-playback)
-                                      :on-progress #(store/update-player-progress %)
-                                      :playback (stream->playback recording)}])]
+                                      :on-done store/stop-playback
+                                      :on-progress store/update-player-progress
+                                      :position position
+                                      :recording recording}])]
           [marks-panel
             {
               :marks (:marks-data recording)

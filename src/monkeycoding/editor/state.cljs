@@ -54,8 +54,12 @@
 
 ;; playback actions
 (defn start-playback []
-    (swap! editor-state assoc :current-mode :playback-mode))
-
+  (let [
+        {:keys [position recording]} @editor-state
+        last-position? (= (inc position) (count (:inputs recording)))]
+    (swap! editor-state assoc
+           :current-mode :playback-mode
+           :position (if last-position? -1 position))))
 
 (defn toggle-playback-pause []
   (swap! editor-state update-in [:current-mode :paused] not))
