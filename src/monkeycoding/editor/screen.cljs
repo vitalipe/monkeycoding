@@ -10,7 +10,7 @@
       [monkeycoding.editor.codemirror.highlighter  :as highlighter]
       [monkeycoding.editor.codemirror.exporter     :as exporter]
       [monkeycoding.editor.codemirror.preview      :refer [js-preview html-preview]]
-      [monkeycoding.editor.codemirror.textarea      :refer [json-text-area markdown-text-area]]
+      [monkeycoding.editor.codemirror.textarea     :refer [json-text-area markdown-text-area]]
 
 
       [monkeycoding.editor.stream     :as stream :refer [stream->snapshot]]

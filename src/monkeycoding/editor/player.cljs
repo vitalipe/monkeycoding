@@ -3,7 +3,6 @@
       [reagent.core                            :as r       :refer [atom]]
       [monkeycoding.editor.stream              :as stream  :refer [stream->playback-snapshot stream->playback]]
       [monkeycoding.widgets.util                           :refer [as-component]]
-      [monkeycoding.playback.codemirror.player :as player]
       [clojure.data                            :as data]))
 
 
@@ -23,7 +22,7 @@
 
 
 (defn init-player! [dom paused playback on-progress on-done config]
-  (let [player (new player/Player dom (player-config->js config))]
+  (let [player (new js/MonkeyPlayer dom (player-config->js config))]
     (when playback (.play player (clj->js playback)))
     (when paused   (.pause player))
     (.onProgressUpdate player #(do

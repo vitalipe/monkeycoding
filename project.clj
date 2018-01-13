@@ -14,10 +14,17 @@
             [lein-npm "0.6.2"]]
 
   :npm {
-        :devDependencies [[node-sass "4.5.3"]]
+        :devDependencies [
+                          [node-sass        "4.5.3"]
+                          [babel-core       "6.26.0"]
+                          [babel-cli        "6.26.0"]
+                          [babel-preset-env "1.6.1"]]
         :package {:scripts
-                  {:sass "node-sass style/app.scss public/css/app.css"
-                   :sass-watch "node-sass style/app.scss public/css/app.css --watch"}}}
+                  {:build-app-sass "node-sass style/app.scss public/css/app.css --output-style compressed"
+                   :build-app-player "babel src/playback/codemirror/player.js --minified --no-babelrc --presets env --out-file public/js/monkey-cm-player.js"
+
+                   :dev-sass   "node-sass style/app.scss public/css/app.css && node-sass style/app.scss public/css/app.css --watch"
+                   :dev-player "babel src/playback/codemirror/player.js --watch --out-file public/js/monkey-cm-player.js"}}}
 
   :min-lein-version "2.5.0"
 
@@ -55,7 +62,11 @@
                          :optimizations :advanced
                          :pretty-print false}}}}
 
-  :aliases {"package" ["do" "clean" ["cljsbuild" "once" "release"]]}
+  :aliases {"package-app" ["do"
+                           "clean"
+                           ["npm" "run" "build-app-sass"]
+                           ["npm" "run" "build-app-player"]
+                           ["cljsbuild" "once" "release"]]}
 
   :profiles {:dev {:dependencies [[binaryage/devtools "0.9.4"]
                                   [figwheel-sidecar "0.5.13"]
