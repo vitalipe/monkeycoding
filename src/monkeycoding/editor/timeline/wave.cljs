@@ -6,8 +6,8 @@
 
 
 ;; later can be dynamic to control zoom
-(def ms-to-px-ratio 10)
-(def segement-ms 80)
+(def ms-to-px-ratio 20)
+(def segement-ms 200)
 (def look-ahead-ms 3000)
 
 (def wave-height-px 75)
