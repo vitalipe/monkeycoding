@@ -1,6 +1,3 @@
-(function(shell) {
-
-
 const Version = Object.freeze({Major : 0, Minor : 1});
 
 
@@ -434,12 +431,5 @@ class Player {
     }
 }
 
-// export
-if (shell.register)
-  shell.register([Version.Major, Version.Minor, "codemirror", "player"], Player);
-else
-  shell["MonkeyPlayer"] = Player;
 
-
-
-})(window["MonkeyCoding"] || window)
+module.exports = Player;

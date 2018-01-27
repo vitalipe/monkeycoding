@@ -14,17 +14,17 @@
             [lein-npm "0.6.2"]]
 
   :npm {
-        :devDependencies [
-                          [node-sass        "4.5.3"]
-                          [babel-core       "6.26.0"]
-                          [babel-cli        "6.26.0"]
-                          [babel-preset-env "1.6.1"]]
+        ;; we use node for node-sass because it's faster and less buggy
+        ;; and we also use it to run the player app build for the embedded player
+        :devDependencies [[node-sass "4.5.3"]]
         :package {:scripts
                   {:build-app-sass "node-sass style/app.scss public/css/app.css --output-style compressed"
-                   :build-app-player "babel src/playback/codemirror/player.js --minified --no-babelrc --presets env --out-file public/js/monkey-cm-player.js"
+                   :build-app-player "cd ./playback && npm run build-app-player"
 
-                   :dev-sass   "node-sass style/app.scss public/css/app.css && node-sass style/app.scss public/css/app.css --watch"
-                   :dev-player "babel src/playback/codemirror/player.js --watch --out-file public/js/monkey-cm-player.js"}}}
+                   ;; build in debug & watch for changes
+                   :watch-app-player "cd ./playback && npm run watch-app-player"
+                   :watch-app-sass   "node-sass style/app.scss public/css/app.css && node-sass style/app.scss public/css/app.css --watch"}}}
+
 
   :min-lein-version "2.5.0"
 
@@ -62,11 +62,21 @@
                          :optimizations :advanced
                          :pretty-print false}}}}
 
-  :aliases {"package-app" ["do"
-                           "clean"
-                           ["npm" "run" "build-app-sass"]
-                           ["npm" "run" "build-app-player"]
-                           ["cljsbuild" "once" "release"]]}
+  :aliases {
+            "package-app" ["do"
+                            "clean"
+                            ["npm" "run" "build-app-sass"]
+                            ["npm" "run" "build-app-player"]
+                            ["cljsbuild" "once" "release"]]
+
+            "init" ["do"
+                    ["npm" "install"]]
+
+            "dev" ["pdo"
+                    ["npm" "run" "watch-app-sass"]
+                    ["npm" "run" "watch-app-player"]
+                    "figwheel"]}
+
 
   :profiles {:dev {:dependencies [[binaryage/devtools "0.9.4"]
                                   [figwheel-sidecar "0.5.13"]

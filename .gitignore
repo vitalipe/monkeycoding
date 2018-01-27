@@ -12,6 +12,9 @@ pom.xml.asc
 /resources/public/js
 /public/js/out
 /public/js/release
+/public/js/monkey-codemirror-player.js
+/public/js/app.js
+
 /out
 /.repl
 *.log
@@ -21,5 +24,5 @@ figwheel_server.log
 node_modules
 public/css
 public/js/monkey-cm-player.js
-package.json
+/package.json
 package-lock.json
