@@ -1,12 +1,15 @@
 {
   "name": "monkeycoding.playback",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "description": "",
   "main": "\"\"",
   "scripts": {
     "build-app-player": "webpack --config webpack.app.config.js --env.production",
     "dev-app-player": "webpack --config webpack.app.config.js",
-    "watch-app-player": "webpack --config webpack.app.config.js --watch"
+    "watch-app-player": "webpack --config webpack.app.config.js --watch",
+
+    "build-playback": "webpack --config webpack.playback.config.js --env.production",
+    "dev-playback": "webpack --config webpack.playback.config.js"
   },
   "author": "",
   "license": "ISC",

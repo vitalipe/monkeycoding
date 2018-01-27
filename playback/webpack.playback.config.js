@@ -1,19 +1,23 @@
-// build file for the app embedded player
+// build file for the exported playback environment
+
 
 module.exports = (env = {production : false}) => {
 
-  const DESTINATION_ROOT    = (__dirname + "/../public/js/");
-  const FILE_NAME           = "monkey-codemirror-player.js";
-  const EXPORTED_CLASS_NAME = "MonkeyPlayer";
+  const VERSION             = [0,0,1];
+  const DESTINATION_ROOT    = (__dirname + "/../public/playback/");
   const PROD_BUILD          = (env.production === true);
+  const FILE_NAME           = "codemirror-playback." +
+                                                      VERSION.join(".") +
+                                                      (PROD_BUILD ? ".min" : "") + ".js";
 
 
   return {
-    entry: { "main": "./src/codemirror-player.js" },
+    entry: { "codemirror": "./src/main.js" },
     output: {
           path: DESTINATION_ROOT,
-          filename: "./" + FILE_NAME,
-          library: EXPORTED_CLASS_NAME},
+          filename: "./" + FILE_NAME},
+
+    externals: [{"window": "window"}],
 
     module: {
       rules: [

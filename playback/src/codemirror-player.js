@@ -1,4 +1,3 @@
-const Version = Object.freeze({Major : 0, Minor : 1});
 
 
 const ZeroPosition = Object.freeze({line : 0, ch : 0});
