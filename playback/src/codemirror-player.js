@@ -1,14 +1,29 @@
-goog.provide("monkeycoding.player");
-goog.require("cljsjs.codemirror");
-goog.require("goog.object");
-
 
 
 const ZeroPosition = Object.freeze({line : 0, ch : 0});
 const EmptySelection = Object.freeze({from :ZeroPosition, to: ZeroPosition });
 const NullMark = Object.freeze({id :null, info: null, isNull: true});
 
+
 function noop() {}
+
+
+// inlined from goog.object utils:
+function get(obj, key, opt_val) {
+  if (obj !== null && key in obj) {
+    return obj[key];
+  }
+  return opt_val;
+};
+
+// inlined from goog.object utils:
+function clone(obj) {
+  var res = {};
+  for (var key in obj) {
+    res[key] = obj[key];
+  }
+  return res;
+}
 
 
 function initCodemirror(dom, config) {
@@ -47,7 +62,7 @@ function registerInteractionEvents(codemirror, ...handlers) {
 
 
 function applySnapshot(codemirror, {text = "", marks = {}, selection = EmptySelection}, meta) {
-    let fetchClassMeta = (id) => goog.object.get(meta[id], "class-names", []);
+    let fetchClassMeta = (id) => get(meta[id], "class-names", []);
 
     codemirror.setValue(text);
     codemirror.setSelection(selection.from, selection.to);
@@ -355,7 +370,7 @@ class Player {
       if (widget)
         widget.clear();
 
-      handler(goog.object.clone(meta));
+      handler(clone(meta));
 
       if (mark.isNull || !this._isHighlightActiveMark)
         return;
@@ -367,7 +382,7 @@ class Player {
     _execAction(action) {
       let command = commands[action.type];
       let codemirror = this._codemirror;
-      let fetchClassMeta = (id) => goog.object.get(this._marksInfo[id], "class-names", []);
+      let fetchClassMeta = (id) => get(this._marksInfo[id], "class-names", []);
 
       command(codemirror, action);
 
@@ -389,7 +404,7 @@ class Player {
     _notifyActionExec(action, currentPosition) {
       let total  = this._stream.length;
       let played = this._position; // next index, by starts at 0, so we're fine
-      let fetchMarkMeta = (id) => goog.object.clone(this._marksInfo[id]);
+      let fetchMarkMeta = (id) => clone(this._marksInfo[id]);
 
       this._progressHandler({total, played});
 
@@ -416,7 +431,4 @@ class Player {
 }
 
 
-
-
-// export
-monkeycoding.player.Player = Player;
+module.exports = Player;

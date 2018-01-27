@@ -11,6 +11,10 @@ pom.xml.asc
 /.lein-repl-history
 /resources/public/js
 /public/js/out
+/public/js/release
+/public/js/monkey-codemirror-player.js
+/public/js/app.js
+
 /out
 /.repl
 *.log
@@ -19,5 +23,6 @@ pad
 figwheel_server.log
 node_modules
 public/css
-package.json
+public/js/monkey-cm-player.js
+/package.json
 package-lock.json

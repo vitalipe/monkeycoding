@@ -1,9 +1,9 @@
 (ns monkeycoding.editor.player
     (:require
-      [reagent.core :as r :refer [atom]]
-      [monkeycoding.editor.stream     :as stream :refer [stream->playback-snapshot stream->playback]]
-      [monkeycoding.widgets.util :refer [as-component]]
-      [monkeycoding.player :as player]))
+      [reagent.core                            :as r       :refer [atom]]
+      [monkeycoding.editor.stream              :as stream  :refer [stream->playback-snapshot stream->playback]]
+      [monkeycoding.widgets.util                           :refer [as-component]]
+      [clojure.data                            :as data]))
 
 
 (defn player-config->js [{:keys [show-line-numbers theme language playback-speed]}]
@@ -17,12 +17,12 @@
 
 
 (defn compare-and-set-config! [player old-config new-config]
-  (when-let [changed (second (clojure.data/diff old-config new-config))]
+  (when-let [changed (second (data/diff old-config new-config))]
     (.setConfig player (player-config->js changed))))
 
 
 (defn init-player! [dom paused playback on-progress on-done config]
-  (let [player (new player/Player dom (player-config->js config))]
+  (let [player (new js/MonkeyPlayer dom (player-config->js config))]
     (when playback (.play player (clj->js playback)))
     (when paused   (.pause player))
     (.onProgressUpdate player #(do
