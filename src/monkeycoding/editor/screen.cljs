@@ -18,7 +18,7 @@
       [monkeycoding.editor.undo                  :refer [undo! redo! can-undo? can-redo?]]
 
 
-      [monkeycoding.widgets.keyboard :refer [keyboard-shortcuts keyboard-shortcuts-block]]
+      [monkeycoding.widgets.keyboard :refer [keyboard-shortcuts]]
       [monkeycoding.widgets.icon     :refer [icon]]
       [monkeycoding.widgets.dropdown :refer [dropdown-text-item dropdown-submenu]]
       [monkeycoding.widgets.label    :refer [multi-select-label combo-label editable-label select-label]]
@@ -68,8 +68,6 @@
          [:h4 "Edit Highlight"]]
 
         [modal-content
-         [keyboard-shortcuts-block]
-
          [:h5 "Text:"]
          [markdown-text-area {
                               :class "mark-description"
@@ -280,11 +278,6 @@
           snapshot (stream->snapshot recording position)]
       [:div.editor-screen-layout
 
-        (when-not (= current-mode :playback-mode)
-          [keyboard-shortcuts
-              [:ctrl :z] undo!
-              [:ctrl :y] redo!])
-
         (cond
           (:next-highlight @state) [add-highlight-modal {
                                                          :mark stream/empty-mark-data
@@ -303,7 +296,12 @@
                                                     :on-close #(swap! state assoc :settings-open false)}]
 
           (:about-open @state) [about-modal {
-                                              :on-close #(swap! state assoc :about-open false)}])
+                                              :on-close #(swap! state assoc :about-open false)}]
+
+          (not= current-mode :playback-mode) [keyboard-shortcuts
+                                              [:ctrl :z] undo!
+                                              [:ctrl :y] redo!])
+
         ;; editor header
         [:div.editor-navbar.navbar.top
           [:div.form-inline
