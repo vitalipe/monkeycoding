@@ -26,7 +26,7 @@
 
 
 (defn apply-selection! [codemirror {:keys [from to]}]
-  (.setSelection codemirror (position->js from) (position->js to) (js-obj "origin" "snapshot!")))
+  (.setSelection codemirror (position->js from) (position->js to) (js-obj "origin" "applying-snapshot-ignore-this-event!")))
 
 
 (defn take-snapshot [codemirror prv-marks-data]

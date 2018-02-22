@@ -55,7 +55,7 @@
         origin (get input "origin")
 
         cursor-event? (nil? origin)
-        snapshot-event? (= origin "snapshot!")
+        snapshot-event? (= origin "applying-snapshot-ignore-this-event!")
         selection-event? (contains? input "ranges")
         text-event? (contains? #{"+input" "+delete" "cut" "paste" "copy" "undo" "redo"} origin)]
 
