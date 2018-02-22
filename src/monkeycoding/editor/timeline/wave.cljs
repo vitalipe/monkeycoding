@@ -74,15 +74,11 @@
 
 
 (defn adjust-wave-size! [{:keys [canvas ctx] :as wave} segements] nil
-    (set! (.-height canvas) wave-height-px)
-    (set! (.-width canvas) (segments->width-px segements))
-    ;; this hack should disable sub-pixel AA
-    ;; setting canvas size will reset the transform matrix, so we do this for every size change..
-    (.translate ctx 0.5 0.5)
+  (set! (.-height canvas) wave-height-px)
+  (set! (.-width canvas) (segments->width-px segements))
 
-  (merge wave {
-                :width  (.-width (.getBoundingClientRect canvas))
-                :height (.-height (.getBoundingClientRect canvas))}))
+  (assoc wave :width  (.-width (.getBoundingClientRect canvas))
+              :height (.-height (.getBoundingClientRect canvas))))
 
 
 (defn render-wave! [{:keys [ctx width height] :as wave}  segements]
