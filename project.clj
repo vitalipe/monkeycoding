@@ -11,7 +11,8 @@
 
   :plugins [[lein-cljsbuild "1.1.5"]
             [lein-figwheel "0.5.13"]
-            [lein-npm "0.6.2"]]
+            [lein-npm "0.6.2"]
+            [lein-pdo "0.1.1"]]
 
   :npm {
         ;; we use node for node-sass because it's faster and less buggy
@@ -73,9 +74,10 @@
                     ["npm" "install"]]
 
             "dev" ["pdo"
-                    ["npm" "run" "watch-app-sass"]
-                    ["npm" "run" "watch-app-player"]
-                    "figwheel"]}
+                   ["npm" "run" "watch-app-sass"]
+                   ["npm" "run" "watch-app-player"]
+                   "figwheel"]}
+
 
 
   :profiles {:dev {:dependencies [[binaryage/devtools "0.9.4"]
