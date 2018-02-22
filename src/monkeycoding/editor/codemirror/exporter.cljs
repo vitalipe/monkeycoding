@@ -1,5 +1,6 @@
 (ns monkeycoding.editor.codemirror.exporter
   (:require
+    [goog.string                    :as string]
     [monkeycoding.editor.stream     :as stream]
     [monkeycoding.editor.player     :refer [player-config->js]]))
 
@@ -96,7 +97,7 @@
         player-config (.stringify js/JSON (player-config->js options))]
     (str
       "(function(MonkeyCoding) { \n"
-      "var node = document.querySelector(" "\"" parent-selector "\"" ")); \n"
+      "var node = document.querySelector(" (string/quote parent-selector) ")); \n"
       "var Player = MonkeyCoding.latestPlayerByVersion(" 0 "," 0 "," 1 ", \"codemirror\"); \n"
       "var playback = Player.createPlayback(node, \n"
                                                   "// player config: \n"
