@@ -23,9 +23,7 @@ module.exports = (env = {production : false}) => {
           use: {
             loader: "babel-loader",
             options: {
-              // using "@babel/preset-env" like it's written in the readme givens an error..
-              // I bet it's a webpack bug, anyway using a rel path seems to work
               presets: PROD_BUILD
-                        ? ["../node_modules/babel-preset-minify", "../node_modules/babel-preset-env"]
+                        ? ["babel-preset-minify", "babel-preset-env"]
                         : []
 }}}]}}};
